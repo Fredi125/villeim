@@ -4,6 +4,8 @@ obj/
 [Dd]ebug/
 [Rr]elease/
 *.dll
+# Allow bundled mod framework DLLs needed for building
+!VillageLife/lib/*.dll
 *.exe
 *.pdb
 *.user
