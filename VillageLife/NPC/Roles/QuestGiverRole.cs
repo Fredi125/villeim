@@ -21,7 +21,7 @@ namespace VillageLife.NPC.Roles
         public void OnAssigned(VillageNPC npc)
         {
             var zdo = npc.ZNetView?.GetZDO();
-            _questPool = zdo?.GetString(ZDOHelper.Hash(ZDOHelper.KeyQuestPool), "meadows") ?? "meadows";
+            _questPool = zdo?.GetString(VLData.Hash(VLData.KeyQuestPool), "meadows") ?? "meadows";
         }
 
         public void OnRemoved(VillageNPC npc) { }

@@ -209,9 +209,9 @@ namespace VillageLife.UI
                 if (zdo != null)
                 {
                     if (roleId == Constants.RoleMerchant)
-                        zdo.Set(ZDOHelper.Hash(ZDOHelper.KeyShopType), _selectedShopType);
+                        zdo.Set(VLData.Hash(VLData.KeyShopType), _selectedShopType);
                     else if (roleId == Constants.RoleQuestGiver)
-                        zdo.Set(ZDOHelper.Hash(ZDOHelper.KeyQuestPool), _questPools[_selectedQuestPool]);
+                        zdo.Set(VLData.Hash(VLData.KeyQuestPool), _questPools[_selectedQuestPool]);
                 }
 
                 NPCPrefabFactory.ApplyAppearance(npc);

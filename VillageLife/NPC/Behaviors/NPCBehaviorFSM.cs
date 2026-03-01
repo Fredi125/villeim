@@ -88,7 +88,7 @@ namespace VillageLife.NPC.Behaviors
 
             // Sync state to ZDO
             var zdo = _npc.ZNetView?.GetZDO();
-            zdo?.Set(ZDOHelper.Hash(ZDOHelper.KeyBehaviorState), (int)newState);
+            zdo?.Set(VLData.Hash(VLData.KeyBehaviorState), (int)newState);
         }
 
         private void OnEnterState(BehaviorState state)

@@ -24,7 +24,7 @@ namespace VillageLife.NPC.Roles
         {
             // Load shop type from ZDO
             var zdo = npc.ZNetView?.GetZDO();
-            string shopType = zdo?.GetString(ZDOHelper.Hash(ZDOHelper.KeyShopType), "general_store")
+            string shopType = zdo?.GetString(VLData.Hash(VLData.KeyShopType), "general_store")
                               ?? "general_store";
 
             // Load inventory from config
@@ -32,14 +32,14 @@ namespace VillageLife.NPC.Roles
             _shopInventory = new ShopInventory(shopConfig);
 
             // Check if we need to restore saved inventory state
-            string savedInventory = zdo?.GetString(ZDOHelper.Hash(ZDOHelper.KeyShopInventory), "");
+            string savedInventory = zdo?.GetString(VLData.Hash(VLData.KeyShopInventory), "");
             if (!string.IsNullOrEmpty(savedInventory))
             {
                 _shopInventory.DeserializeState(savedInventory);
             }
 
             // Initialize restock timer
-            long lastRestock = zdo?.GetLong(ZDOHelper.Hash(ZDOHelper.KeyLastRestock), 0) ?? 0;
+            long lastRestock = zdo?.GetLong(VLData.Hash(VLData.KeyLastRestock), 0) ?? 0;
             float minutesSinceRestock = (float)(DateTimeOffset.UtcNow.ToUnixTimeSeconds() - lastRestock) / 60f;
             int restockMinutes = Plugin.VillageLifePlugin.MerchantRestockMinutes.Value;
 
@@ -84,14 +84,14 @@ namespace VillageLife.NPC.Roles
         private void SaveRestockTime(VillageNPC npc)
         {
             var zdo = npc.ZNetView?.GetZDO();
-            zdo?.Set(ZDOHelper.Hash(ZDOHelper.KeyLastRestock), DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+            zdo?.Set(VLData.Hash(VLData.KeyLastRestock), DateTimeOffset.UtcNow.ToUnixTimeSeconds());
         }
 
         private void SaveInventoryState(VillageNPC npc)
         {
             var zdo = npc.ZNetView?.GetZDO();
             if (zdo == null || _shopInventory == null) return;
-            zdo.Set(ZDOHelper.Hash(ZDOHelper.KeyShopInventory), _shopInventory.SerializeState());
+            zdo.Set(VLData.Hash(VLData.KeyShopInventory), _shopInventory.SerializeState());
         }
 
         #region Trade Operations

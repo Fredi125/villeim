@@ -234,7 +234,7 @@ namespace VillageLife.Multiplayer
         private static long GetServerPeerId()
         {
             if (ZNet.instance == null) return 0;
-            if (ZNet.instance.IsServer()) return ZNet.instance.GetUID();
+            if (ZNet.instance.IsServer()) return ZNet.GetUID();
             var serverPeer = ZNet.instance.GetServerPeer();
             return serverPeer?.m_uid ?? 0;
         }

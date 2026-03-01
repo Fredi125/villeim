@@ -71,17 +71,17 @@ namespace VillageLife.NPC
             var zdo = _zNetView?.GetZDO();
             if (zdo == null) return;
 
-            zdo.Set(ZDOHelper.Hash(ZDOHelper.KeyNPCName), NPCName);
-            zdo.Set(ZDOHelper.Hash(ZDOHelper.KeyNPCRole), RoleId);
-            zdo.Set(ZDOHelper.Hash(ZDOHelper.KeyNPCCreatorId), CreatorId);
-            zdo.Set(ZDOHelper.Hash(ZDOHelper.KeyIsMale), IsMale);
-            zdo.Set(ZDOHelper.Hash(ZDOHelper.KeyHairStyle), HairStyle);
-            zdo.Set(ZDOHelper.Hash(ZDOHelper.KeyBeardStyle), BeardStyle);
+            zdo.Set(VLData.Hash(VLData.KeyNPCName), NPCName);
+            zdo.Set(VLData.Hash(VLData.KeyNPCRole), RoleId);
+            zdo.Set(VLData.Hash(VLData.KeyNPCCreatorId), CreatorId);
+            zdo.Set(VLData.Hash(VLData.KeyIsMale), IsMale);
+            zdo.Set(VLData.Hash(VLData.KeyHairStyle), HairStyle);
+            zdo.Set(VLData.Hash(VLData.KeyBeardStyle), BeardStyle);
 
             var pos = transform.position;
-            zdo.Set(ZDOHelper.Hash(ZDOHelper.KeyHomeX), pos.x);
-            zdo.Set(ZDOHelper.Hash(ZDOHelper.KeyHomeY), pos.y);
-            zdo.Set(ZDOHelper.Hash(ZDOHelper.KeyHomeZ), pos.z);
+            zdo.Set(VLData.Hash(VLData.KeyHomeX), pos.x);
+            zdo.Set(VLData.Hash(VLData.KeyHomeY), pos.y);
+            zdo.Set(VLData.Hash(VLData.KeyHomeZ), pos.z);
         }
 
         public void LoadFromZDO()
@@ -89,12 +89,12 @@ namespace VillageLife.NPC
             var zdo = _zNetView?.GetZDO();
             if (zdo == null) return;
 
-            NPCName = zdo.GetString(ZDOHelper.Hash(ZDOHelper.KeyNPCName), "Villager");
-            RoleId = zdo.GetString(ZDOHelper.Hash(ZDOHelper.KeyNPCRole), Constants.RoleVillager);
-            CreatorId = zdo.GetLong(ZDOHelper.Hash(ZDOHelper.KeyNPCCreatorId), 0L);
-            IsMale = zdo.GetBool(ZDOHelper.Hash(ZDOHelper.KeyIsMale), true);
-            HairStyle = zdo.GetString(ZDOHelper.Hash(ZDOHelper.KeyHairStyle), "");
-            BeardStyle = zdo.GetString(ZDOHelper.Hash(ZDOHelper.KeyBeardStyle), "");
+            NPCName = zdo.GetString(VLData.Hash(VLData.KeyNPCName), "Villager");
+            RoleId = zdo.GetString(VLData.Hash(VLData.KeyNPCRole), Constants.RoleVillager);
+            CreatorId = zdo.GetLong(VLData.Hash(VLData.KeyNPCCreatorId), 0L);
+            IsMale = zdo.GetBool(VLData.Hash(VLData.KeyIsMale), true);
+            HairStyle = zdo.GetString(VLData.Hash(VLData.KeyHairStyle), "");
+            BeardStyle = zdo.GetString(VLData.Hash(VLData.KeyBeardStyle), "");
         }
 
         #endregion
@@ -191,9 +191,9 @@ namespace VillageLife.NPC
             if (zdo == null) return transform.position;
 
             return new Vector3(
-                zdo.GetFloat(ZDOHelper.Hash(ZDOHelper.KeyHomeX), transform.position.x),
-                zdo.GetFloat(ZDOHelper.Hash(ZDOHelper.KeyHomeY), transform.position.y),
-                zdo.GetFloat(ZDOHelper.Hash(ZDOHelper.KeyHomeZ), transform.position.z)
+                zdo.GetFloat(VLData.Hash(VLData.KeyHomeX), transform.position.x),
+                zdo.GetFloat(VLData.Hash(VLData.KeyHomeY), transform.position.y),
+                zdo.GetFloat(VLData.Hash(VLData.KeyHomeZ), transform.position.z)
             );
         }
     }

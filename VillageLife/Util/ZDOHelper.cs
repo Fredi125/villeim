@@ -3,8 +3,9 @@ namespace VillageLife.Util
     /// <summary>
     /// Centralized ZDO key names and helpers for the VillageLife mod.
     /// All keys are namespaced with "villagelife:" to avoid conflicts.
+    /// Renamed from ZDOHelper to avoid collision with Valheim's own ZDOHelper class.
     /// </summary>
-    public static class ZDOHelper
+    public static class VLData
     {
         // NPC identity
         public const string KeyNPCName = "villagelife:npc_name";

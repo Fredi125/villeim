@@ -21,7 +21,7 @@ namespace VillageLife.NPC.Roles
         public void OnAssigned(VillageNPC npc)
         {
             var zdo = npc.ZNetView?.GetZDO();
-            _patrolRadius = zdo?.GetFloat(ZDOHelper.Hash(ZDOHelper.KeyPatrolRadius), 15f) ?? 15f;
+            _patrolRadius = zdo?.GetFloat(VLData.Hash(VLData.KeyPatrolRadius), 15f) ?? 15f;
 
             // Equip the guard with a weapon if the humanoid component exists
             var humanoid = npc.GetComponent<Humanoid>();
