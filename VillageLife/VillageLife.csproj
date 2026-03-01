@@ -11,7 +11,8 @@
 
   <PropertyGroup>
     <!-- Paths to Valheim and BepInEx - adjust per machine -->
-    <ValheimDir>$(VALHEIM_INSTALL)</ValheimDir>
+    <ValheimDir Condition="'$(VALHEIM_INSTALL)' != ''">$(VALHEIM_INSTALL)</ValheimDir>
+    <ValheimDir Condition="'$(ValheimDir)' == ''">G:\SteamLibrary\steamapps\common\Valheim</ValheimDir>
     <BepInExDir>$(ValheimDir)\BepInEx</BepInExDir>
   </PropertyGroup>
 
