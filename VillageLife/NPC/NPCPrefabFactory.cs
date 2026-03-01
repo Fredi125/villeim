@@ -64,10 +64,10 @@ namespace VillageLife.NPC
             RemoveComponent<Skills>(npcObj);
             RemoveComponent<CraftingStation>(npcObj);
 
-            // Remove attack-related components
-            var attacks = npcObj.GetComponents<Attack>();
-            foreach (var atk in attacks)
-                Object.Destroy(atk);
+            // Clear default attack items on the humanoid to prevent NPC combat
+            var existingHumanoid = npcObj.GetComponent<Humanoid>();
+            if (existingHumanoid != null)
+                existingHumanoid.m_defaultItems = System.Array.Empty<GameObject>();
 
             // Ensure we have a ZNetView
             var zNetView = npcObj.GetComponent<ZNetView>();

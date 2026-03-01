@@ -144,7 +144,7 @@ namespace VillageLife.NPC
                     hoverText += "\n" + extra;
             }
 
-            return Localization.instance.Localize(hoverText);
+            return global::Localization.instance.Localize(hoverText);
         }
 
         public string GetHoverName()

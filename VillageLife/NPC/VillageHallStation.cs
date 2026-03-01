@@ -79,7 +79,7 @@ namespace VillageLife.NPC
     {
         public string GetHoverText()
         {
-            return Localization.instance.Localize(
+            return global::Localization.instance.Localize(
                 "$piece_vl_villagehall\n" +
                 "[<color=yellow><b>$KEY_Use</b></color>] Open NPC Workshop");
         }

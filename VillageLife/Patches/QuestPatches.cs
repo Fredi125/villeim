@@ -27,8 +27,9 @@ namespace VillageLife.Patches
                 // Get the creature name (prefab name without clone suffix)
                 string creatureName = Utils.GetPrefabName(__instance.gameObject);
 
-                // Find who killed it by checking the last hit data
-                var lastHit = __instance.m_lastHit;
+                // Find who killed it by checking the last hit data (m_lastHit is protected, use reflection)
+                var lastHitField = AccessTools.Field(typeof(Character), "m_lastHit");
+                var lastHit = lastHitField?.GetValue(__instance) as HitData;
                 if (lastHit == null) return;
 
                 // Check if the attacker is a player

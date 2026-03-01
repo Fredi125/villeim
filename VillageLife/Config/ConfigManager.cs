@@ -602,7 +602,7 @@ namespace VillageLife.Config
 
             if (_dialogConfig == null)
             {
-                _dialogConfig = DialogConfigDefaults.Create();
+                _dialogConfig = CreateDefaultDialogConfig();
                 try
                 {
                     string json = JsonUtility.ToJson(_dialogConfig, true);
@@ -613,6 +613,45 @@ namespace VillageLife.Config
                     Debug.LogError($"[VillageLife] Failed to save dialog config: {e.Message}");
                 }
             }
+        }
+
+        private static DialogConfig CreateDefaultDialogConfig()
+        {
+            var config = new DialogConfig();
+
+            // Greeting lines
+            config.Lines.Add(new DialogLineConfig { Role = "any", Context = "greeting", Line = "Welcome to our village!", Weight = 1f });
+            config.Lines.Add(new DialogLineConfig { Role = "any", Context = "greeting", Line = "Good to see you, traveler!", Weight = 1f });
+            config.Lines.Add(new DialogLineConfig { Role = "merchant", Context = "greeting", Line = "Looking to trade? I've got the goods!", Weight = 1f });
+            config.Lines.Add(new DialogLineConfig { Role = "guard", Context = "greeting", Line = "Stay safe out there. I've got watch.", Weight = 1f });
+            config.Lines.Add(new DialogLineConfig { Role = "quest_giver", Context = "greeting", Line = "Ah, just the adventurer I was looking for!", Weight = 1f });
+
+            // Idle lines
+            config.Lines.Add(new DialogLineConfig { Role = "any", Context = "idle", Line = "Beautiful day, isn't it?", Weight = 1f });
+            config.Lines.Add(new DialogLineConfig { Role = "any", Context = "idle", Line = "The village is coming along nicely.", Weight = 1f });
+            config.Lines.Add(new DialogLineConfig { Role = "merchant", Context = "idle", Line = "I should restock soon...", Weight = 1f });
+            config.Lines.Add(new DialogLineConfig { Role = "guard", Context = "idle", Line = "All quiet on the perimeter.", Weight = 1f });
+            config.Lines.Add(new DialogLineConfig { Role = "villager", Context = "idle", Line = "Another day in the tenth world.", Weight = 1f });
+
+            // Morning lines
+            config.Lines.Add(new DialogLineConfig { Role = "any", Context = "morning", Line = "Good morning! Fresh start to the day.", Weight = 1f });
+            config.Lines.Add(new DialogLineConfig { Role = "any", Context = "morning", Line = "The sun rises on our village once more.", Weight = 1f });
+
+            // Evening lines
+            config.Lines.Add(new DialogLineConfig { Role = "any", Context = "evening", Line = "Getting dark... best head inside soon.", Weight = 1f });
+            config.Lines.Add(new DialogLineConfig { Role = "any", Context = "evening", Line = "Another day survived in these lands.", Weight = 1f });
+
+            // Rain lines
+            config.Lines.Add(new DialogLineConfig { Role = "any", Context = "rain", Line = "This rain won't let up, will it?", Weight = 1f });
+            config.Lines.Add(new DialogLineConfig { Role = "any", Context = "rain", Line = "At least the crops will be happy...", Weight = 1f });
+
+            // Combat lines
+            config.Lines.Add(new DialogLineConfig { Role = "any", Context = "combat", Line = "Enemies! Run!", Weight = 1f });
+            config.Lines.Add(new DialogLineConfig { Role = "guard", Context = "combat", Line = "To arms! Defend the village!", Weight = 1.5f });
+            config.Lines.Add(new DialogLineConfig { Role = "villager", Context = "combat", Line = "Help! Someone protect us!", Weight = 1f });
+            config.Lines.Add(new DialogLineConfig { Role = "merchant", Context = "combat", Line = "My wares! Someone stop them!", Weight = 1f });
+
+            return config;
         }
 
         #endregion

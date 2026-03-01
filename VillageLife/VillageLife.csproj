@@ -39,6 +39,9 @@
     <Reference Include="UnityEngine.TextRenderingModule" HintPath="$(ValheimDir)\valheim_Data\Managed\UnityEngine.TextRenderingModule.dll" Private="false" />
     <Reference Include="UnityEngine.IMGUIModule" HintPath="$(ValheimDir)\valheim_Data\Managed\UnityEngine.IMGUIModule.dll" Private="false" />
     <Reference Include="UnityEngine.AIModule" HintPath="$(ValheimDir)\valheim_Data\Managed\UnityEngine.AIModule.dll" Private="false" />
+    <Reference Include="UnityEngine.InputLegacyModule" HintPath="$(ValheimDir)\valheim_Data\Managed\UnityEngine.InputLegacyModule.dll" Private="false" />
+    <Reference Include="UnityEngine.JSONSerializeModule" HintPath="$(ValheimDir)\valheim_Data\Managed\UnityEngine.JSONSerializeModule.dll" Private="false" />
+    <Reference Include="UnityEngine.AssetBundleModule" HintPath="$(ValheimDir)\valheim_Data\Managed\UnityEngine.AssetBundleModule.dll" Private="false" />
   </ItemGroup>
 
   <!-- Post-build: copy to BepInEx plugins folder -->

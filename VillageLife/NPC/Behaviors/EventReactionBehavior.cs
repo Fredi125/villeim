@@ -64,11 +64,10 @@ namespace VillageLife.NPC.Behaviors
 
                     // Show combat dialog
                     string line = DialogSystem.GetRandomLine(_npc.RoleId, DialogContext.Combat);
-                    if (!string.IsNullOrEmpty(line) && Chat.instance != null)
+                    if (!string.IsNullOrEmpty(line))
                     {
-                        Chat.instance.AddInworldText(gameObject, 0L,
-                            transform.position + Vector3.up * 2.2f,
-                            Talker.Type.Shout, UserInfo.GetLocalUser(), line);
+                        MessageHud.instance?.ShowMessage(MessageHud.MessageType.Center,
+                            $"{_npc.NPCName}: \"{line}\"");
                     }
                 }
             }

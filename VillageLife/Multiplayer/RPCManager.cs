@@ -52,7 +52,7 @@ namespace VillageLife.Multiplayer
             pkg.Write(quantity);
             pkg.Write(isBuying);
 
-            _tradeRPC.SendPackage(ZRoutedRpc.instance.GetServerPeerID(), pkg);
+            _tradeRPC.SendPackage(GetServerPeerId(), pkg);
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace VillageLife.Multiplayer
                 var peer = ZNet.instance.GetPeer(sender);
                 if (peer != null)
                 {
-                    var player = Player.GetPlayer(sender);
+                    var player = GetPlayer(sender);
                     if (player != null)
                     {
                         if (isBuying)
@@ -145,7 +145,7 @@ namespace VillageLife.Multiplayer
             pkg.Write(npcId.UserID);
             pkg.Write(npcId.ID);
 
-            _questAcceptRPC.SendPackage(ZRoutedRpc.instance.GetServerPeerID(), pkg);
+            _questAcceptRPC.SendPackage(GetServerPeerId(), pkg);
         }
 
         private static IEnumerator<bool> OnQuestAcceptServer(long sender, ZPackage pkg)
@@ -189,7 +189,7 @@ namespace VillageLife.Multiplayer
             var pkg = new ZPackage();
             pkg.Write(questId);
 
-            _questCompleteRPC.SendPackage(ZRoutedRpc.instance.GetServerPeerID(), pkg);
+            _questCompleteRPC.SendPackage(GetServerPeerId(), pkg);
         }
 
         private static IEnumerator<bool> OnQuestCompleteServer(long sender, ZPackage pkg)
@@ -227,6 +227,17 @@ namespace VillageLife.Multiplayer
         }
 
         #endregion
+
+        /// <summary>
+        /// Get the server's peer ID for RPC routing.
+        /// </summary>
+        private static long GetServerPeerId()
+        {
+            if (ZNet.instance == null) return 0;
+            if (ZNet.instance.IsServer()) return ZNet.instance.GetUID();
+            var serverPeer = ZNet.instance.GetServerPeer();
+            return serverPeer?.m_uid ?? 0;
+        }
 
         /// <summary>
         /// Find a Player by their peer ID.

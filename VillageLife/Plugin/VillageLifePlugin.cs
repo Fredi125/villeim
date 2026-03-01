@@ -40,8 +40,8 @@ namespace VillageLife.Plugin
             _harmony.PatchAll(typeof(VillageLifePlugin).Assembly);
 
             // Initialize core systems
-            Config.ConfigManager.Initialize(Paths.ConfigPath);
-            Localization.LocalizationManager.Initialize();
+            VillageLife.Config.ConfigManager.Initialize(BepInEx.Paths.ConfigPath);
+            VillageLife.Localization.LocalizationManager.Initialize();
             NPC.NPCManager.Initialize();
             Quest.QuestEngine.Initialize();
             Dialog.DialogSystem.Initialize();

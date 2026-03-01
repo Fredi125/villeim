@@ -40,11 +40,23 @@ namespace VillageLife.Util
 
         /// <summary>
         /// Hashes a key string into an int for ZDO operations.
-        /// Uses the same hashing Valheim uses internally.
+        /// Uses the same algorithm as Valheim's GetStableHashCode extension method.
         /// </summary>
         public static int Hash(string key)
         {
-            return key.GetStableHashCode();
+            unchecked
+            {
+                int hash1 = 5381;
+                int hash2 = hash1;
+                for (int i = 0; i < key.Length && key[i] != '\0'; i += 2)
+                {
+                    hash1 = ((hash1 << 5) + hash1) ^ key[i];
+                    if (i == key.Length - 1 || key[i + 1] == '\0')
+                        break;
+                    hash2 = ((hash2 << 5) + hash2) ^ key[i + 1];
+                }
+                return hash1 + (hash2 * 1566083941);
+            }
         }
     }
 }

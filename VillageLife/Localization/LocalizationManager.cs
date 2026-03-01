@@ -58,18 +58,16 @@ namespace VillageLife.Localization
 
         private static void RegisterWithValheim()
         {
-            // Add all translations to Valheim's localization system
-            if (!_translations.TryGetValue("en", out var enDict)) return;
+            // Add translations through Jotunn's CustomLocalization API
+            var customLoc = Jotunn.Managers.LocalizationManager.Instance.GetLocalization();
 
-            foreach (var kvp in enDict)
+            if (_translations.TryGetValue("en", out var enDict))
             {
-                // Valheim uses $ prefix for localization keys
-                string key = kvp.Key.StartsWith("$") ? kvp.Key.Substring(1) : kvp.Key;
-                Jotunn.Managers.LocalizationManager.Instance.AddTranslation(
-                    new Jotunn.Configs.LocalizationConfig("English")
-                    {
-                        Translations = { { key, kvp.Value } }
-                    });
+                foreach (var kvp in enDict)
+                {
+                    string key = kvp.Key.StartsWith("$") ? kvp.Key.Substring(1) : kvp.Key;
+                    customLoc.AddTranslation("English", key, kvp.Value);
+                }
             }
 
             if (_translations.TryGetValue("fr", out var frDict))
@@ -77,11 +75,7 @@ namespace VillageLife.Localization
                 foreach (var kvp in frDict)
                 {
                     string key = kvp.Key.StartsWith("$") ? kvp.Key.Substring(1) : kvp.Key;
-                    Jotunn.Managers.LocalizationManager.Instance.AddTranslation(
-                        new Jotunn.Configs.LocalizationConfig("French")
-                        {
-                            Translations = { { key, kvp.Value } }
-                        });
+                    customLoc.AddTranslation("French", key, kvp.Value);
                 }
             }
         }

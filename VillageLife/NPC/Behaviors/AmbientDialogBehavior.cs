@@ -72,12 +72,15 @@ namespace VillageLife.NPC.Behaviors
             _showing = true;
             _displayTimer = Constants.DialogDisplaySeconds;
 
-            // Display using Valheim's chat bubble system
-            var chat = Chat.instance;
-            if (chat != null)
+            // Display ambient dialog as a message when player is nearby
+            if (Player.m_localPlayer != null)
             {
-                chat.AddInworldText(gameObject, 0L, transform.position + Vector3.up * 2.2f,
-                    Talker.Type.Normal, UserInfo.GetLocalUser(), line);
+                float dist = Vector3.Distance(transform.position, Player.m_localPlayer.transform.position);
+                if (dist < 15f)
+                {
+                    MessageHud.instance?.ShowMessage(MessageHud.MessageType.TopLeft,
+                        $"{_npc.NPCName}: \"{line}\"");
+                }
             }
         }
 
