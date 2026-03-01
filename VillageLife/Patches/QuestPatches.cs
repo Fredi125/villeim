@@ -12,7 +12,7 @@ namespace VillageLife.Patches
         /// <summary>
         /// Patch Character.OnDeath to detect creature kills for Kill objectives.
         /// </summary>
-        [HarmonyPatch(typeof(Character), nameof(Character.OnDeath))]
+        [HarmonyPatch(typeof(Character), "OnDeath")]
         public static class CharacterOnDeathPatch
         {
             public static void Postfix(Character __instance)
@@ -73,25 +73,6 @@ namespace VillageLife.Patches
         }
 
         /// <summary>
-        /// Patch Player.UpdateKnownTexts to detect location discovery for Explore objectives.
-        /// </summary>
-        [HarmonyPatch(typeof(Player), nameof(Player.UpdateKnownTexts))]
-        public static class PlayerUpdateKnownTextsPatch
-        {
-            public static void Postfix(Player __instance)
-            {
-                if (!Plugin.VillageLifePlugin.EnableQuestSystem.Value)
-                    return;
-
-                if (__instance != Player.m_localPlayer)
-                    return;
-
-                // Valheim shows location discovery text when entering a named location
-                // We check for recent discoveries by monitoring the message queue
-            }
-        }
-
-        /// <summary>
         /// Patch Piece placement to detect building for Build objectives.
         /// </summary>
         [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
@@ -121,7 +102,7 @@ namespace VillageLife.Patches
         /// <summary>
         /// Patch RandEventSystem to detect raid events and trigger NPC flee behavior.
         /// </summary>
-        [HarmonyPatch(typeof(RandEventSystem), nameof(RandEventSystem.SetActiveEvent))]
+        [HarmonyPatch(typeof(RandEventSystem), "SetActiveEvent")]
         public static class RaidEventPatch
         {
             public static void Postfix(RandEventSystem __instance, RandomEvent ev)

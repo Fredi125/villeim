@@ -17,15 +17,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- BepInEx -->
-    <Reference Include="BepInEx" HintPath="$(BepInExDir)\core\BepInEx.dll" Private="false" />
-    <Reference Include="0Harmony" HintPath="$(BepInExDir)\core\0Harmony.dll" Private="false" />
+    <!-- BepInEx + Jotunn via NuGet (no need to pre-install to build) -->
+    <PackageReference Include="JotunnLib" Version="2.20.0" />
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" PrivateAssets="all" />
+  </ItemGroup>
 
-    <!-- Jötunn (Valheim Library) -->
-    <Reference Include="Jotunn" HintPath="$(BepInExDir)\plugins\Jotunn\Jotunn.dll" Private="false" />
-
-    <!-- Valheim assemblies -->
-    <Reference Include="assembly_valheim" HintPath="$(ValheimDir)\valheim_Data\Managed\assembly_valheim.dll" Private="false" />
+  <ItemGroup>
+    <!-- Valheim assemblies (publicized so protected/private members are accessible for Harmony patches) -->
+    <Reference Include="assembly_valheim" HintPath="$(ValheimDir)\valheim_Data\Managed\assembly_valheim.dll" Private="false" Publicize="true" />
     <Reference Include="assembly_utils" HintPath="$(ValheimDir)\valheim_Data\Managed\assembly_utils.dll" Private="false" />
     <Reference Include="assembly_guiutils" HintPath="$(ValheimDir)\valheim_Data\Managed\assembly_guiutils.dll" Private="false" />
 
