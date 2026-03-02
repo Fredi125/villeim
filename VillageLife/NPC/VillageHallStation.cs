@@ -25,7 +25,11 @@ namespace VillageLife.NPC
                 return;
             }
 
+            // Deactivate source before cloning to prevent Awake() from firing on the clone
+            bool wasActive = basePrefab.activeSelf;
+            basePrefab.SetActive(false);
             _prefab = Object.Instantiate(basePrefab);
+            basePrefab.SetActive(wasActive);
             _prefab.name = Constants.VillageHallPrefabName;
 
             // Remove WearNTear from the cloned workbench — its Awake() crashes with
@@ -74,6 +78,15 @@ namespace VillageLife.NPC
                     new RequirementConfig { Item = "Resin", Amount = 5, Recover = true }
                 }
             };
+
+            // Use a vanilla piece icon so Jötunn accepts the piece as valid
+            var workbenchPrefab = PrefabManager.Instance.GetPrefab("piece_workbench");
+            if (workbenchPrefab != null)
+            {
+                var wbPiece = workbenchPrefab.GetComponent<Piece>();
+                if (wbPiece != null && wbPiece.m_icon != null)
+                    pieceConfig.Icon = wbPiece.m_icon;
+            }
 
             PieceManager.Instance.AddPiece(new CustomPiece(_prefab, true, pieceConfig));
         }

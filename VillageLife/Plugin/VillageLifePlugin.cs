@@ -79,6 +79,10 @@ namespace VillageLife.Plugin
 
         private void OnVanillaPrefabsAvailable()
         {
+            // Unsubscribe immediately — this event can fire multiple times (e.g. returning
+            // to main menu) and re-registering prefabs causes "already exists" errors.
+            PrefabManager.OnVanillaPrefabsAvailable -= OnVanillaPrefabsAvailable;
+
             NPC.NPCPrefabFactory.RegisterPrefabs();
             NPC.VillageHallStation.RegisterPrefab();
 

@@ -41,6 +41,15 @@ namespace VillageLife.NPC
                 }
             };
 
+            // Use a vanilla piece icon so Jötunn accepts the piece as valid
+            var bedPrefab = PrefabManager.Instance.GetPrefab("piece_bed");
+            if (bedPrefab != null)
+            {
+                var bedPiece = bedPrefab.GetComponent<Piece>();
+                if (bedPiece != null && bedPiece.m_icon != null)
+                    pieceConfig.Icon = bedPiece.m_icon;
+            }
+
             PieceManager.Instance.AddPiece(new CustomPiece(_npcPrefab, true, pieceConfig));
         }
 
@@ -54,7 +63,13 @@ namespace VillageLife.NPC
                 return null;
             }
 
+            // Deactivate the source prefab before cloning so that Awake() doesn't fire
+            // on the clone during Instantiate. Without this, Humanoid.Awake() triggers
+            // SEMan RPC registration which fails with "duplicate key" on the cloned ZNetView.
+            bool wasActive = basePrefab.activeSelf;
+            basePrefab.SetActive(false);
             var npcObj = Object.Instantiate(basePrefab);
+            basePrefab.SetActive(wasActive);
             npcObj.name = Constants.NPCPrefabName;
 
             // Remove player-specific components we don't need
