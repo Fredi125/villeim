@@ -79,12 +79,12 @@ namespace VillageLife.Patches
         [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
         public static class PlayerPlacePiecePatch
         {
-            public static void Postfix(Player __instance, Piece piece, bool __result)
+            public static void Postfix(Player __instance, Piece piece)
             {
                 if (!Plugin.VillageLifePlugin.EnableQuestSystem.Value)
                     return;
 
-                if (!__result || piece == null) return;
+                if (piece == null) return;
 
                 if (__instance != Player.m_localPlayer)
                     return;
