@@ -36,12 +36,11 @@ namespace VillageLife.NPC
             basePrefab.SetActive(wasActive);
             _prefab.name = Constants.VillageHallPrefabName;
 
-            // Strip ALL gameplay components — keep only visuals (MeshFilter, MeshRenderer,
-            // Transform) and colliders. Each stripped component has Awake() logic that
-            // references workbench-specific objects, RPCs, or effects.
+            // Strip gameplay components with complex Awake() logic that references
+            // workbench-specific objects, RPCs, or effects. Keep Piece (data-only,
+            // no risky Awake) — Jötunn requires it for CustomPiece validation.
             StripComponent<WearNTear>(_prefab);
             StripComponent<CraftingStation>(_prefab);
-            StripComponent<Piece>(_prefab);
 
             // Remove stale ZNetView (has workbench RPCs/hash) and add a fresh one
             StripComponent<ZNetView>(_prefab);
