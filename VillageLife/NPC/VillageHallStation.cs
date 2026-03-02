@@ -17,11 +17,7 @@ namespace VillageLife.NPC
 
         public static void RegisterPrefab()
         {
-            // Clone the workbench just for its visual mesh. We strip ALL gameplay
-            // components (CraftingStation, WearNTear, ZNetView, Piece, EffectArea)
-            // because their Awake() methods reference objects/RPCs from the original
-            // workbench that don't exist on the clone, causing silent crashes and
-            // invisible buildings.
+            // Clone the workbench for its visual mesh only.
             var basePrefab = PrefabManager.Instance.GetPrefab("piece_workbench");
             if (basePrefab == null)
             {
@@ -36,35 +32,26 @@ namespace VillageLife.NPC
             basePrefab.SetActive(wasActive);
             _prefab.name = Constants.VillageHallPrefabName;
 
-            // Strip gameplay components with complex Awake() logic that references
-            // workbench-specific objects, RPCs, or effects. Keep Piece (data-only,
-            // no risky Awake) and ZNetView (serialized config needed for networking).
-            StripComponent<WearNTear>(_prefab);
-            StripComponent<CraftingStation>(_prefab);
+            // Strip ALL MonoBehaviour scripts from root and children. This removes every
+            // gameplay component (WearNTear, CraftingStation, ZNetView, Piece, EffectArea,
+            // child effect scripts, etc.) while preserving visual/physics components
+            // (MeshFilter, MeshRenderer, Transform, Collider) which are NOT MonoBehaviours.
+            foreach (var mb in _prefab.GetComponentsInChildren<MonoBehaviour>(true))
+                Object.DestroyImmediate(mb);
 
-            // Keep the cloned ZNetView (has proper serialized fields) — just set persistent
-            var zNetView = _prefab.GetComponent<ZNetView>();
-            if (zNetView != null)
-                zNetView.m_persistent = true;
-
-            // Strip EffectArea from children (workbench area-of-effect markers)
-            foreach (var ea in _prefab.GetComponentsInChildren<EffectArea>(true))
-                Object.DestroyImmediate(ea);
-
-            // Add our custom interaction component
-            _prefab.AddComponent<VillageHallInteraction>();
-
-            // Prefab MUST be active — Valheim's Instantiate preserves active state,
-            // and Player.PlacePiece doesn't call SetActive(true) on placed instances.
-            // An inactive prefab → invisible building.
+            // Now safe to activate — only built-in visual/physics components remain.
+            // The prefab MUST be active because Valheim's Instantiate preserves active
+            // state, and Player.PlacePiece never calls SetActive on placed instances.
             _prefab.SetActive(true);
-        }
 
-        private static void StripComponent<T>(GameObject obj) where T : Component
-        {
-            var comp = obj.GetComponent<T>();
-            if (comp != null)
-                Object.DestroyImmediate(comp);
+            // Add required components on the now-active prefab.
+            // At OnVanillaPrefabsAvailable time, ZNet.instance is null (no world loaded),
+            // so ZNetView.Awake() early-returns without registering a phantom ZDO.
+            var zNetView = _prefab.AddComponent<ZNetView>();
+            zNetView.m_persistent = true;
+
+            _prefab.AddComponent<Piece>();
+            _prefab.AddComponent<VillageHallInteraction>();
         }
 
         public static void RegisterPiece()
