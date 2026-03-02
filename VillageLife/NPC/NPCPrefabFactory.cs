@@ -17,10 +17,7 @@ namespace VillageLife.NPC
         public static void RegisterPrefabs()
         {
             _npcPrefab = CreateNPCPrefab();
-            if (_npcPrefab != null)
-            {
-                PrefabManager.Instance.AddPrefab(new CustomPrefab(_npcPrefab, false));
-            }
+            // Don't register with PrefabManager here — CustomPiece handles it in RegisterPieces()
         }
 
         public static void RegisterPieces()
@@ -41,14 +38,19 @@ namespace VillageLife.NPC
                 }
             };
 
-            // Use a vanilla piece icon so Jötunn accepts the piece as valid
+            // Jötunn rejects pieces without icons. Try a vanilla icon first, fall back to
+            // a procedural placeholder if vanilla prefabs aren't fully loaded yet.
+            Sprite icon = null;
             var bedPrefab = PrefabManager.Instance.GetPrefab("piece_bed");
             if (bedPrefab != null)
             {
                 var bedPiece = bedPrefab.GetComponent<Piece>();
-                if (bedPiece != null && bedPiece.m_icon != null)
-                    pieceConfig.Icon = bedPiece.m_icon;
+                if (bedPiece != null)
+                    icon = bedPiece.m_icon;
             }
+            if (icon == null)
+                icon = CreatePlaceholderIcon();
+            pieceConfig.Icon = icon;
 
             PieceManager.Instance.AddPiece(new CustomPiece(_npcPrefab, true, pieceConfig));
         }
@@ -123,6 +125,17 @@ namespace VillageLife.NPC
             npcObj.SetActive(false);
 
             return npcObj;
+        }
+
+        private static Sprite CreatePlaceholderIcon()
+        {
+            var tex = new Texture2D(64, 64);
+            var pixels = new Color[64 * 64];
+            for (int i = 0; i < pixels.Length; i++)
+                pixels[i] = new Color(0.55f, 0.35f, 0.2f);
+            tex.SetPixels(pixels);
+            tex.Apply();
+            return Sprite.Create(tex, new Rect(0, 0, 64, 64), new Vector2(0.5f, 0.5f));
         }
 
         private static void RemoveComponent<T>(GameObject obj) where T : Component

@@ -57,8 +57,7 @@ namespace VillageLife.NPC
                 zNetView.m_persistent = true;
 
             _prefab.SetActive(false);
-
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(_prefab, false));
+            // Don't register with PrefabManager here — CustomPiece handles it in RegisterPiece()
         }
 
         public static void RegisterPiece()
