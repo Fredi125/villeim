@@ -114,7 +114,7 @@ namespace VillageLife.NPC
         {
             var comp = obj.GetComponent<T>();
             if (comp != null)
-                Object.Destroy(comp);
+                Object.DestroyImmediate(comp);
         }
 
         /// <summary>

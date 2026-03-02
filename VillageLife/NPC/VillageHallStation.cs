@@ -28,6 +28,14 @@ namespace VillageLife.NPC
             _prefab = Object.Instantiate(basePrefab);
             _prefab.name = Constants.VillageHallPrefabName;
 
+            // Remove WearNTear from the cloned workbench — its Awake() crashes with
+            // a NullRef on the placement ghost (no valid ZNetView/ZDO). The Village
+            // Hall is a utility station that doesn't need to take damage; the Piece
+            // component still allows hammer placement and removal.
+            var wearNTear = _prefab.GetComponent<WearNTear>();
+            if (wearNTear != null)
+                Object.DestroyImmediate(wearNTear);
+
             // Replace the CraftingStation behavior with our own
             var existingStation = _prefab.GetComponent<CraftingStation>();
             if (existingStation != null)
