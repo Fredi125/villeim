@@ -52,7 +52,6 @@ namespace VillageLife.Plugin
 
             // Register Jötunn events
             PrefabManager.OnVanillaPrefabsAvailable += OnVanillaPrefabsAvailable;
-            PieceManager.OnPiecesRegistered += OnPiecesRegistered;
 
             Logger.LogInfo($"{PluginName} v{PluginVersion} loaded.");
         }
@@ -82,10 +81,9 @@ namespace VillageLife.Plugin
         {
             NPC.NPCPrefabFactory.RegisterPrefabs();
             NPC.VillageHallStation.RegisterPrefab();
-        }
 
-        private void OnPiecesRegistered()
-        {
+            // Register pieces immediately after prefabs, while piece tables are still being built.
+            // OnPiecesRegistered fires AFTER tables are finalized, which is too late.
             NPC.NPCPrefabFactory.RegisterPieces();
             NPC.VillageHallStation.RegisterPiece();
         }
