@@ -38,14 +38,14 @@ namespace VillageLife.NPC
 
             // Strip gameplay components with complex Awake() logic that references
             // workbench-specific objects, RPCs, or effects. Keep Piece (data-only,
-            // no risky Awake) — Jötunn requires it for CustomPiece validation.
+            // no risky Awake) and ZNetView (serialized config needed for networking).
             StripComponent<WearNTear>(_prefab);
             StripComponent<CraftingStation>(_prefab);
 
-            // Remove stale ZNetView (has workbench RPCs/hash) and add a fresh one
-            StripComponent<ZNetView>(_prefab);
-            var zNetView = _prefab.AddComponent<ZNetView>();
-            zNetView.m_persistent = true;
+            // Keep the cloned ZNetView (has proper serialized fields) — just set persistent
+            var zNetView = _prefab.GetComponent<ZNetView>();
+            if (zNetView != null)
+                zNetView.m_persistent = true;
 
             // Strip EffectArea from children (workbench area-of-effect markers)
             foreach (var ea in _prefab.GetComponentsInChildren<EffectArea>(true))
@@ -54,7 +54,10 @@ namespace VillageLife.NPC
             // Add our custom interaction component
             _prefab.AddComponent<VillageHallInteraction>();
 
-            _prefab.SetActive(false);
+            // Prefab MUST be active — Valheim's Instantiate preserves active state,
+            // and Player.PlacePiece doesn't call SetActive(true) on placed instances.
+            // An inactive prefab → invisible building.
+            _prefab.SetActive(true);
         }
 
         private static void StripComponent<T>(GameObject obj) where T : Component

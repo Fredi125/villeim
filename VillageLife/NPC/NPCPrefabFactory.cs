@@ -38,15 +38,16 @@ namespace VillageLife.NPC
                 }
             };
 
-            // Jötunn rejects pieces without icons. Try a vanilla icon first, fall back to
-            // a procedural placeholder if vanilla prefabs aren't fully loaded yet.
+            // Jötunn rejects pieces without icons. Use the workbench icon (reliable
+            // source — same one used for the Village Hall), fall back to a procedural
+            // placeholder if somehow unavailable.
             Sprite icon = null;
-            var bedPrefab = PrefabManager.Instance.GetPrefab("piece_bed");
-            if (bedPrefab != null)
+            var wbPrefab = PrefabManager.Instance.GetPrefab("piece_workbench");
+            if (wbPrefab != null)
             {
-                var bedPiece = bedPrefab.GetComponent<Piece>();
-                if (bedPiece != null)
-                    icon = bedPiece.m_icon;
+                var wbPiece = wbPrefab.GetComponent<Piece>();
+                if (wbPiece != null)
+                    icon = wbPiece.m_icon;
             }
             if (icon == null)
                 icon = CreatePlaceholderIcon();
