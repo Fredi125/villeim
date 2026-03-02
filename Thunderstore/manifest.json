@@ -4,7 +4,7 @@
     "website_url": "https://github.com/Fredi125/villeim",
     "description": "Craft, customize, and place friendly NPCs to populate your Valheim settlements with merchants, quest givers, guards, and villagers.",
     "dependencies": [
-        "denikson-BepInExPack_Valheim-5.4.2202",
-        "ValheimModding-Jotunn-2.20.0"
+        "denikson-BepInExPack_Valheim-5.4.2333",
+        "ValheimModding-Jotunn-2.27.1"
     ]
 }

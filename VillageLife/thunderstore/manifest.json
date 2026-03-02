@@ -4,7 +4,7 @@
     "website_url": "",
     "description": "Add NPCs to your Valheim village — merchants, quest givers, guards, and villagers with dialog, trading, and quests.",
     "dependencies": [
-        "denikson-BepInExPack_Valheim-5.4.2202",
-        "ValheimModding-Jotunn-2.20.0"
+        "denikson-BepInExPack_Valheim-5.4.2333",
+        "ValheimModding-Jotunn-2.27.1"
     ]
 }
