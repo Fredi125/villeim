@@ -17,7 +17,11 @@ namespace VillageLife.NPC
 
         public static void RegisterPrefab()
         {
-            // Base the Village Hall on an existing crafting station for the mesh
+            // Clone the workbench just for its visual mesh. We strip ALL gameplay
+            // components (CraftingStation, WearNTear, ZNetView, Piece, EffectArea)
+            // because their Awake() methods reference objects/RPCs from the original
+            // workbench that don't exist on the clone, causing silent crashes and
+            // invisible buildings.
             var basePrefab = PrefabManager.Instance.GetPrefab("piece_workbench");
             if (basePrefab == null)
             {
@@ -32,32 +36,33 @@ namespace VillageLife.NPC
             basePrefab.SetActive(wasActive);
             _prefab.name = Constants.VillageHallPrefabName;
 
-            // Remove WearNTear from the cloned workbench — its Awake() crashes with
-            // a NullRef on the placement ghost (no valid ZNetView/ZDO). The Village
-            // Hall is a utility station that doesn't need to take damage; the Piece
-            // component still allows hammer placement and removal.
-            var wearNTear = _prefab.GetComponent<WearNTear>();
-            if (wearNTear != null)
-                Object.DestroyImmediate(wearNTear);
+            // Strip ALL gameplay components — keep only visuals (MeshFilter, MeshRenderer,
+            // Transform) and colliders. Each stripped component has Awake() logic that
+            // references workbench-specific objects, RPCs, or effects.
+            StripComponent<WearNTear>(_prefab);
+            StripComponent<CraftingStation>(_prefab);
+            StripComponent<Piece>(_prefab);
 
-            // Replace the CraftingStation behavior with our own
-            var existingStation = _prefab.GetComponent<CraftingStation>();
-            if (existingStation != null)
-            {
-                existingStation.m_name = "$piece_vl_villagehall";
-                existingStation.m_rangeBuild = 20f;
-            }
+            // Remove stale ZNetView (has workbench RPCs/hash) and add a fresh one
+            StripComponent<ZNetView>(_prefab);
+            var zNetView = _prefab.AddComponent<ZNetView>();
+            zNetView.m_persistent = true;
+
+            // Strip EffectArea from children (workbench area-of-effect markers)
+            foreach (var ea in _prefab.GetComponentsInChildren<EffectArea>(true))
+                Object.DestroyImmediate(ea);
 
             // Add our custom interaction component
             _prefab.AddComponent<VillageHallInteraction>();
 
-            // Ensure ZNetView persistence
-            var zNetView = _prefab.GetComponent<ZNetView>();
-            if (zNetView != null)
-                zNetView.m_persistent = true;
-
             _prefab.SetActive(false);
-            // Don't register with PrefabManager here — CustomPiece handles it in RegisterPiece()
+        }
+
+        private static void StripComponent<T>(GameObject obj) where T : Component
+        {
+            var comp = obj.GetComponent<T>();
+            if (comp != null)
+                Object.DestroyImmediate(comp);
         }
 
         public static void RegisterPiece()
