@@ -61,8 +61,12 @@ namespace VillageLife.Config
                 }
             }
 
-            if (_shopConfigs.Count == 0)
+            // Validate loaded data — regenerate if empty or corrupt
+            bool shopsValid = _shopConfigs.Count > 0 &&
+                              _shopConfigs.Values.Any(s => s.Items != null && s.Items.Count > 0);
+            if (!shopsValid)
             {
+                _shopConfigs.Clear();
                 CreateDefaultShopConfigs();
                 SaveShopConfigs(filePath);
             }
@@ -190,8 +194,12 @@ namespace VillageLife.Config
                 }
             }
 
-            if (_questDefinitions.Count == 0)
+            // Validate loaded data — regenerate if empty or corrupt (e.g. from prior serialization bug)
+            bool questsValid = _questDefinitions.Count > 0 &&
+                               _questDefinitions.Any(q => !string.IsNullOrEmpty(q.QuestId));
+            if (!questsValid)
             {
+                _questDefinitions.Clear();
                 CreateDefaultQuests();
                 SaveQuestConfigs(filePath);
             }
@@ -600,7 +608,8 @@ namespace VillageLife.Config
                 }
             }
 
-            if (_dialogConfig == null)
+            // Validate loaded data — regenerate if empty or corrupt
+            if (_dialogConfig == null || _dialogConfig.Lines == null || _dialogConfig.Lines.Count == 0)
             {
                 _dialogConfig = CreateDefaultDialogConfig();
                 try
