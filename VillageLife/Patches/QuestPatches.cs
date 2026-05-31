@@ -96,31 +96,6 @@ namespace VillageLife.Patches
     }
 
     /// <summary>
-    /// Patches for NPC event reactions (raids, combat).
-    /// </summary>
-    public static class EventPatches
-    {
-        /// <summary>
-        /// Patch RandEventSystem to detect raid events and trigger NPC flee behavior.
-        /// </summary>
-        [HarmonyPatch(typeof(RandEventSystem), "SetActiveEvent")]
-        public static class RaidEventPatch
-        {
-            public static void Postfix(RandEventSystem __instance, RandomEvent ev)
-            {
-                if (ev == null) return;
-
-                // Get all NPCs near the event and trigger flee
-                var nearbyNPCs = NPC.NPCManager.GetNPCsInRange(ev.m_pos, 50f);
-                foreach (var npc in nearbyNPCs)
-                {
-                    npc.BehaviorFSM?.TriggerFlee();
-                }
-            }
-        }
-    }
-
-    /// <summary>
     /// Patch to detect location discovery for exploration quests.
     /// </summary>
     [HarmonyPatch(typeof(MessageHud), nameof(MessageHud.ShowBiomeFoundMsg))]

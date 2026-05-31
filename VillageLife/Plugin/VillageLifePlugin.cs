@@ -16,7 +16,7 @@ namespace VillageLife.Plugin
     {
         public const string PluginGUID = "com.villagelife.mod";
         public const string PluginName = "VillageLife";
-        public const string PluginVersion = "1.0.0";
+        public const string PluginVersion = "2.0.0";
 
         public static VillageLifePlugin Instance { get; private set; }
 
@@ -83,13 +83,10 @@ namespace VillageLife.Plugin
             // to main menu) and re-registering prefabs causes "already exists" errors.
             PrefabManager.OnVanillaPrefabsAvailable -= OnVanillaPrefabsAvailable;
 
-            NPC.NPCPrefabFactory.RegisterPrefabs();
-            NPC.VillageHallStation.RegisterPrefab();
-
-            // Register pieces immediately after prefabs, while piece tables are still being built.
-            // OnPiecesRegistered fires AFTER tables are finalized, which is too late.
-            NPC.NPCPrefabFactory.RegisterPieces();
-            NPC.VillageHallStation.RegisterPiece();
+            // Clone-based registration via Jötunn (lifecycle-safe). The NPC is a creature
+            // spawned from the Village Hall UI; the Village Hall is a buildable piece.
+            NPC.NPCPrefabFactory.Register();
+            NPC.VillageHallStation.Register();
         }
 
         private void Update()

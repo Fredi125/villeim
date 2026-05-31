@@ -7,63 +7,37 @@ using VillageLife.Util;
 namespace VillageLife.NPC
 {
     /// <summary>
-    /// The Village Hall crafting station — a custom piece that opens the NPC creation UI
-    /// when players interact with it. NPCs are "crafted" here by selecting role, name,
-    /// and appearance before being placed via the build hammer.
+    /// The Village Hall — a buildable piece that opens the NPC Workshop when used.
+    ///
+    /// 2.0: Built with Jötunn's <c>CustomPiece(name, basePrefab, config)</c> constructor,
+    /// which clones <c>piece_workbench</c> through the disabled prefab container (no Awake
+    /// crashes) and registers the piece exactly once (no "already exists" double-register).
+    /// We only remove the CraftingStation component so our interaction handler wins the
+    /// E key, and leave WearNTear/Piece/ZNetView intact so it behaves like a normal build.
     /// </summary>
     public static class VillageHallStation
     {
-        private static GameObject _prefab;
+        private const string BasePrefab = "piece_workbench";
 
-        public static void RegisterPrefab()
+        public static void Register()
         {
-            // Clone the workbench for its visual mesh only.
-            var basePrefab = PrefabManager.Instance.GetPrefab("piece_workbench");
-            if (basePrefab == null)
+            // Borrow the workbench's icon so the hammer entry is never blank.
+            Sprite icon = null;
+            var workbench = PrefabManager.Instance.GetPrefab(BasePrefab);
+            if (workbench != null)
             {
-                Debug.LogError("[VillageLife] Could not find workbench prefab for Village Hall!");
-                return;
+                var wbPiece = workbench.GetComponent<Piece>();
+                if (wbPiece != null)
+                    icon = wbPiece.m_icon;
             }
 
-            // Deactivate source before cloning to prevent Awake() from firing on the clone
-            bool wasActive = basePrefab.activeSelf;
-            basePrefab.SetActive(false);
-            _prefab = Object.Instantiate(basePrefab);
-            basePrefab.SetActive(wasActive);
-            _prefab.name = Constants.VillageHallPrefabName;
-
-            // Strip ALL MonoBehaviour scripts from root and children. This removes every
-            // gameplay component (WearNTear, CraftingStation, ZNetView, Piece, EffectArea,
-            // child effect scripts, etc.) while preserving visual/physics components
-            // (MeshFilter, MeshRenderer, Transform, Collider) which are NOT MonoBehaviours.
-            foreach (var mb in _prefab.GetComponentsInChildren<MonoBehaviour>(true))
-                Object.DestroyImmediate(mb);
-
-            // Now safe to activate — only built-in visual/physics components remain.
-            // The prefab MUST be active because Valheim's Instantiate preserves active
-            // state, and Player.PlacePiece never calls SetActive on placed instances.
-            _prefab.SetActive(true);
-
-            // Add required components on the now-active prefab.
-            // At OnVanillaPrefabsAvailable time, ZNet.instance is null (no world loaded),
-            // so ZNetView.Awake() early-returns without registering a phantom ZDO.
-            var zNetView = _prefab.AddComponent<ZNetView>();
-            zNetView.m_persistent = true;
-
-            _prefab.AddComponent<Piece>();
-            _prefab.AddComponent<VillageHallInteraction>();
-        }
-
-        public static void RegisterPiece()
-        {
-            if (_prefab == null) return;
-
-            var pieceConfig = new PieceConfig
+            var config = new PieceConfig
             {
                 Name = "$piece_vl_villagehall",
                 Description = "$piece_vl_villagehall_desc",
                 PieceTable = "Hammer",
                 Category = Constants.PieceCategory,
+                Icon = icon,
                 Requirements = new[]
                 {
                     new RequirementConfig { Item = "Wood", Amount = 20, Recover = true },
@@ -72,22 +46,30 @@ namespace VillageLife.NPC
                 }
             };
 
-            // Use a vanilla piece icon so Jötunn accepts the piece as valid
-            var workbenchPrefab = PrefabManager.Instance.GetPrefab("piece_workbench");
-            if (workbenchPrefab != null)
+            // Jötunn clones piece_workbench into a fresh prefab named VL_VillageHall.
+            var customPiece = new CustomPiece(Constants.VillageHallPrefabName, BasePrefab, config);
+            var prefab = customPiece.PiecePrefab;
+
+            if (prefab != null)
             {
-                var wbPiece = workbenchPrefab.GetComponent<Piece>();
-                if (wbPiece != null && wbPiece.m_icon != null)
-                    pieceConfig.Icon = wbPiece.m_icon;
+                // Remove the crafting-station behaviour so our E interaction is used instead.
+                var craftingStation = prefab.GetComponent<CraftingStation>();
+                if (craftingStation != null)
+                    Object.DestroyImmediate(craftingStation);
+
+                // Our interaction handler opens the NPC Workshop UI.
+                prefab.AddComponent<VillageHallInteraction>();
             }
 
-            PieceManager.Instance.AddPiece(new CustomPiece(_prefab, true, pieceConfig));
+            PieceManager.Instance.AddPiece(customPiece);
+
+            Jotunn.Logger.LogInfo("[VillageLife] Village Hall piece registered.");
         }
     }
 
     /// <summary>
-    /// Interaction handler for the Village Hall.
-    /// Opens the NPC creation UI when the player presses E.
+    /// Hover text + E-key handler for a placed Village Hall.
+    /// Opens the NPC Workshop where players design and place villagers.
     /// </summary>
     public class VillageHallInteraction : MonoBehaviour, Hoverable, Interactable
     {
@@ -100,17 +82,14 @@ namespace VillageLife.NPC
 
         public string GetHoverName()
         {
-            return "$piece_vl_villagehall";
+            return global::Localization.instance.Localize("$piece_vl_villagehall");
         }
 
         public bool Interact(Humanoid user, bool hold, bool alt)
         {
             if (hold) return false;
+            if (!(user is Player)) return false;
 
-            var player = user as Player;
-            if (player == null) return false;
-
-            // Open NPC creation UI
             UI.NPCCreationPanel.Show(this);
             return true;
         }

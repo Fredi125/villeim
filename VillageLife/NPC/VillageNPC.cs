@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using VillageLife.NPC.Behaviors;
 using VillageLife.NPC.Roles;
@@ -7,15 +6,18 @@ using VillageLife.Util;
 namespace VillageLife.NPC
 {
     /// <summary>
-    /// Core NPC component. Attached to every placed NPC.
-    /// Implements Hoverable (show name on hover) and Interactable (E key interaction).
-    /// Manages ZDO persistence and delegates to role-specific behavior.
+    /// Core controller attached to every placed NPC.
+    /// Implements Hoverable (name/role on hover) and Interactable (E to talk).
+    /// Handles ZDO persistence and delegates behaviour to the assigned role.
+    ///
+    /// 2.0: NPCs are stationary. The old movement FSM (which set transform.position
+    /// directly and never animated or net-synced) has been removed. Roles are ticked
+    /// here on the owning client; ambient dialog is added as a lightweight companion.
     /// </summary>
     public class VillageNPC : MonoBehaviour, Hoverable, Interactable
     {
         private ZNetView _zNetView;
         private INPCRole _role;
-        private NPCBehaviorFSM _behaviorFSM;
 
         // Cached ZDO data
         public string NPCName { get; private set; } = "Villager";
@@ -26,19 +28,11 @@ namespace VillageLife.NPC
         public string BeardStyle { get; private set; } = "";
 
         public INPCRole Role => _role;
-        public NPCBehaviorFSM BehaviorFSM => _behaviorFSM;
         public ZNetView ZNetView => _zNetView;
 
         private void Awake()
         {
             _zNetView = GetComponent<ZNetView>();
-            if (_zNetView == null)
-            {
-                Debug.LogError("[VillageLife] VillageNPC missing ZNetView!");
-                return;
-            }
-
-            _behaviorFSM = gameObject.AddComponent<NPCBehaviorFSM>();
         }
 
         private void Start()
@@ -48,6 +42,7 @@ namespace VillageLife.NPC
 
             LoadFromZDO();
             AssignRole(RoleId);
+            EnsureAmbientDialog();
             NPCManager.Register(this);
         }
 
@@ -55,6 +50,21 @@ namespace VillageLife.NPC
         {
             NPCManager.Unregister(this);
             _role?.OnRemoved(this);
+        }
+
+        private void Update()
+        {
+            // Only the owning client drives role logic (restock timers, guard scans, etc.).
+            if (_zNetView == null || !_zNetView.IsValid() || !_zNetView.IsOwner())
+                return;
+
+            _role?.OnUpdate(this, Time.deltaTime);
+        }
+
+        private void EnsureAmbientDialog()
+        {
+            if (GetComponent<AmbientDialogBehavior>() == null)
+                gameObject.AddComponent<AmbientDialogBehavior>();
         }
 
         public ZDOID GetZDOID()
@@ -77,11 +87,6 @@ namespace VillageLife.NPC
             zdo.Set(VLData.Hash(VLData.KeyIsMale), IsMale);
             zdo.Set(VLData.Hash(VLData.KeyHairStyle), HairStyle);
             zdo.Set(VLData.Hash(VLData.KeyBeardStyle), BeardStyle);
-
-            var pos = transform.position;
-            zdo.Set(VLData.Hash(VLData.KeyHomeX), pos.x);
-            zdo.Set(VLData.Hash(VLData.KeyHomeY), pos.y);
-            zdo.Set(VLData.Hash(VLData.KeyHomeZ), pos.z);
         }
 
         public void LoadFromZDO()
@@ -102,8 +107,8 @@ namespace VillageLife.NPC
         #region Configuration
 
         /// <summary>
-        /// Called when the NPC is first created at the Village Hall.
-        /// Sets up initial ZDO data.
+        /// Called when an NPC is first created at the Village Hall. Writes the initial ZDO
+        /// data and assigns the role. The owning client must hold the ZDO.
         /// </summary>
         public void Configure(string npcName, string roleId, long creatorId, bool isMale,
             string hairStyle = "", string beardStyle = "")
@@ -132,10 +137,12 @@ namespace VillageLife.NPC
 
         public string GetHoverText()
         {
-            string roleDisplay = RoleSystem.GetRoleDisplayName(RoleId);
+            string roleDisplay = global::Localization.instance.Localize(
+                RoleSystem.GetRoleDisplayName(RoleId));
+
             string hoverText = $"<color=yellow><b>{NPCName}</b></color>\n" +
-                              $"<color=#AAAAAA>{roleDisplay}</color>\n" +
-                              "[<color=yellow><b>$KEY_Use</b></color>] Talk";
+                               $"<color=#AAAAAA>{roleDisplay}</color>\n" +
+                               "[<color=yellow><b>$KEY_Use</b></color>] Talk";
 
             if (_role != null)
             {
@@ -161,16 +168,12 @@ namespace VillageLife.NPC
             if (hold) return false;
             if (_role == null) return false;
 
-            // Face the player
-            Vector3 dir = (user.transform.position - transform.position).normalized;
+            // Turn to face the player (rotation only — NPCs never move from their post).
+            Vector3 dir = (user.transform.position - transform.position);
             dir.y = 0;
-            if (dir != Vector3.zero)
-                transform.rotation = Quaternion.LookRotation(dir);
+            if (dir.sqrMagnitude > 0.01f)
+                transform.rotation = Quaternion.LookRotation(dir.normalized);
 
-            // Transition to INTERACTING state
-            _behaviorFSM?.SetState(BehaviorState.Interacting);
-
-            // Delegate to role
             _role.OnInteract(this, user as Player);
             return true;
         }
@@ -181,20 +184,5 @@ namespace VillageLife.NPC
         }
 
         #endregion
-
-        /// <summary>
-        /// Get the NPC's home position (where it was originally placed).
-        /// </summary>
-        public Vector3 GetHomePosition()
-        {
-            var zdo = _zNetView?.GetZDO();
-            if (zdo == null) return transform.position;
-
-            return new Vector3(
-                zdo.GetFloat(VLData.Hash(VLData.KeyHomeX), transform.position.x),
-                zdo.GetFloat(VLData.Hash(VLData.KeyHomeY), transform.position.y),
-                zdo.GetFloat(VLData.Hash(VLData.KeyHomeZ), transform.position.z)
-            );
-        }
     }
 }

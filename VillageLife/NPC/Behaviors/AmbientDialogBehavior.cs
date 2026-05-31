@@ -5,16 +5,14 @@ using VillageLife.Util;
 namespace VillageLife.NPC.Behaviors
 {
     /// <summary>
-    /// Periodically displays ambient dialog text above the NPC's head.
-    /// Context-sensitive: considers time of day, weather, and nearby threats.
+    /// Periodically surfaces a context-aware ambient line for the NPC (time of day,
+    /// weather, nearby combat). Shown in the message HUD when the local player is close.
+    /// Attached automatically by <see cref="VillageNPC"/>.
     /// </summary>
     public class AmbientDialogBehavior : MonoBehaviour
     {
         private VillageNPC _npc;
         private float _nextDialogTime;
-        private float _displayTimer;
-        private string _currentLine;
-        private bool _showing;
 
         private void Awake()
         {
@@ -26,62 +24,36 @@ namespace VillageLife.NPC.Behaviors
         {
             if (!Plugin.VillageLifePlugin.EnableAmbientDialog.Value)
                 return;
-
-            if (_npc == null) return;
-
-            // Don't talk while sleeping
-            if (_npc.BehaviorFSM != null && _npc.BehaviorFSM.CurrentState == BehaviorState.Sleeping)
+            if (_npc == null)
                 return;
 
             _nextDialogTime -= Time.deltaTime;
-
             if (_nextDialogTime <= 0f)
             {
                 ShowAmbientDialog();
                 ResetTimer();
             }
-
-            if (_showing)
-            {
-                _displayTimer -= Time.deltaTime;
-                if (_displayTimer <= 0f)
-                {
-                    _showing = false;
-                    _currentLine = null;
-                }
-            }
         }
 
         private void ShowAmbientDialog()
         {
-            // Check for combat first
-            DialogContext context;
-            if (DialogSystem.IsInCombatArea(transform.position))
-            {
-                context = DialogContext.Combat;
-            }
-            else
-            {
-                context = DialogSystem.GetCurrentContext();
-            }
+            // Only chatter when the local player is nearby enough to read it.
+            var player = Player.m_localPlayer;
+            if (player == null)
+                return;
+            if (Vector3.Distance(transform.position, player.transform.position) > 15f)
+                return;
+
+            DialogContext context = DialogSystem.IsInCombatArea(transform.position)
+                ? DialogContext.Combat
+                : DialogSystem.GetCurrentContext();
 
             string line = DialogSystem.GetRandomLine(_npc.RoleId, context);
-            if (string.IsNullOrEmpty(line)) return;
+            if (string.IsNullOrEmpty(line))
+                return;
 
-            _currentLine = line;
-            _showing = true;
-            _displayTimer = Constants.DialogDisplaySeconds;
-
-            // Display ambient dialog as a message when player is nearby
-            if (Player.m_localPlayer != null)
-            {
-                float dist = Vector3.Distance(transform.position, Player.m_localPlayer.transform.position);
-                if (dist < 15f)
-                {
-                    MessageHud.instance?.ShowMessage(MessageHud.MessageType.TopLeft,
-                        $"{_npc.NPCName}: \"{line}\"");
-                }
-            }
+            MessageHud.instance?.ShowMessage(MessageHud.MessageType.TopLeft,
+                $"{_npc.NPCName}: \"{line}\"");
         }
 
         private void ResetTimer()

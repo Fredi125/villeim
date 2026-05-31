@@ -1,5 +1,3 @@
-using Jotunn.Configs;
-using Jotunn.Entities;
 using Jotunn.Managers;
 using UnityEngine;
 using VillageLife.Util;
@@ -7,162 +5,89 @@ using VillageLife.Util;
 namespace VillageLife.NPC
 {
     /// <summary>
-    /// Creates and registers the NPC prefab based on Valheim's humanoid model.
-    /// Strips unnecessary components (combat, player inventory) and attaches VillageNPC.
+    /// Creates and registers the VillageLife NPC prefab.
+    ///
+    /// 2.0: Instead of cloning the Player prefab and stripping dozens of components
+    /// (which caused SEMan duplicate-key crashes), we clone Haldor — the vanilla
+    /// travelling trader. Haldor is already a friendly, idle-animated, non-combat
+    /// Humanoid with no AI, which is exactly what a stationary villager needs.
+    ///
+    /// Cloning is done through Jötunn's <see cref="PrefabManager.CreateClonedPrefab"/>,
+    /// which parents the clone to a disabled container so its Awake never fires during
+    /// setup — the root cause of every prefab crash in 1.x.
     /// </summary>
     public static class NPCPrefabFactory
     {
+        /// <summary>The vanilla prefab we base our NPC on.</summary>
+        private const string BasePrefab = "Haldor";
+
         private static GameObject _npcPrefab;
 
-        public static void RegisterPrefabs()
+        /// <summary>Clone Haldor, turn it into our NPC, and register it in ZNetScene.</summary>
+        public static void Register()
         {
-            _npcPrefab = CreateNPCPrefab();
-            // Don't register with PrefabManager here — CustomPiece handles it in RegisterPieces()
-        }
-
-        public static void RegisterPieces()
-        {
-            if (_npcPrefab == null) return;
-
-            var pieceConfig = new PieceConfig
+            // CreateClonedPrefab parents the clone to a disabled container (no Awake)
+            // and registers it with the PrefabManager so it ends up in ZNetScene.
+            _npcPrefab = PrefabManager.Instance.CreateClonedPrefab(Constants.NPCPrefabName, BasePrefab);
+            if (_npcPrefab == null)
             {
-                Name = "$piece_vl_npc",
-                Description = "$piece_vl_npc_desc",
-                PieceTable = "Hammer",
-                Category = Constants.PieceCategory,
-                AllowedInDungeons = false,
-                Requirements = new[]
-                {
-                    new RequirementConfig { Item = "Wood", Amount = 5, Recover = true },
-                    new RequirementConfig { Item = "LeatherScraps", Amount = 2, Recover = true }
-                }
-            };
-
-            // Jötunn rejects pieces without icons. Use the workbench icon (reliable
-            // source — same one used for the Village Hall), fall back to a procedural
-            // placeholder if somehow unavailable.
-            Sprite icon = null;
-            var wbPrefab = PrefabManager.Instance.GetPrefab("piece_workbench");
-            if (wbPrefab != null)
-            {
-                var wbPiece = wbPrefab.GetComponent<Piece>();
-                if (wbPiece != null)
-                    icon = wbPiece.m_icon;
-            }
-            if (icon == null)
-                icon = CreatePlaceholderIcon();
-            pieceConfig.Icon = icon;
-
-            PieceManager.Instance.AddPiece(new CustomPiece(_npcPrefab, true, pieceConfig));
-        }
-
-        private static GameObject CreateNPCPrefab()
-        {
-            // Clone from a vanilla humanoid prefab (e.g., the player or a villager-type NPC)
-            var basePrefab = PrefabManager.Instance.GetPrefab("Player");
-            if (basePrefab == null)
-            {
-                Debug.LogError("[VillageLife] Could not find Player prefab to base NPC on!");
-                return null;
+                Jotunn.Logger.LogError($"[VillageLife] Could not clone '{BasePrefab}' for the NPC prefab.");
+                return;
             }
 
-            // Deactivate the source prefab before cloning so that Awake() doesn't fire
-            // on the clone during Instantiate. Without this, Humanoid.Awake() triggers
-            // SEMan RPC registration which fails with "duplicate key" on the cloned ZNetView.
-            bool wasActive = basePrefab.activeSelf;
-            basePrefab.SetActive(false);
-            var npcObj = Object.Instantiate(basePrefab);
-            basePrefab.SetActive(wasActive);
-            npcObj.name = Constants.NPCPrefabName;
+            // Drop the vanilla trade behaviour so our VillageNPC interaction takes over.
+            var trader = _npcPrefab.GetComponent<Trader>();
+            if (trader != null)
+                Object.DestroyImmediate(trader);
 
-            // Remove player-specific components we don't need
-            RemoveComponent<Player>(npcObj);
-            RemoveComponent<PlayerController>(npcObj);
-            RemoveComponent<Talker>(npcObj);
-            RemoveComponent<Skills>(npcObj);
-            RemoveComponent<CraftingStation>(npcObj);
+            // Strip any AI so the NPC stands at its post (no wandering, fleeing, or
+            // day/night despawn). GetComponent returns null when absent, so this is
+            // safe whether or not Haldor ships with an AI component.
+            var monsterAI = _npcPrefab.GetComponent<MonsterAI>();
+            if (monsterAI != null)
+                Object.DestroyImmediate(monsterAI);
+            var animalAI = _npcPrefab.GetComponent<AnimalAI>();
+            if (animalAI != null)
+                Object.DestroyImmediate(animalAI);
 
-            // Clear default attack items on the humanoid to prevent NPC combat
-            var existingHumanoid = npcObj.GetComponent<Humanoid>();
-            if (existingHumanoid != null)
-                existingHumanoid.m_defaultItems = System.Array.Empty<GameObject>();
+            // Persist the NPC with the world like any other saved creature.
+            var nview = _npcPrefab.GetComponent<ZNetView>();
+            if (nview != null)
+                nview.m_persistent = true;
 
-            // Ensure we have a ZNetView
-            var zNetView = npcObj.GetComponent<ZNetView>();
-            if (zNetView == null)
-                zNetView = npcObj.AddComponent<ZNetView>();
-
-            zNetView.m_persistent = true;
-
-            // Add the VillageNPC component
-            npcObj.AddComponent<VillageNPC>();
-
-            // Add a basic humanoid component for animations (if not already present)
-            var humanoid = npcObj.GetComponent<Humanoid>();
-            if (humanoid == null)
-                humanoid = npcObj.AddComponent<Humanoid>();
-
-            // Configure humanoid - make non-hostile and non-targetable by enemies
-            humanoid.m_name = "$npc_vl_villager";
-            humanoid.m_faction = Character.Faction.Players;
-            humanoid.m_group = "villagelife";
-
-            // Add a Piece component for building system
-            var piece = npcObj.GetComponent<Piece>();
-            if (piece == null)
-                piece = npcObj.AddComponent<Piece>();
-
-            // Setup collider for interaction
-            var collider = npcObj.GetComponent<CapsuleCollider>();
-            if (collider == null)
+            // Friendly faction so nothing in the world treats it as an enemy.
+            var humanoid = _npcPrefab.GetComponent<Humanoid>();
+            if (humanoid != null)
             {
-                collider = npcObj.AddComponent<CapsuleCollider>();
-                collider.center = new Vector3(0, 0.9f, 0);
-                collider.radius = 0.3f;
-                collider.height = 1.8f;
+                humanoid.m_faction = Character.Faction.Players;
+                humanoid.m_group = "villagelife";
             }
 
-            // Disable the NPC in prefab state (will be enabled when placed)
-            npcObj.SetActive(false);
+            // Attach our controller (ZDO persistence, role delegation, hover/interact).
+            _npcPrefab.AddComponent<VillageNPC>();
 
-            return npcObj;
-        }
-
-        private static Sprite CreatePlaceholderIcon()
-        {
-            var tex = new Texture2D(64, 64);
-            var pixels = new Color[64 * 64];
-            for (int i = 0; i < pixels.Length; i++)
-                pixels[i] = new Color(0.55f, 0.35f, 0.2f);
-            tex.SetPixels(pixels);
-            tex.Apply();
-            return Sprite.Create(tex, new Rect(0, 0, 64, 64), new Vector2(0.5f, 0.5f));
-        }
-
-        private static void RemoveComponent<T>(GameObject obj) where T : Component
-        {
-            var comp = obj.GetComponent<T>();
-            if (comp != null)
-                Object.DestroyImmediate(comp);
+            Jotunn.Logger.LogInfo("[VillageLife] NPC prefab registered.");
         }
 
         /// <summary>
-        /// Apply appearance settings to a placed NPC.
-        /// Called after the NPC is configured with its visual settings.
+        /// Best-effort visual customisation applied after an NPC is spawned.
+        /// Failures here are purely cosmetic and never throw.
         /// </summary>
         public static void ApplyAppearance(VillageNPC npc)
         {
             if (npc == null) return;
 
-            var visEquip = npc.GetComponent<VisEquipment>();
-            if (visEquip == null) return;
+            var vis = npc.GetComponent<VisEquipment>();
+            if (vis == null) return;
 
-            // Set hair and beard from NPC config
+            // 0 = male body, 1 = female body
+            vis.SetModel(npc.IsMale ? 0 : 1);
+
             if (!string.IsNullOrEmpty(npc.HairStyle))
-                visEquip.SetHairItem(npc.HairStyle);
+                vis.SetHairItem(npc.HairStyle);
 
-            if (!string.IsNullOrEmpty(npc.BeardStyle))
-                visEquip.SetBeardItem(npc.BeardStyle);
+            if (!string.IsNullOrEmpty(npc.BeardStyle) && npc.BeardStyle != "None")
+                vis.SetBeardItem(npc.BeardStyle);
         }
     }
 }
