@@ -1,47 +1,29 @@
 namespace VillageLife.Util
 {
+    /// <summary>
+    /// Shared names and keys for the mod. Kept deliberately small — this is the
+    /// reliable foundation we build the rest of VillageLife on top of.
+    /// </summary>
     public static class Constants
     {
-        // Prefab names
-        public const string NPCPrefabName = "VL_NPC";
+        // Plugin identity
+        public const string PluginGuid = "com.villagelife.mod";
+        public const string PluginName = "VillageLife";
+        public const string PluginVersion = "3.0.0";
+
+        // Prefab names for the content we register (cloned from the vanilla prefabs below).
+        public const string NpcPrefabName = "VL_Villager";
         public const string VillageHallPrefabName = "VL_VillageHall";
 
-        // Piece categories
-        public const string PieceCategory = "Village";
+        // Vanilla prefabs we clone. Haldor is a friendly, idle-animated, non-combat
+        // humanoid with no AI — exactly what a stationary villager needs. The workbench
+        // is a known-good buildable piece.
+        public const string NpcBasePrefab = "Haldor";
+        public const string HallBasePrefab = "piece_workbench";
 
-        // Role IDs
-        public const string RoleMerchant = "merchant";
-        public const string RoleQuestGiver = "quest_giver";
-        public const string RoleGuard = "guard";
-        public const string RoleVillager = "villager";
-
-        // Day/night schedule (EnvMan day fractions)
-        public const float DawnFraction = 0.25f;
-        public const float DuskFraction = 0.7f;
-        public const float SleepFraction = 0.8f;
-
-        // NPC behavior
-        public const float DefaultWanderRadius = 12f;
-        public const float WanderIdleMinSeconds = 5f;
-        public const float WanderIdleMaxSeconds = 15f;
-        public const float InteractionDistance = 3f;
-        public const float DialogDisplaySeconds = 4f;
-        public const float AmbientDialogIntervalMin = 30f;
-        public const float AmbientDialogIntervalMax = 120f;
-
-        // Multiplayer
-        public const string RPCTradeRequest = "VL_TradeRequest";
-        public const string RPCTradeResponse = "VL_TradeResponse";
-        public const string RPCQuestAccept = "VL_QuestAccept";
-        public const string RPCQuestComplete = "VL_QuestComplete";
-        public const string RPCQuestResponse = "VL_QuestResponse";
-        public const string RPCNPCCreate = "VL_NPCCreate";
-
-        // Config paths
-        public const string ConfigFolderName = "VillageLife";
-        public const string ShopConfigFile = "shops.json";
-        public const string QuestConfigFile = "quests.json";
-        public const string DialogConfigFile = "dialog.json";
-        public const string LocalizationFolder = "localization";
+        // ZDO keys, namespaced so they never collide with the game or other mods.
+        // Hashed once at startup (GetStableHashCode is pure and deterministic).
+        public static readonly int KeyName = "villagelife_name".GetStableHashCode();
+        public static readonly int KeyCreator = "villagelife_creator".GetStableHashCode();
     }
 }

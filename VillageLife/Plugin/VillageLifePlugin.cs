@@ -1,104 +1,53 @@
 using BepInEx;
 using BepInEx.Configuration;
-using HarmonyLib;
-using Jotunn;
-using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
-using UnityEngine;
+using VillageLife.Building;
+using VillageLife.NPC;
+using VillageLife.Util;
 
 namespace VillageLife.Plugin
 {
-    [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
+    /// <summary>
+    /// BepInEx entry point. Binds a single config value and registers our content with
+    /// Jötunn at the right moment. No Harmony patches, no per-frame update loop, no
+    /// background managers — the foundation does exactly one thing and does it reliably.
+    /// </summary>
+    [BepInPlugin(Constants.PluginGuid, Constants.PluginName, Constants.PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
     public class VillageLifePlugin : BaseUnityPlugin
     {
-        public const string PluginGUID = "com.villagelife.mod";
-        public const string PluginName = "VillageLife";
-        public const string PluginVersion = "2.0.0";
-
-        public static VillageLifePlugin Instance { get; private set; }
-
-        private Harmony _harmony;
-
-        // Configuration
-        public static ConfigEntry<int> MaxNPCsPerPlayer;
-        public static ConfigEntry<float> NPCWanderRadius;
-        public static ConfigEntry<int> MerchantRestockMinutes;
-        public static ConfigEntry<bool> EnableQuestSystem;
-        public static ConfigEntry<bool> EnableAmbientDialog;
-        public static ConfigEntry<string> Language;
+        /// <summary>How far in front of the Village Hall (metres) a new villager appears.</summary>
+        public static ConfigEntry<float> SpawnDistance;
 
         private void Awake()
         {
-            Instance = this;
+            SpawnDistance = Config.Bind(
+                "General", "SpawnDistance", 2.5f,
+                "How far in front of the Village Hall (in metres) a new villager spawns.");
 
-            InitConfig();
+            // Register each piece of content once the vanilla prefab it clones is available.
+            // The creature clones Haldor (a creature) → CreatureManager event.
+            // The piece clones the workbench (a prefab) → PrefabManager event.
+            // Jötunn re-injects registered content on every world load, so we add it once
+            // and unsubscribe to avoid duplicate-registration errors.
+            CreatureManager.OnVanillaCreaturesAvailable += OnCreaturesAvailable;
+            PrefabManager.OnVanillaPrefabsAvailable += OnPrefabsAvailable;
 
-            _harmony = new Harmony(PluginGUID);
-            _harmony.PatchAll(typeof(VillageLifePlugin).Assembly);
-
-            // Initialize core systems
-            VillageLife.Config.ConfigManager.Initialize(BepInEx.Paths.ConfigPath);
-            VillageLife.Localization.LocalizationManager.Initialize();
-            NPC.NPCManager.Initialize();
-            Quest.QuestEngine.Initialize();
-            Dialog.DialogSystem.Initialize();
-            Multiplayer.RPCManager.Initialize();
-
-            // Initialize UI
-            UI.UIManager.Initialize(gameObject);
-
-            // Register Jötunn events
-            PrefabManager.OnVanillaPrefabsAvailable += OnVanillaPrefabsAvailable;
-
-            Logger.LogInfo($"{PluginName} v{PluginVersion} loaded.");
+            Jotunn.Logger.LogInfo($"{Constants.PluginName} v{Constants.PluginVersion} loaded.");
         }
 
-        private void InitConfig()
+        private void OnCreaturesAvailable()
         {
-            MaxNPCsPerPlayer = base.Config.Bind("General", "MaxNPCsPerPlayer", 20,
-                "Maximum number of NPCs a single player can place.");
-
-            NPCWanderRadius = base.Config.Bind("Behavior", "NPCWanderRadius", 12f,
-                "Default wander radius for NPCs around their home point.");
-
-            MerchantRestockMinutes = base.Config.Bind("Merchant", "RestockMinutes", 60,
-                "Minutes between merchant inventory restocks.");
-
-            EnableQuestSystem = base.Config.Bind("Quests", "EnableQuestSystem", true,
-                "Enable the quest system. Disable to use NPCs as merchants/villagers only.");
-
-            EnableAmbientDialog = base.Config.Bind("Dialog", "EnableAmbientDialog", true,
-                "Enable NPCs speaking ambient dialog lines above their heads.");
-
-            Language = base.Config.Bind("Localization", "Language", "en",
-                "Language code for UI text and dialog (en, fr).");
+            CreatureManager.OnVanillaCreaturesAvailable -= OnCreaturesAvailable;
+            NpcPrefab.Register();
         }
 
-        private void OnVanillaPrefabsAvailable()
+        private void OnPrefabsAvailable()
         {
-            // Unsubscribe immediately — this event can fire multiple times (e.g. returning
-            // to main menu) and re-registering prefabs causes "already exists" errors.
-            PrefabManager.OnVanillaPrefabsAvailable -= OnVanillaPrefabsAvailable;
-
-            // Clone-based registration via Jötunn (lifecycle-safe). The NPC is a creature
-            // spawned from the Village Hall UI; the Village Hall is a buildable piece.
-            NPC.NPCPrefabFactory.Register();
-            NPC.VillageHallStation.Register();
-        }
-
-        private void Update()
-        {
-            NPC.NPCManager.Tick();
-            Quest.QuestEngine.Tick();
-        }
-
-        private void OnDestroy()
-        {
-            _harmony?.UnpatchSelf();
-            NPC.NPCManager.Cleanup();
+            PrefabManager.OnVanillaPrefabsAvailable -= OnPrefabsAvailable;
+            VillageHall.Register();
         }
     }
 }

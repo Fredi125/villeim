@@ -1,33 +1,38 @@
 # Changelog
 
+## 3.0.0 — Reliable foundation (rebuild)
+
+A deliberate, from-scratch rebuild. Earlier versions tried to ship a large feature set
+(quests, merchants, guards, ambient dialog, localization, custom multiplayer RPC) on an
+unstable base and never reached a dependable state. 3.0 strips the mod back to a small core
+that works, so the rest can be added one tested feature at a time.
+
+### What it does now
+- Buildable **Village Hall** (Hammer → *Misc* tab).
+- Press *Use* on the hall to **summon a friendly, named villager** in front of it.
+- Villagers are non-hostile, stationary, persistent, and greet you when talked to.
+- Standard networked creatures — multiplayer and dedicated-server friendly.
+
+### How it's built (for reliability)
+- Villagers are registered through Jötunn's **CreatureManager** as a clone of **Haldor**
+  (a friendly, idle, AI-less humanoid), replacing the hand-rolled prefab creation that
+  caused the invisible/crashing NPCs in earlier builds.
+- The Village Hall is a Jötunn **CustomPiece** cloned from the workbench, placed in the
+  built-in *Misc* tab (custom build tabs were a recurring source of bugs).
+- No Harmony patches, no custom RPC layer, no per-frame managers — far less to go wrong.
+- Spawning goes through a single `NpcSpawner` entry point so a creation UI can be added
+  later without changing the spawn/persistence logic.
+
+### Removed (returning later as tested increments)
+- Quest system, merchant trading, guard AI, day/night routines, ambient dialog packs,
+  localization framework, and the custom multiplayer RPC layer.
+
+---
+
 ## 2.0.0
-
-A ground-up rebuild of the prefab and behaviour layer for reliability.
-
-### Changed
-- **NPCs are now cloned from Haldor** (the vanilla trader) instead of the Player prefab — a friendly, animated, non-combat humanoid base. This eliminates the prefab-creation crashes from 1.x.
-- **Prefab creation uses Jötunn's lifecycle-safe cloning** (`CreateClonedPrefab` / `CustomPiece` clone constructor) instead of hand-rolled `Instantiate` + component stripping. Fixes the invisible-building and startup crash bugs.
-- **NPCs are stationary.** Each villager holds its post (a merchant at the stall, a guard at the gate). The 1.x movement system manipulated the transform directly, which never animated or synced over the network.
-
-### Fixed
-- Village Hall now places and renders correctly.
-- NPC and Village Hall prefabs register exactly once (no "already exists" errors).
-- Config files (shops/quests/dialog) generate with full content instead of empty data.
+Rebuild of the prefab/behaviour layer (NPCs cloned from Haldor). Improved over 1.x but
+still carried the full, unreliable feature set; superseded by the 3.0 foundation.
 
 ## 1.0.0
-
-### Added
-- **NPC System**: Craft and place friendly NPCs using the Village Hall crafting station
-- **4 NPC Roles**: Merchant, Quest Giver, Guard, and Villager
-- **Merchant Trading**: Config-driven shop inventories with buy/sell UI, restocking timers, and 4 shop types (General Store, Weaponsmith, Armorer, Food Vendor)
-- **Quest System**: 15 starter quests across Meadows, Black Forest, and Swamp biomes
-- **Quest Types**: Kill, Gather, Deliver, Explore, and Build objectives
-- **Quest UI**: Quest offer panel, progress tracking, completion dialog, and HUD overlay
-- **NPC Behaviors**: Day/night schedule with wander, sleep, and flee states
-- **Ambient Dialog**: Context-sensitive spoken lines based on time, weather, and events (60+ lines)
-- **Guard AI**: Guards patrol and defend against hostile creatures
-- **NPC Customization**: Name, gender, hair style, and beard options
-- **Multiplayer Support**: Server-authoritative trade validation, per-player quest state, ZDO sync
-- **Localization**: Full English and French translations
-- **Config System**: JSON-driven shop inventories, quest definitions, and dialog lines — fully moddable
-- **Dedicated Server Support**: Headless-compatible with server-side validation
+Initial release: NPC roles (merchant, quest giver, guard, villager), a 15-quest system,
+ambient dialog, guard AI, localization, and multiplayer RPC. Ambitious but unreliable.
