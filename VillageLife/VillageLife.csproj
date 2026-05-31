@@ -9,12 +9,34 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <!--
+    Resolve the Valheim install directory (the folder containing valheim.exe).
+    Priority: the VALHEIM_INSTALL environment variable, then the first common Steam
+    path that exists on disk. If none match, set VALHEIM_INSTALL or hard-code the
+    <ValheimDir> line below — see README.md. The CheckValheimDir target prints a
+    clear error if the game assemblies still can't be found.
+  -->
+  <PropertyGroup Condition="'$(VALHEIM_INSTALL)' != ''">
+    <ValheimDir>$(VALHEIM_INSTALL)</ValheimDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(ValheimDir)' == ''">
+    <ValheimDir Condition="Exists('C:\Program Files (x86)\Steam\steamapps\common\Valheim')">C:\Program Files (x86)\Steam\steamapps\common\Valheim</ValheimDir>
+    <ValheimDir Condition="'$(ValheimDir)' == '' And Exists('C:\Program Files\Steam\steamapps\common\Valheim')">C:\Program Files\Steam\steamapps\common\Valheim</ValheimDir>
+    <ValheimDir Condition="'$(ValheimDir)' == '' And Exists('D:\SteamLibrary\steamapps\common\Valheim')">D:\SteamLibrary\steamapps\common\Valheim</ValheimDir>
+    <ValheimDir Condition="'$(ValheimDir)' == '' And Exists('D:\Steam\steamapps\common\Valheim')">D:\Steam\steamapps\common\Valheim</ValheimDir>
+    <ValheimDir Condition="'$(ValheimDir)' == '' And Exists('E:\SteamLibrary\steamapps\common\Valheim')">E:\SteamLibrary\steamapps\common\Valheim</ValheimDir>
+    <!-- Last-resort placeholder; the CheckValheimDir target will flag it if it doesn't exist. -->
+    <ValheimDir Condition="'$(ValheimDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Valheim</ValheimDir>
+  </PropertyGroup>
   <PropertyGroup>
-    <!-- Paths to Valheim and BepInEx - adjust per machine -->
-    <ValheimDir Condition="'$(VALHEIM_INSTALL)' != ''">$(VALHEIM_INSTALL)</ValheimDir>
-    <ValheimDir Condition="'$(ValheimDir)' == ''">G:\SteamLibrary\steamapps\common\Valheim</ValheimDir>
     <BepInExDir>$(ValheimDir)\BepInEx</BepInExDir>
   </PropertyGroup>
+
+  <!-- Fail early with an actionable message if Valheim's assemblies aren't where we looked. -->
+  <Target Name="CheckValheimDir" BeforeTargets="ResolveAssemblyReferences;BeforeBuild">
+    <Error Condition="!Exists('$(ValheimDir)\valheim_Data\Managed\assembly_valheim.dll')"
+           Text="Valheim game assemblies not found. Looked in: $(ValheimDir)\valheim_Data\Managed. Set the VALHEIM_INSTALL environment variable to your Valheim folder (the one with valheim.exe), or edit the ValheimDir line in VillageLife.csproj. See README.md > Building." />
+  </Target>
 
   <ItemGroup>
     <!-- BepInEx + Harmony + Jotunn (bundled in lib/ so build works without pre-installing mods) -->

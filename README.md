@@ -46,22 +46,47 @@ VillageLife/
 ## Building
 
 The build needs a local Valheim install for the game assemblies (they are **not** committed).
+The BepInEx, Jötunn and Harmony reference DLLs *are* committed under `VillageLife/lib/`, so you
+don't need to pre-install any mods to compile.
 
-1. Point the build at your install, either by setting an environment variable:
-   ```
-   VALHEIM_INSTALL=C:\Program Files (x86)\Steam\steamapps\common\Valheim
-   ```
-   or by editing `ValheimDir` in `VillageLife/VillageLife.csproj`.
-2. Build:
-   ```
-   dotnet build VillageLife.sln -c Release
-   ```
-   (or open `VillageLife.sln` in Visual Studio / Rider and build).
-3. Output: `VillageLife/bin/Release/net472/VillageLife.dll`. If BepInEx is found under the
-   Valheim folder, it's also copied to `BepInEx/plugins/VillageLife/` automatically.
+### Find your Valheim folder
 
-The BepInEx, Jötunn and Harmony reference DLLs are committed under `VillageLife/lib/`, so no
-mod pre-install is required to compile.
+It's the folder that contains `valheim.exe` and a `valheim_Data\Managed\` subfolder. In Steam:
+right-click **Valheim → Manage → Browse local files**. Common paths:
+
+- `C:\Program Files (x86)\Steam\steamapps\common\Valheim`
+- `D:\SteamLibrary\steamapps\common\Valheim`
+
+The project auto-detects these (and a few more). You only need the next step if your install is
+somewhere else.
+
+### Point the build at it (only if auto-detect fails)
+
+Either set an environment variable (recommended — survives across rebuilds):
+
+```powershell
+# PowerShell, persists for your user; reopen the terminal/VS afterward
+setx VALHEIM_INSTALL "D:\YourPath\steamapps\common\Valheim"
+```
+
+…or edit the `ValheimDir` line in `VillageLife/VillageLife.csproj`.
+
+If the assemblies still can't be found, the build stops with a clear message telling you which
+path it checked — that's expected, just set `VALHEIM_INSTALL` to the right folder.
+
+### Build
+
+**Visual Studio:** open `VillageLife.sln`, set the configuration to **Release**, then
+**Build → Build Solution** (`Ctrl+Shift+B`).
+
+**CLI:**
+```powershell
+dotnet build VillageLife.sln -c Release
+```
+
+**Output:** `VillageLife/bin/Release/net472/VillageLife.dll`. If BepInEx is found under your
+Valheim folder, the DLL is also copied to `BepInEx/plugins/VillageLife/` automatically — launch
+the game and you're testing.
 
 ## Packaging for Thunderstore
 
