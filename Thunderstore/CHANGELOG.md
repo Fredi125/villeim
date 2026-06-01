@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.8.0 — Bounty Board
+
+### Added
+- **Bounty Board** — a new buildable station (Hammer → Misc) that posts **all five bounty-givers at
+  once** in a row out front, so the turn-in bounties are reachable directly instead of cycling the
+  Village Hall. Its [Use] is the same summon/dismiss toggle: press once to staff the board, press
+  again to clear the whole row. Built cheap and early (Wood, Fine Wood, Coal) since bounties are how
+  you earn coins for the pricier posts.
+
+### Changed
+- Stations can now post a list of specific vendors at once (the mechanism behind the board), in
+  addition to the single-vendor posts (biome traders) and the rotating Village Hall.
+
 ## 3.7.0 — Turn-in bounties
 
 ### Added

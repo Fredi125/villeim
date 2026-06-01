@@ -24,6 +24,7 @@ namespace VillageLife.Building
             public string DisplayName;
             public string Description;
             public string VendorId;     // null = use the rotation (Village Hall); else a specific vendor id.
+            public string[] VendorIds;  // when set, the station posts several specific vendors at once (Bounty Board).
             public RequirementConfig[] Requirements;
         }
 
@@ -93,6 +94,25 @@ namespace VillageLife.Building
                     ("FineWood", 30), ("BlackMetal", 5), ("Flax", 10),
                     ("Barley", 10), ("Tar", 15), ("LoxPelt", 5)),
             },
+
+            // The Bounty Board posts every bounty-giver at once in a row out front (and its Use toggle
+            // clears the whole row), so the turn-in bounties are reachable directly instead of by
+            // cycling the Village Hall. Built cheap and early — bounties are how you earn the coins the
+            // pricier posts assume you already have.
+            new StationDef
+            {
+                PrefabName = "VL_Station_BountyBoard",
+                DisplayName = "Bounty Board",
+                Description = "Press [Use] to post (or dismiss) the bounty-givers.",
+                VendorId = null,
+                VendorIds = new[]
+                {
+                    "bounty_meadows", "bounty_forest", "bounty_swamp",
+                    "bounty_mountain", "bounty_plains",
+                },
+                Requirements = Req(
+                    ("Wood", 20), ("FineWood", 10), ("Coal", 5)),
+            },
         };
 
         /// <summary>Concise builder for a recovery-on-deconstruct requirement list.</summary>
@@ -151,7 +171,7 @@ namespace VillageLife.Building
                 var interaction = prefab.GetComponent<StationInteraction>();
                 if (interaction == null)
                     interaction = prefab.AddComponent<StationInteraction>();
-                interaction.Configure(def.DisplayName, def.VendorId);
+                interaction.Configure(def.DisplayName, def.VendorId, def.VendorIds);
             }
 
             PieceManager.Instance.AddPiece(piece);
@@ -170,22 +190,27 @@ namespace VillageLife.Building
         // enough not to grab a neighbouring post's merchant in a tightly-packed trading hub.
         private const float MerchantRadius = 3f;
 
-        // Set on the prefab at registration; serialized by Unity so placed instances keep it.
+        // Set on the prefab at registration; serialized by Unity so placed instances keep them.
         [SerializeField] private string _displayName = "Village Hall";
         [SerializeField] private string _vendorId = "";
+        [SerializeField] private string _vendorIds = "";   // CSV; non-empty = a board that posts several at once.
 
-        public void Configure(string displayName, string vendorId)
+        public void Configure(string displayName, string vendorId, string[] vendorIds = null)
         {
             _displayName = displayName;
             _vendorId = vendorId ?? "";
+            _vendorIds = (vendorIds != null && vendorIds.Length > 0) ? string.Join(",", vendorIds) : "";
         }
 
         public string GetHoverName() => _displayName;
 
         public string GetHoverText()
         {
+            string action = string.IsNullOrEmpty(_vendorIds)
+                ? "Summon / dismiss merchant"
+                : "Post / dismiss bounties";
             return Localization.instance.Localize(
-                $"{_displayName}\n[<color=yellow><b>$KEY_Use</b></color>] Summon / dismiss merchant");
+                $"{_displayName}\n[<color=yellow><b>$KEY_Use</b></color>] {action}");
         }
 
         public bool Interact(Humanoid user, bool hold, bool alt)
@@ -201,15 +226,19 @@ namespace VillageLife.Building
                 ? VillageLifePlugin.SpawnDistance.Value
                 : 2.5f;
 
-            Vector3 position = transform.position + transform.forward * distance;
-            if (ZoneSystem.instance != null)
-                position.y = ZoneSystem.instance.GetGroundHeight(position);
+            Vector3 frontCenter = transform.position + transform.forward * distance;
+            frontCenter.y = GroundHeight(frontCenter);
 
-            // Toggle: if this post already has a merchant in front (or a leftover pile from older
-            // builds), dismiss them; otherwise summon one. This is how merchants are removed, and it
-            // doubles as cleanup for duplicates — so a single station can no longer breed an endless
-            // crowd of villagers.
-            int dismissed = NpcSpawner.RemoveNear(position, MerchantRadius);
+            string[] boardIds = SplitIds(_vendorIds);
+            return boardIds.Length > 0
+                ? ToggleBoard(player, frontCenter, boardIds)
+                : ToggleSingle(player, frontCenter);
+        }
+
+        /// <summary>Ordinary post: one merchant, summoned on the first Use and dismissed on the next.</summary>
+        private bool ToggleSingle(Player player, Vector3 frontCenter)
+        {
+            int dismissed = NpcSpawner.RemoveNear(frontCenter, MerchantRadius);
             if (dismissed > 0)
             {
                 player.Message(MessageHud.MessageType.Center,
@@ -219,21 +248,56 @@ namespace VillageLife.Building
                 return true;
             }
 
-            // Face the new merchant back toward the station.
             Quaternion rotation = Quaternion.LookRotation(-transform.forward);
-
             NpcRequest request = string.IsNullOrEmpty(_vendorId)
                 ? NpcSpawner.DefaultRequest(player)
                 : NpcSpawner.RequestFor(player, _vendorId);
 
-            NpcSpawner.Result result = NpcSpawner.Spawn(position, rotation, request);
+            NpcSpawner.Result result = NpcSpawner.Spawn(frontCenter, rotation, request);
             player.Message(MessageHud.MessageType.Center,
                 result.Success
                     ? $"{result.Name} the {result.Title} has joined your village!"
                     : "Could not summon a villager.");
-
             return true;
         }
+
+        /// <summary>Board: posts each listed vendor in a row out front, or clears the whole row.</summary>
+        private bool ToggleBoard(Player player, Vector3 frontCenter, string[] ids)
+        {
+            const float spacing = 1.2f;
+            float halfSpan = (ids.Length - 1) * spacing * 0.5f;
+
+            // One sweep clears the entire row (the radius spans it), so a board can't pile up either.
+            int dismissed = NpcSpawner.RemoveNear(frontCenter, halfSpan + spacing);
+            if (dismissed > 0)
+            {
+                player.Message(MessageHud.MessageType.Center,
+                    $"The bounty board is empty again ({dismissed} dismissed).");
+                return true;
+            }
+
+            Quaternion rotation = Quaternion.LookRotation(-transform.forward);
+            int posted = 0;
+            for (int i = 0; i < ids.Length; i++)
+            {
+                Vector3 pos = frontCenter + transform.right * (i * spacing - halfSpan);
+                pos.y = GroundHeight(pos);
+                if (NpcSpawner.Spawn(pos, rotation, NpcSpawner.RequestFor(player, ids[i])).Success)
+                    posted++;
+            }
+
+            player.Message(MessageHud.MessageType.Center,
+                posted > 0
+                    ? $"{posted} bounty-givers have taken up posts at the board!"
+                    : "Could not staff the bounty board.");
+            return true;
+        }
+
+        private static float GroundHeight(Vector3 p)
+            => ZoneSystem.instance != null ? ZoneSystem.instance.GetGroundHeight(p) : p.y;
+
+        private static string[] SplitIds(string csv)
+            => string.IsNullOrEmpty(csv) ? new string[0] : csv.Split(',');
 
         public bool UseItem(Humanoid user, ItemDrop.ItemData item) => false;
     }
