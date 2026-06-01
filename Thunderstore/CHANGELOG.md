@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.19.0 — More posts become buildings
+
+### Changed
+- Re-skinned three more biome posts onto real structures (all confirmed-working vanilla prefabs):
+  **Black Forest → old wooden house**, **Mountain → ruined stone tower**, **Plains → ruined stone
+  tower**. The merchant spawns inside each. The Swamp post stays a workbench until a fitting swamp
+  structure is confirmed.
+
 ## 3.18.0 — Reputation is visible
 
 ### Added

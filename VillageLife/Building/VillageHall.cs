@@ -61,6 +61,8 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = "VL_Station_BlackForest",
+                BasePrefab = "WoodHouse2",   // old forest-village house
+                SpawnInside = true,
                 DisplayName = "Black Forest Trading Post",
                 Description = "Press [Use] to summon the Black Forest merchant.",
                 VendorId = "blackforest",
@@ -81,6 +83,8 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = "VL_Station_Mountain",
+                BasePrefab = "StoneTowerRuins04",   // ruined stone tower
+                SpawnInside = true,
                 DisplayName = "Mountain Trading Post",
                 Description = "Press [Use] to summon the Mountain merchant.",
                 VendorId = "mountain",
@@ -91,6 +95,8 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = "VL_Station_Plains",
+                BasePrefab = "StoneTowerRuins05",   // ruined stone tower
+                SpawnInside = true,
                 DisplayName = "Plains Trading Post",
                 Description = "Press [Use] to summon the Plains merchant.",
                 VendorId = "plains",
