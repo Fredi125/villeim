@@ -102,6 +102,76 @@ namespace VillageLife.NPC
                 CostPrefab = "Stone", CostAmount = 40,
                 GivePrefab = "Wood",  GiveAmount = 30,
             },
+
+            // Biome vendors — summoned by their matching biome station. Each sells basic biome
+            // resources plus one high-priced "rare" item (just a Good with a big price). Prefab
+            // names are resolved at runtime; any that don't exist are skipped and logged, so a
+            // wrong name simply means that item is absent (fix it in vendors.json).
+            new VendorType
+            {
+                Id = "meadows", Title = "Meadows Trader", Kind = "coin", Biome = "Meadows",
+                Goods = new[]
+                {
+                    new VendorGood("Wood",      1, 50),
+                    new VendorGood("Stone",     1, 50),
+                    new VendorGood("Flint",     2, 30),
+                    new VendorGood("Resin",     2, 20),
+                    new VendorGood("Dandelion", 3, 10),
+                    new VendorGood("QueenBee", 800,  1),  // rare
+                }
+            },
+            new VendorType
+            {
+                Id = "blackforest", Title = "Black Forest Trader", Kind = "coin", Biome = "BlackForest",
+                Goods = new[]
+                {
+                    new VendorGood("FineWood",     2, 30),
+                    new VendorGood("RoundLog",     2, 30),
+                    new VendorGood("Coal",         2, 30),
+                    new VendorGood("Copper",       4, 20),
+                    new VendorGood("Tin",          4, 20),
+                    new VendorGood("SurtlingCore", 200, 1), // rare
+                }
+            },
+            new VendorType
+            {
+                Id = "swamp", Title = "Swamp Trader", Kind = "coin", Biome = "Swamp",
+                Goods = new[]
+                {
+                    new VendorGood("Guck",         3, 20),
+                    new VendorGood("Entrails",     3, 20),
+                    new VendorGood("Bloodbag",     3, 20),
+                    new VendorGood("WitheredBone", 6, 10),
+                    new VendorGood("IronScrap",    8, 10),
+                    new VendorGood("Chain",      400,  1),  // rare
+                }
+            },
+            new VendorType
+            {
+                Id = "mountain", Title = "Mountain Trader", Kind = "coin", Biome = "Mountain",
+                Goods = new[]
+                {
+                    new VendorGood("Obsidian",    4, 20),
+                    new VendorGood("FreezeGland", 4, 20),
+                    new VendorGood("WolfPelt",    6, 10),
+                    new VendorGood("Onion",       3, 10),
+                    new VendorGood("Crystal",     5, 20),
+                    new VendorGood("DragonEgg", 9999, 1),   // rare
+                }
+            },
+            new VendorType
+            {
+                Id = "plains", Title = "Plains Trader", Kind = "coin", Biome = "Plains",
+                Goods = new[]
+                {
+                    new VendorGood("Barley",     4, 20),
+                    new VendorGood("Flax",       4, 20),
+                    new VendorGood("Cloudberry", 4, 20),
+                    new VendorGood("Needle",     3, 20),
+                    new VendorGood("Tar",        3, 30),
+                    new VendorGood("LoxPelt",  300,  1),    // rare
+                }
+            },
         };
 
         private static VendorType[] _all;

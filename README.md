@@ -32,7 +32,7 @@ VillageLife/
   NPC/MerchantStock.cs         Resolves a coin vendor's goods into trade items via ObjectDB
   NPC/ItemNames.cs             Resolves prefab vs. shared item names (safe inventory moves)
   NPC/NpcSpawner.cs            Single spawn entry point; routes coin/barter by vendor kind
-  Building/VillageHall.cs       Buildable piece (workbench clone) that summons a villager
+  Building/VillageHall.cs       Buildable stations (workbench clones): Village Hall + 5 biome posts
   lib/                          BepInEx / Jötunn / Harmony reference DLLs (committed)
 ```
 

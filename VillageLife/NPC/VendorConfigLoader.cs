@@ -50,9 +50,17 @@ namespace VillageLife.NPC
                     return;
                 }
 
-                VendorCatalog.Initialize(parsed.vendors);
+                // Upgrade path: append any built-in vendor whose id the file doesn't already have,
+                // so new defaults (e.g. the biome vendors) appear after a mod update without
+                // discarding the player's edits. If anything was added, rewrite the file.
+                VendorType[] merged = MergeMissingDefaults(parsed.vendors, out bool added);
+                VendorCatalog.Initialize(merged);
+                if (added)
+                    File.WriteAllText(path, Serialize(merged));
+
                 Jotunn.Logger.LogInfo(
-                    $"[VillageLife] Loaded {parsed.vendors.Length} vendor type(s) from {path}");
+                    $"[VillageLife] Loaded {merged.Length} vendor type(s) from {path}" +
+                    (added ? " (added new built-in vendors)." : "."));
             }
             catch (Exception e)
             {
@@ -66,6 +74,38 @@ namespace VillageLife.NPC
         private static string Serialize(VendorType[] vendors)
         {
             return JsonUtility.ToJson(new Wrapper { vendors = vendors }, prettyPrint: true);
+        }
+
+        /// <summary>
+        /// Return <paramref name="existing"/> plus any built-in default vendor whose id isn't
+        /// already present. Existing entries are preserved exactly (player edits win); only
+        /// genuinely missing ids are appended. <paramref name="added"/> reports whether anything
+        /// was appended so the caller can persist the upgraded file.
+        /// </summary>
+        private static VendorType[] MergeMissingDefaults(VendorType[] existing, out bool added)
+        {
+            added = false;
+            var result = new System.Collections.Generic.List<VendorType>(existing);
+
+            foreach (VendorType def in VendorCatalog.DefaultVendors)
+            {
+                bool present = false;
+                foreach (VendorType cur in existing)
+                {
+                    if (cur != null && cur.Id == def.Id)
+                    {
+                        present = true;
+                        break;
+                    }
+                }
+                if (!present)
+                {
+                    result.Add(def);
+                    added = true;
+                }
+            }
+
+            return result.ToArray();
         }
     }
 }

@@ -45,10 +45,16 @@ namespace VillageLife.NPC
         public static NpcRequest DefaultRequest(Player creator)
         {
             VendorType type = VendorCatalog.ByIndex(_rotation++);
+            return RequestFor(creator, type.Id);
+        }
+
+        /// <summary>Build a request for a specific vendor id (used by the biome stations).</summary>
+        public static NpcRequest RequestFor(Player creator, string vendorTypeId)
+        {
             return new NpcRequest
             {
                 Name = NamePool[Random.Range(0, NamePool.Length)],
-                VendorTypeId = type.Id,
+                VendorTypeId = vendorTypeId,
                 CreatorId = creator != null ? creator.GetPlayerID() : 0L
             };
         }

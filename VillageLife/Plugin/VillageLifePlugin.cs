@@ -46,7 +46,7 @@ namespace VillageLife.Plugin
         {
             PrefabManager.OnVanillaPrefabsAvailable -= OnPrefabsAvailable;
             NpcPrefab.Register();
-            VillageHall.Register();
+            VillageStations.Register();
         }
     }
 }

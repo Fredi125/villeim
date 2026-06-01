@@ -1,5 +1,26 @@
 # Changelog
 
+## 3.5.0 — Biome trading posts
+
+### Added
+- **Five biome trading-post buildables** (Meadows, Black Forest, Swamp, Mountain, Plains), each in
+  the Hammer's *Misc* tab and built from that biome's materials. Each summons its own merchant that
+  sells **basic biome goods plus one rare item at a high coin price** (e.g. Mountain → Dragon Egg).
+- The original **Village Hall** remains and now cycles through *all* vendor types (a sampler).
+- All biome vendors are normal `vendors.json` entries (tagged with `biome`), so you can retune
+  their goods, prices, and the rare item without rebuilding.
+
+### Changed
+- Stations share one generalized piece + interaction (`VillageStations` / `StationInteraction`):
+  a station either summons a specific vendor (biome posts) or the rotation (Village Hall).
+- **Config upgrade is non-destructive:** on load, any built-in vendor whose id is missing from your
+  `vendors.json` (such as the new biome vendors) is appended and the file rewritten, preserving all
+  your existing edits.
+
+### Notes
+- Biome sell-lists use vanilla item prefab names; any that don't resolve are skipped and logged, so
+  a wrong name just means that item is absent — correct it in `vendors.json`.
+
 ## 3.4.0 — Vendors are config-driven (JSON)
 
 ### Added
