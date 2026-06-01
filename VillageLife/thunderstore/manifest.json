@@ -1,6 +1,6 @@
 {
     "name": "VillageLife",
-    "version_number": "3.17.0",
+    "version_number": "3.17.1",
     "website_url": "https://github.com/Fredi125/villeim",
     "description": "Build a Village Hall and summon friendly, named villagers to your Valheim settlement. A small, reliable foundation for a growing NPC mod.",
     "dependencies": [

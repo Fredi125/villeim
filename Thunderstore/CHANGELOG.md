@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.17.1 — Villagers can stand inside
+
+### Added
+- Stations can spawn their villager **inside the structure** (new per-station `SpawnInside` option),
+  enabled for the Meadows house so the merchant stands in the house rather than out front. The
+  summon/dismiss toggle is centred there too.
+
 ## 3.17.0 — The Meadows post is a house now
 
 ### Changed

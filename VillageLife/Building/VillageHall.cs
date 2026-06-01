@@ -26,6 +26,7 @@ namespace VillageLife.Building
             public string Description;
             public string VendorId;     // null = use the rotation (Village Hall); else a specific vendor id.
             public string[] VendorIds;  // when set, the station posts several specific vendors at once (Bounty Board).
+            public bool SpawnInside;    // spawn the villager inside the structure (for building-based posts).
             public RequirementConfig[] Requirements;
         }
 
@@ -49,6 +50,7 @@ namespace VillageLife.Building
             {
                 PrefabName = "VL_Station_Meadows",
                 BasePrefab = "WoodHouse5",   // this post IS an Old Wooden House V, not a workbench
+                SpawnInside = true,          // the merchant stands inside the house
                 DisplayName = "Meadows Trading Post",
                 Description = "Press [Use] to summon the Meadows merchant.",
                 VendorId = "meadows",
@@ -203,7 +205,7 @@ namespace VillageLife.Building
                 var interaction = prefab.GetComponent<StationInteraction>();
                 if (interaction == null)
                     interaction = prefab.AddComponent<StationInteraction>();
-                interaction.Configure(def.DisplayName, def.VendorId, def.VendorIds);
+                interaction.Configure(def.DisplayName, def.VendorId, def.VendorIds, def.SpawnInside);
             }
 
             PieceManager.Instance.AddPiece(piece);
@@ -226,12 +228,14 @@ namespace VillageLife.Building
         [SerializeField] private string _displayName = "Village Hall";
         [SerializeField] private string _vendorId = "";
         [SerializeField] private string _vendorIds = "";   // CSV; non-empty = a board that posts several at once.
+        [SerializeField] private bool _spawnInside;        // spawn the villager inside (building-based posts).
 
-        public void Configure(string displayName, string vendorId, string[] vendorIds = null)
+        public void Configure(string displayName, string vendorId, string[] vendorIds = null, bool spawnInside = false)
         {
             _displayName = displayName;
             _vendorId = vendorId ?? "";
             _vendorIds = (vendorIds != null && vendorIds.Length > 0) ? string.Join(",", vendorIds) : "";
+            _spawnInside = spawnInside;
         }
 
         public string GetHoverName() => _displayName;
@@ -258,8 +262,17 @@ namespace VillageLife.Building
                 ? VillageLifePlugin.SpawnDistance.Value
                 : 2.5f;
 
-            Vector3 frontCenter = transform.position + transform.forward * distance;
-            frontCenter.y = GroundHeight(frontCenter);
+            Vector3 frontCenter;
+            if (_spawnInside)
+            {
+                // Building-based posts (e.g. the Meadows house) put the villager inside, at the base.
+                frontCenter = transform.position;
+            }
+            else
+            {
+                frontCenter = transform.position + transform.forward * distance;
+                frontCenter.y = GroundHeight(frontCenter);
+            }
 
             string[] boardIds = SplitIds(_vendorIds);
             return boardIds.Length > 0
