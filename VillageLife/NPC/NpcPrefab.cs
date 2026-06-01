@@ -47,10 +47,9 @@ namespace VillageLife.NPC
                 prefab.AddComponent<VillageNpc>();
 
             // Register as a plain prefab; Jötunn injects it into ZNetScene on every world load.
-            if (PrefabManager.Instance.AddPrefab(prefab))
-                Jotunn.Logger.LogInfo("[VillageLife] Villager prefab registered.");
-            else
-                Jotunn.Logger.LogWarning("[VillageLife] Villager prefab was not added (already registered?).");
+            // AddPrefab(GameObject) returns void, so we log success after it returns without throwing.
+            PrefabManager.Instance.AddPrefab(prefab);
+            Jotunn.Logger.LogInfo("[VillageLife] Villager prefab registered.");
         }
     }
 }
