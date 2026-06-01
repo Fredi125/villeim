@@ -1,5 +1,33 @@
 # Changelog
 
+## 3.0.3 — Solidify the villager
+
+### Fixed
+- **Villagers no longer move when talked to.** The interaction used to rotate the villager to
+  face the player; because Haldor's model is offset from its pivot (and direct transform edits
+  fight the networked transform sync), that made them appear to teleport. Talking now leaves the
+  transform completely untouched — villagers greet you in place.
+
+### Changed
+- **More greetings, no immediate repeats.** Expanded to 10 lines and the same line never plays
+  twice in a row, so the variety is actually visible.
+
+### Dev
+- Logs Haldor's component list once at startup (diagnostic groundwork for future restyling).
+- Optional `R2_PROFILE` build variable: when set, the build auto-copies the DLL straight into
+  your r2modman profile (no more manual copy). Inert if unset. See README.
+
+## 3.0.2 — Register the villager as a plain prefab
+
+### Fixed
+- **Summoning works.** The game log proved Haldor has no `Character`/`BaseAI`/`Rigidbody`/
+  `ZSyncAnimation`/`CharacterAnimEvent` — he's a stationary, non-killable interactable NPC, not a
+  spawn-system creature — so `CreatureManager.AddCreature` rejected the clone as "not valid".
+  The villager is now cloned via `PrefabManager` and registered with `PrefabManager.AddPrefab`,
+  which injects it into ZNetScene on every world load (so `GetPrefab("VL_Villager")` resolves and
+  it persists). A villager with no `Character` component also can't enter the global character
+  list, so it can't trigger the per-frame `EnemyHud` crash spam seen with the old NPCs.
+
 ## 3.0.1 — Fix villager summoning
 
 ### Fixed
@@ -8,9 +36,9 @@
   `CreatureManager.GetCreaturePrefab("Haldor")` — that returns null because Haldor is a
   location-placed trader, not a spawn-system creature. The result was a "Failed to clone
   'Haldor'" error at startup and a "Could not summon a villager" message in game.
-- Now the villager is cloned through `PrefabManager` (the same proven path the Village Hall
-  uses for the workbench, where Haldor is resolvable) and then registered with
-  `CreatureManager.AddCreature`.
+- Cloned the villager through `PrefabManager` instead of the `CustomCreature` string
+  constructor. (Registration was still routed through `CreatureManager` at this point; 3.0.2
+  finished the fix by switching to `PrefabManager.AddPrefab`.)
 - Kept the Haldor clone faithful to vanilla — only the Trader component is removed (so our
   E-interaction is unambiguous). Avoids the over-stripping that produced malformed NPCs
   before.

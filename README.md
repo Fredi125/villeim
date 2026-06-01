@@ -84,9 +84,24 @@ path it checked — that's expected, just set `VALHEIM_INSTALL` to the right fol
 dotnet build VillageLife.sln -c Release
 ```
 
-**Output:** `VillageLife/bin/Release/net472/VillageLife.dll`. If BepInEx is found under your
-Valheim folder, the DLL is also copied to `BepInEx/plugins/VillageLife/` automatically — launch
-the game and you're testing.
+**Output:** `VillageLife/bin/<Config>/net472/VillageLife.dll`. If BepInEx is found under your
+Valheim folder, the DLL is also copied to `BepInEx/plugins/VillageLife/` automatically.
+
+### Testing through r2modman (auto-copy)
+
+r2modman launches its **own** BepInEx inside the active profile, so the copy above (into the raw
+Valheim folder) is ignored. Point the build at your profile once and every rebuild lands where
+r2modman will load it:
+
+```powershell
+# one time — use YOUR profile name, then reopen Visual Studio so it sees the variable
+setx R2_PROFILE "C:\Users\<you>\AppData\Roaming\r2modmanPlus-local\Valheim\profiles\<Profile>"
+```
+
+With `R2_PROFILE` set, the build copies `VillageLife.dll` into
+`<profile>\BepInEx\plugins\VillageLife\`. Then the loop is just **Rebuild → Start modded**. The
+step is inert if `R2_PROFILE` is unset, so it never affects other machines. Make sure that
+profile has **BepInExPack_Valheim** and **Jotunn** installed.
 
 ## Packaging for Thunderstore
 

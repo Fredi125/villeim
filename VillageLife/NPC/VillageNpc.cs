@@ -4,15 +4,17 @@ using VillageLife.Util;
 namespace VillageLife.NPC
 {
     /// <summary>
-    /// The controller on every spawned villager. It is intentionally simple:
-    ///   • stores a display name in the creature's ZDO (so it persists and syncs),
+    /// The controller on every spawned villager. Intentionally simple:
+    ///   • stores a display name in the ZDO (persists + syncs),
     ///   • shows that name on hover,
-    ///   • says a short greeting when talked to.
-    /// Villagers are stationary — they never move from where they were summoned.
+    ///   • greets the player when talked to.
+    /// Villagers are stationary and the transform is never modified after spawn, so they can't
+    /// fight Valheim's networked transform sync (which made them appear to teleport when talked to).
     /// </summary>
     public class VillageNpc : MonoBehaviour, Hoverable, Interactable
     {
         private ZNetView _nview;
+        private int _lastGreeting = -1;
 
         public string NpcName { get; private set; } = "Villager";
 
@@ -22,7 +24,12 @@ namespace VillageLife.NPC
             "A fine day in the meadows, is it not?",
             "Stay a while — the fire is warm.",
             "The gods watch over this place.",
-            "Mind the forest after dark, friend."
+            "Mind the forest after dark, friend.",
+            "Good to see a friendly face.",
+            "I hold my post, but I'm glad of company.",
+            "Odin's ravens flew over this morning — a good omen.",
+            "Rest easy. No draugr get past me here.",
+            "Trade's been slow, but the mead is plenty."
         };
 
         private void Awake()
@@ -33,7 +40,7 @@ namespace VillageLife.NPC
         private void Start()
         {
             // Read the name written by whoever summoned this villager. On clients that
-            // received the creature over the network, this is how they learn its name.
+            // received the villager over the network, this is how they learn its name.
             var zdo = _nview != null ? _nview.GetZDO() : null;
             if (zdo != null)
                 NpcName = zdo.GetString(Constants.KeyName, NpcName);
@@ -76,21 +83,34 @@ namespace VillageLife.NPC
             if (hold)
                 return false;
 
-            // Turn to face the player (rotation only — villagers never leave their post).
-            Vector3 dir = user.transform.position - transform.position;
-            dir.y = 0f;
-            if (dir.sqrMagnitude > 0.01f)
-                transform.rotation = Quaternion.LookRotation(dir.normalized);
-
-            string line = Greetings[Random.Range(0, Greetings.Length)];
-            if (Chat.instance != null)
-                Chat.instance.SetNpcText(gameObject, Vector3.up * 1.5f, 20f, 5f, "", line, false);
-
+            // Deliberately do NOT rotate or move the villager. They greet the player in place.
+            Say(PickGreeting());
             return true;
         }
 
         public bool UseItem(Humanoid user, ItemDrop.ItemData item) => false;
 
         #endregion
+
+        /// <summary>Pick a greeting at random, never the same one twice in a row.</summary>
+        private string PickGreeting()
+        {
+            if (Greetings.Length <= 1)
+                return Greetings[0];
+
+            int index;
+            do { index = Random.Range(0, Greetings.Length); }
+            while (index == _lastGreeting);
+
+            _lastGreeting = index;
+            return Greetings[index];
+        }
+
+        /// <summary>Show a speech bubble above the villager's head.</summary>
+        private void Say(string line)
+        {
+            if (Chat.instance != null)
+                Chat.instance.SetNpcText(gameObject, Vector3.up * 1.5f, 20f, 5f, "", line, false);
+        }
     }
 }

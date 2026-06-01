@@ -4,7 +4,7 @@
     <TargetFramework>net472</TargetFramework>
     <AssemblyName>VillageLife</AssemblyName>
     <RootNamespace>VillageLife</RootNamespace>
-    <Version>3.0.2</Version>
+    <Version>3.0.3</Version>
     <LangVersion>9.0</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -70,6 +70,15 @@
   <Target Name="CopyToPlugins" AfterTargets="Build" Condition="Exists('$(BepInExDir)')">
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BepInExDir)\plugins\VillageLife\" />
     <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(BepInExDir)\plugins\VillageLife\" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
+  </Target>
+
+  <!-- Optional: also copy the built DLL into an r2modman profile so launching "Start modded"
+       picks up the fresh build with no manual copy. Inert unless the R2_PROFILE environment
+       variable points at your profile folder, e.g. (run once, then reopen VS):
+       setx R2_PROFILE "C:\Users\<you>\AppData\Roaming\r2modmanPlus-local\Valheim\profiles\<Profile>" -->
+  <Target Name="CopyToR2Profile" AfterTargets="Build" Condition="'$(R2_PROFILE)' != ''">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(R2_PROFILE)\BepInEx\plugins\VillageLife\" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(R2_PROFILE)\BepInEx\plugins\VillageLife\" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
   </Target>
 
 </Project>
