@@ -1,5 +1,22 @@
 # Changelog
 
+## 3.3.0 — Barter vendors
+
+### Added
+- **Barter villagers** that give a single product for a fixed resource — no coins, no shop window.
+  The starter one is the **Stonemason** (40 Stone → 30 Wood). Press *Use* to trade; the hover text
+  shows the exchange.
+- The exchange is safe by construction: it counts the required input first and only removes it if
+  you have enough **and** there's a free inventory slot for the reward — a declined or impossible
+  trade never takes anything.
+
+### Changed
+- Barter and coin vendors are now **separate prefabs** (`VL_Barterer` has Haldor's Trader removed
+  and uses our own interaction; `VL_Merchant` keeps it for the vanilla shop). This guarantees one
+  interactable per villager — no ambiguity over what the *Use* key does.
+- `VendorType` gained barter fields (`CostPrefab`/`CostAmount` → `GivePrefab`/`GiveAmount`) and a
+  `VendorKind` that routes spawning to the right prefab.
+
 ## 3.2.0 — Villager types
 
 ### Added

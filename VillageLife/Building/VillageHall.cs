@@ -81,17 +81,11 @@ namespace VillageLife.Building
             // Face the new merchant back toward the hall.
             Quaternion rotation = Quaternion.LookRotation(-transform.forward);
 
-            VillageMerchant merchant = NpcSpawner.Spawn(position, rotation, NpcSpawner.DefaultRequest(player));
-            if (merchant != null)
-            {
-                string title = VendorCatalog.ById(merchant.VendorTypeId).Title;
-                player.Message(MessageHud.MessageType.Center,
-                    $"{merchant.MerchantName} the {title} has joined your village!");
-            }
-            else
-            {
-                player.Message(MessageHud.MessageType.Center, "Could not summon a merchant.");
-            }
+            NpcSpawner.Result result = NpcSpawner.Spawn(position, rotation, NpcSpawner.DefaultRequest(player));
+            player.Message(MessageHud.MessageType.Center,
+                result.Success
+                    ? $"{result.Name} the {result.Title} has joined your village!"
+                    : "Could not summon a villager.");
 
             return true;
         }

@@ -1,8 +1,6 @@
-using System.Collections.Generic;
-
 namespace VillageLife.NPC
 {
-    /// <summary>One thing a vendor offers: a prefab, its price, and the stack size sold.</summary>
+    /// <summary>One thing a coin-shop vendor offers: a prefab, its price, and the stack size sold.</summary>
     public struct VendorGood
     {
         public string Prefab;
@@ -19,9 +17,9 @@ namespace VillageLife.NPC
 
     /// <summary>
     /// How a vendor does business.
-    ///   • <see cref="CoinShop"/> — sells goods for coins through Valheim's own trade window. (Built.)
-    ///   • <see cref="Barter"/>   — gives a single product for a fixed resource (e.g. 40 Stone → 30
-    ///     Wood). Planned: it steps off the vanilla shop and uses a small no-UI interact handler.
+    ///   • <see cref="CoinShop"/> — sells goods for coins through Valheim's own trade window.
+    ///   • <see cref="Barter"/>   — gives a single product for a fixed resource (e.g. 40 Stone →
+    ///     30 Wood) via a small no-UI interaction. No coins, no custom window.
     /// </summary>
     public enum VendorKind
     {
@@ -35,16 +33,25 @@ namespace VillageLife.NPC
         public string Id;
         public string Title;
         public VendorKind Kind;
-        public VendorGood[] Goods;   // CoinShop: the goods sold for coins.
+
+        // CoinShop: the goods sold for coins.
+        public VendorGood[] Goods;
+
+        // Barter: "give CostAmount × CostPrefab, receive GiveAmount × GivePrefab".
+        public string CostPrefab;
+        public int CostAmount;
+        public string GivePrefab;
+        public int GiveAmount;
     }
 
     /// <summary>
     /// The catalogue of villager types. This is the single, obvious place to add a new kind of
-    /// merchant — append an entry and it joins the rotation automatically. Only coin shops exist
-    /// today; barter vendors are the planned next type (see README roadmap).
+    /// vendor — append an entry and it joins the rotation automatically. Prefab names are resolved
+    /// at runtime and any that don't exist are skipped, so a typo offers fewer goods (or a barter
+    /// that politely refuses) rather than crashing.
     ///
-    /// Prefab names are resolved at runtime and any that don't exist are skipped, so an entry with
-    /// a typo simply offers fewer goods rather than crashing.
+    /// Planned: this catalogue will move to a JSON config so types/goods/prices are editable
+    /// without rebuilding (see README roadmap).
     /// </summary>
     public static class VendorCatalog
     {
@@ -86,6 +93,12 @@ namespace VillageLife.NPC
                     new VendorGood("ArrowFlint",    4, 20),
                     new VendorGood("Resin",         2, 20),
                 }
+            },
+            new VendorType
+            {
+                Id = "stonemason", Title = "Stonemason", Kind = VendorKind.Barter,
+                CostPrefab = "Stone", CostAmount = 40,
+                GivePrefab = "Wood",  GiveAmount = 30,
             },
         };
 
