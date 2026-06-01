@@ -9,13 +9,14 @@ namespace VillageLife.Util
         // Plugin identity
         public const string PluginGuid = "com.villagelife.mod";
         public const string PluginName = "VillageLife";
-        public const string PluginVersion = "3.12.0";
+        public const string PluginVersion = "3.13.0";
 
         // Prefab names for the content we register (cloned from the vanilla prefabs below).
         // Two villager prefabs: one keeps Haldor's Trader (coin shop), one has it removed and
         // uses our own barter interaction. The vendor type decides which is spawned.
         public const string MerchantPrefabName = "VL_Merchant";
         public const string BartererPrefabName = "VL_Barterer";
+        public const string GuardPrefabName = "VL_Guard";
         public const string VillageHallPrefabName = "VL_VillageHall";
 
         // Vanilla prefabs we clone. Haldor is a friendly, stationary, non-combat trader with

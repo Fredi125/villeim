@@ -27,9 +27,20 @@ namespace VillageLife.NPC
             "There's always a beast that needs culling.",
         };
 
-        /// <summary>A random line themed to the vendor (bounties get hunt talk, others shop talk).</summary>
+        private static readonly string[] Guard =
+        {
+            "Your village is safe with me.",
+            "Let the monsters come — I'm ready.",
+            "I'll keep watch.",
+            "None shall trouble your hearth.",
+        };
+
+        /// <summary>A random line themed to the villager (guards, bounty-givers, or shopkeepers).</summary>
         public static string Line(VendorType type)
         {
+            if (type != null && string.Equals(type.Kind, "guard", System.StringComparison.OrdinalIgnoreCase))
+                return Guard[Random.Range(0, Guard.Length)];
+
             string[] pool = (type != null && !string.IsNullOrEmpty(type.UnlocksVendorId))
                 ? Bounty
                 : Merchant;

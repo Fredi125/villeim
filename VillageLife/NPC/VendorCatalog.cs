@@ -69,7 +69,7 @@ namespace VillageLife.NPC
         /// regenerates an out-of-date vendors.json from these defaults (keeping a .bak), so value
         /// tweaks here reach an existing install without a manual file delete.
         /// </summary>
-        public const int ConfigVersion = 7;
+        public const int ConfigVersion = 8;
 
         /// <summary>Built-in safety net, also used to seed vendors.json on first run.</summary>
         public static VendorType[] DefaultVendors => new[]
@@ -154,6 +154,9 @@ namespace VillageLife.NPC
                     new VendorGood("OnionSeeds",  15, 20),  // 0.75/unit
                 }
             },
+
+            // Guard — not a trader at all; summoned at a Guard Post to ward off nearby monsters.
+            new VendorType { Id = "guard", Title = "Village Guard", Kind = "guard" },
 
             // Biome vendors — summoned by their matching biome station. Each sells basic biome
             // resources plus one high-priced "rare" item (just a Good with a big price). Prefab

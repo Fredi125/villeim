@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.13.0 — Guards
+
+### Added
+- A **Guard Post** station (Hammer → Misc) summons a **Village Guard** who wards off nearby monsters —
+  a stationary, friendly Haldor clone (no crash-prone AI of its own) that periodically damages hostile
+  creatures in range. Built with Wood, Stone, and Bronze. Same summon/dismiss toggle as other posts.
+- Guards never harm players or tamed creatures; only the object's owner deals damage (so a monster
+  isn't hit once per player), and the damage tick is fully guarded — any unexpected combat-API result
+  disables the tick and logs once instead of throwing.
+
 ## 3.12.0 — Visual variety
 
 ### Added

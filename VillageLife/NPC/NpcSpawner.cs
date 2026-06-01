@@ -78,9 +78,13 @@ namespace VillageLife.NPC
             if (ZNetScene.instance == null)
                 return result;
 
-            string prefabName = type.IsBarter
-                ? Constants.BartererPrefabName
-                : Constants.MerchantPrefabName;
+            string prefabName;
+            if (string.Equals(type.Kind, "guard", System.StringComparison.OrdinalIgnoreCase))
+                prefabName = Constants.GuardPrefabName;
+            else if (type.IsBarter)
+                prefabName = Constants.BartererPrefabName;
+            else
+                prefabName = Constants.MerchantPrefabName;
 
             GameObject prefab = ZNetScene.instance.GetPrefab(prefabName);
             if (prefab == null)
@@ -99,6 +103,10 @@ namespace VillageLife.NPC
             var barterer = go.GetComponent<VillageBarterer>();
             if (barterer != null)
                 barterer.Initialize(request.Name, request.VendorTypeId, request.CreatorId);
+
+            var guard = go.GetComponent<VillageGuard>();
+            if (guard != null)
+                guard.Initialize(request.Name, request.VendorTypeId, request.CreatorId);
 
             // Give each villager a slightly different build, persisted in its ZDO.
             var nview = go.GetComponent<ZNetView>();
@@ -122,7 +130,8 @@ namespace VillageLife.NPC
 
             float r2 = radius * radius;
             return DestroyNear(Object.FindObjectsOfType<VillageMerchant>(), center, r2)
-                 + DestroyNear(Object.FindObjectsOfType<VillageBarterer>(), center, r2);
+                 + DestroyNear(Object.FindObjectsOfType<VillageBarterer>(), center, r2)
+                 + DestroyNear(Object.FindObjectsOfType<VillageGuard>(), center, r2);
         }
 
         private static int DestroyNear<T>(T[] components, Vector3 center, float radiusSqr) where T : Component

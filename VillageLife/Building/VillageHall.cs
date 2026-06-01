@@ -94,6 +94,15 @@ namespace VillageLife.Building
                     ("FineWood", 30), ("BlackMetal", 5), ("Flax", 10),
                     ("Barley", 10), ("Tar", 15), ("LoxPelt", 5)),
             },
+            new StationDef
+            {
+                PrefabName = "VL_Station_GuardPost",
+                DisplayName = "Guard Post",
+                Description = "Press [Use] to post (or dismiss) a guard who wards off nearby monsters.",
+                VendorId = "guard",
+                Requirements = Req(
+                    ("Wood", 20), ("Stone", 10), ("Bronze", 2)),
+            },
 
             // The Bounty Board posts every bounty-giver at once in a row out front (and its Use toggle
             // clears the whole row), so the turn-in bounties are reachable directly instead of by

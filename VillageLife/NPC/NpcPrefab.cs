@@ -26,6 +26,7 @@ namespace VillageLife.NPC
         {
             RegisterMerchant();
             RegisterBarterer();
+            RegisterGuard();
         }
 
         private static void RegisterMerchant()
@@ -58,6 +59,25 @@ namespace VillageLife.NPC
 
             PrefabManager.Instance.AddPrefab(prefab);
             Jotunn.Logger.LogInfo("[VillageLife] Barterer prefab registered.");
+        }
+
+        private static void RegisterGuard()
+        {
+            GameObject prefab = Clone(Constants.GuardPrefabName);
+            if (prefab == null)
+                return;
+
+            // A guard has no shop, so (like the barterer) Haldor's Trader is removed and our
+            // VillageGuard becomes the only interactable.
+            var trader = prefab.GetComponent<Trader>();
+            if (trader != null)
+                Object.DestroyImmediate(trader);
+
+            if (prefab.GetComponent<VillageGuard>() == null)
+                prefab.AddComponent<VillageGuard>();
+
+            PrefabManager.Instance.AddPrefab(prefab);
+            Jotunn.Logger.LogInfo("[VillageLife] Guard prefab registered.");
         }
 
         /// <summary>Clone Haldor (resolvable via PrefabManager) and make it persist with the world.</summary>
