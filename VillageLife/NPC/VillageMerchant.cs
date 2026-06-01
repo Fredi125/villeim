@@ -41,6 +41,7 @@ namespace VillageLife.NPC
                 VendorTypeId = zdo.GetString(Constants.KeyVendorType, VendorTypeId);
             }
 
+            VillagerAppearance.Apply(gameObject, zdo);
             ApplyVendorType();
         }
 

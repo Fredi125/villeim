@@ -9,7 +9,7 @@ namespace VillageLife.Util
         // Plugin identity
         public const string PluginGuid = "com.villagelife.mod";
         public const string PluginName = "VillageLife";
-        public const string PluginVersion = "3.11.0";
+        public const string PluginVersion = "3.12.0";
 
         // Prefab names for the content we register (cloned from the vanilla prefabs below).
         // Two villager prefabs: one keeps Haldor's Trader (coin shop), one has it removed and
@@ -29,5 +29,6 @@ namespace VillageLife.Util
         public static readonly int KeyName = "villagelife_name".GetStableHashCode();
         public static readonly int KeyCreator = "villagelife_creator".GetStableHashCode();
         public static readonly int KeyVendorType = "villagelife_vendortype".GetStableHashCode();
+        public static readonly int KeyScale = "villagelife_scale".GetStableHashCode();
     }
 }

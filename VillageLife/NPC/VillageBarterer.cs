@@ -34,6 +34,8 @@ namespace VillageLife.NPC
                 MerchantName = zdo.GetString(Constants.KeyName, MerchantName);
                 VendorTypeId = zdo.GetString(Constants.KeyVendorType, VendorTypeId);
             }
+
+            VillagerAppearance.Apply(gameObject, zdo);
         }
 
         /// <summary>Called by <see cref="NpcSpawner"/> on the owning client right after spawn.</summary>

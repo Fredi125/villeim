@@ -100,6 +100,10 @@ namespace VillageLife.NPC
             if (barterer != null)
                 barterer.Initialize(request.Name, request.VendorTypeId, request.CreatorId);
 
+            // Give each villager a slightly different build, persisted in its ZDO.
+            var nview = go.GetComponent<ZNetView>();
+            VillagerAppearance.Assign(go, nview != null ? nview.GetZDO() : null);
+
             result.Success = true;
             return result;
         }

@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.12.0 — Visual variety
+
+### Added
+- Villagers now spawn at a **slightly different size** (a gentle ±10%), stored per-villager and
+  synced/saved, so a crowd looks like individuals rather than identical Haldor clones. Cosmetic and
+  failure-safe — no value just means default size.
+
 ## 3.11.0 — More village roles
 
 ### Added
