@@ -1,5 +1,20 @@
 # Changelog
 
+## 3.1.0 — Merchants
+
+### Added
+- **Summoned villagers are now working merchants.** Press *Use* on a merchant to open Valheim's
+  real trade window and buy goods for coins.
+- A starter stock of common resources (wood, stone, coal, flint, leather scraps, resin, feathers,
+  thistle). `MerchantStock` is the single, obvious place to extend or later config-drive the shop.
+
+### Changed
+- The merchant reuses Haldor's **vanilla Trader** for hover, interaction and the shop UI instead
+  of a custom panel — so there's exactly one thing handling the *Use* key (no dual-interactable
+  ambiguity) and no fragile IMGUI trade window. This replaces the plain greeter from 3.0.x.
+- Stock is applied defensively: if our item list can't be built (e.g. ObjectDB not ready), the
+  merchant keeps its existing stock, so the store is never empty.
+
 ## 3.0.3 — Solidify the villager
 
 ### Fixed

@@ -10,7 +10,7 @@ namespace VillageLife.Building
 {
     /// <summary>
     /// The Village Hall — a buildable piece cloned from the workbench. Interacting with a
-    /// placed hall summons a villager just in front of it. It lives in the Hammer's built-in
+    /// placed hall summons a merchant just in front of it. It lives in the Hammer's built-in
     /// "Misc" tab, which is guaranteed to exist (custom build tabs were a source of past bugs).
     /// </summary>
     public static class VillageHall
@@ -20,7 +20,7 @@ namespace VillageLife.Building
             var config = new PieceConfig
             {
                 Name = "Village Hall",
-                Description = "Press [Use] to summon a villager to your settlement.",
+                Description = "Press [Use] to summon a merchant to your settlement.",
                 PieceTable = "Hammer",
                 Category = "Misc",
                 Requirements = new[]
@@ -50,7 +50,7 @@ namespace VillageLife.Building
         }
     }
 
-    /// <summary>Hover text + Use handler on a placed Village Hall: summons a villager in front of it.</summary>
+    /// <summary>Hover text + Use handler on a placed Village Hall: summons a merchant in front of it.</summary>
     public class VillageHallInteraction : MonoBehaviour, Hoverable, Interactable
     {
         public string GetHoverName() => "Village Hall";
@@ -58,7 +58,7 @@ namespace VillageLife.Building
         public string GetHoverText()
         {
             return Localization.instance.Localize(
-                "Village Hall\n[<color=yellow><b>$KEY_Use</b></color>] Summon a villager");
+                "Village Hall\n[<color=yellow><b>$KEY_Use</b></color>] Summon a merchant");
         }
 
         public bool Interact(Humanoid user, bool hold, bool alt)
@@ -78,13 +78,13 @@ namespace VillageLife.Building
             if (ZoneSystem.instance != null)
                 position.y = ZoneSystem.instance.GetGroundHeight(position);
 
-            // Face the new villager back toward the hall.
+            // Face the new merchant back toward the hall.
             Quaternion rotation = Quaternion.LookRotation(-transform.forward);
 
-            VillageNpc npc = NpcSpawner.Spawn(position, rotation, NpcSpawner.DefaultRequest(player));
+            VillageMerchant merchant = NpcSpawner.Spawn(position, rotation, NpcSpawner.DefaultRequest(player));
             player.Message(
                 MessageHud.MessageType.Center,
-                npc != null ? $"{npc.NpcName} has joined your village!" : "Could not summon a villager.");
+                merchant != null ? $"{merchant.MerchantName} has joined your village!" : "Could not summon a merchant.");
 
             return true;
         }

@@ -1,23 +1,21 @@
 # VillageLife
 
 A Valheim mod that lets you build a **Village Hall** and summon friendly, named
-**villagers** to your settlement.
+**merchants** to your settlement.
 
-This is a deliberately small, reliable foundation (v3.0) rebuilt from scratch. Earlier
-versions tried to ship quests, merchants, guards, ambient dialog, localization and a
-custom multiplayer layer all at once, and never reached a dependable state. The plan now
-is to grow the mod one tested feature at a time on top of this core.
+This is a deliberately small, reliable foundation rebuilt from scratch. Earlier versions
+tried to ship quests, merchants, guards, ambient dialog, localization and a custom
+multiplayer layer all at once, and never reached a dependable state. The plan now is to
+grow the mod one tested feature at a time on top of this core.
 
 ## What it does today
 
 - Adds a **Village Hall** buildable to the Hammer's *Misc* tab (20 Wood, 10 Stone).
-- Pressing *Use* on the hall **summons a friendly villager** with a random Norse name in
-  front of it.
-- Villagers are **non-hostile, stationary, persistent**, and **greet you** when talked to.
-- Villagers are ordinary networked creatures, so they work in **multiplayer** and on
-  **dedicated servers**.
-
-Villagers are intentionally passive for now — no wandering, trading, combat or quests yet.
+- Pressing *Use* on the hall **summons a merchant** with a random Norse name in front of it.
+- Merchants open **Valheim's real trade window** — buy a starter stock of common resources
+  for coins, using the game's own shop UI (no custom panel).
+- Merchants are **non-hostile, stationary, persistent**, and work in **multiplayer** and on
+  **dedicated servers** (they're ordinary networked objects, like Haldor).
 
 ## Project layout
 
@@ -25,22 +23,23 @@ Villagers are intentionally passive for now — no wandering, trading, combat or
 VillageLife/
   Plugin/VillageLifePlugin.cs   BepInEx entry point; binds config; registers content
   Util/Constants.cs             Prefab names and hashed ZDO keys
-  NPC/NpcPrefab.cs              Registers the villager (Haldor clone) via CreatureManager
-  NPC/VillageNpc.cs            Per-villager controller: hover name, talk greeting, ZDO name
+  NPC/NpcPrefab.cs              Registers the merchant (Haldor clone) via PrefabManager
+  NPC/VillageMerchant.cs       Per-merchant companion: persists name, sets shop stock
+  NPC/MerchantStock.cs         Builds the goods list from ObjectDB (extend the economy here)
   NPC/NpcSpawner.cs            Single spawn entry point (NpcRequest) — UI plugs in here later
-  Building/VillageHall.cs       Buildable piece (workbench clone) that summons a villager
+  Building/VillageHall.cs       Buildable piece (workbench clone) that summons a merchant
   lib/                          BepInEx / Jötunn / Harmony reference DLLs (committed)
 ```
 
 ### Design principles (why it should stay reliable)
 
-- **Clone vanilla, don't hand-build.** The villager is registered through Jötunn's
-  `CreatureManager` as a clone of Haldor; the hall is a Jötunn `CustomPiece` cloned from
-  the workbench. No manual `Instantiate` + component-stripping during prefab setup.
+- **Clone vanilla, don't hand-build.** The merchant is a Haldor clone registered through
+  Jötunn's `PrefabManager`; the hall is a Jötunn `CustomPiece` cloned from the workbench.
+  No manual prefab construction. We keep Haldor's own `Trader` so the shop UI is vanilla.
 - **Use built-ins.** The hall lives in the vanilla *Misc* build tab (custom tabs caused
   bugs before).
 - **No incidental complexity.** No Harmony patches, no custom RPC, no per-frame managers.
-- **One spawn seam.** Everything that creates a villager goes through `NpcSpawner.Spawn`,
+- **One spawn seam.** Everything that creates a merchant goes through `NpcSpawner.Spawn`,
   so a future creation UI only has to fill in an `NpcRequest`.
 
 ## Building
@@ -111,6 +110,8 @@ alongside them when zipping a release. Keep both `manifest.json` files on the sa
 
 ## Roadmap
 
-1. Small creation UI (name + appearance) — plugs into `NpcSpawner`.
-2. Merchant role with simple buy/sell.
-3. Quests, then ambient behaviour.
+1. ~~Merchant with simple buy/sell.~~ ✅ Done (3.1.0) — reuses Valheim's trade window.
+2. Config-driven / per-merchant shop stock (extend `MerchantStock`).
+3. Small creation UI (name + appearance) — plugs into `NpcSpawner`.
+4. Visual variety so merchants aren't all Haldor look-alikes.
+5. Further roles (quests, guards) and ambient behaviour.

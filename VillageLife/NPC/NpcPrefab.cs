@@ -5,7 +5,7 @@ using VillageLife.Util;
 namespace VillageLife.NPC
 {
     /// <summary>
-    /// Registers the villager: a friendly, persistent clone of Haldor, added as a PLAIN
+    /// Registers the merchant: a friendly, persistent clone of Haldor, added as a PLAIN
     /// custom prefab (not a Jötunn "creature").
     ///
     /// Why not CreatureManager: the game log proved Haldor has no Character/BaseAI/Rigidbody/
@@ -13,9 +13,13 @@ namespace VillageLife.NPC
     /// NPC, not a spawn-system creature. CreatureManager enforces that full monster contract and
     /// rejected the clone ("not valid"). Valheim itself treats Haldor as a location-placed prefab,
     /// so we mirror that: clone via PrefabManager and register with AddPrefab, which injects it
-    /// into ZNetScene (so ZNetScene.GetPrefab("VL_Villager") resolves and it reloads with the world).
+    /// into ZNetScene (so ZNetScene.GetPrefab(name) resolves and it reloads with the world).
     ///
-    /// A no-Character villager also can't enter the global character list, so it cannot trigger
+    /// We KEEP Haldor's vanilla Trader component: it already provides the hover text, the Use
+    /// interaction, and the real shop window, so the merchant needs no custom UI. A
+    /// <see cref="VillageMerchant"/> companion just personalises the name and stock.
+    ///
+    /// A no-Character merchant also can't enter the global character list, so it cannot trigger
     /// the per-frame EnemyHud / GetCharactersInRange crashes seen with the old Player-based NPCs.
     /// </summary>
     public static class NpcPrefab
@@ -28,35 +32,23 @@ namespace VillageLife.NPC
             if (prefab == null)
             {
                 Jotunn.Logger.LogError(
-                    $"[VillageLife] Could not clone '{Constants.NpcBasePrefab}' for the villager.");
+                    $"[VillageLife] Could not clone '{Constants.NpcBasePrefab}' for the merchant.");
                 return;
             }
 
-            // One-time diagnostic: log Haldor's component list. We couldn't get this reliably
-            // from the web, and it's the ground truth for confirming nothing else moves the
-            // villager and for restyling it later. Runs once at startup; harmless.
-            Jotunn.Logger.LogInfo("[VillageLife] Haldor clone components: " +
-                string.Join(", ", System.Array.ConvertAll(
-                    prefab.GetComponents<Component>(), c => c ? c.GetType().Name : "null")));
-
-            // Drop Haldor's trade behaviour so our VillageNpc.Interact owns the Use key.
-            var trader = prefab.GetComponent<Trader>();
-            if (trader != null)
-                Object.DestroyImmediate(trader);
-
-            // Persist with the world like any other saved networked object.
+            // Keep Haldor's Trader (the vanilla shop UI + Use interaction). Persist with the world.
             var nview = prefab.GetComponent<ZNetView>();
             if (nview != null)
                 nview.m_persistent = true;
 
-            // Attach our controller: hover name + "talk" greeting + ZDO-backed name.
-            if (prefab.GetComponent<VillageNpc>() == null)
-                prefab.AddComponent<VillageNpc>();
+            // Companion that personalises name + stock. The Trader stays the sole interactable.
+            if (prefab.GetComponent<VillageMerchant>() == null)
+                prefab.AddComponent<VillageMerchant>();
 
             // Register as a plain prefab; Jötunn injects it into ZNetScene on every world load.
             // AddPrefab(GameObject) returns void, so we log success after it returns without throwing.
             PrefabManager.Instance.AddPrefab(prefab);
-            Jotunn.Logger.LogInfo("[VillageLife] Villager prefab registered.");
+            Jotunn.Logger.LogInfo("[VillageLife] Merchant prefab registered.");
         }
     }
 }

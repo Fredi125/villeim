@@ -9,15 +9,15 @@ namespace VillageLife.Util
         // Plugin identity
         public const string PluginGuid = "com.villagelife.mod";
         public const string PluginName = "VillageLife";
-        public const string PluginVersion = "3.0.3";
+        public const string PluginVersion = "3.1.0";
 
         // Prefab names for the content we register (cloned from the vanilla prefabs below).
         public const string NpcPrefabName = "VL_Villager";
         public const string VillageHallPrefabName = "VL_VillageHall";
 
-        // Vanilla prefabs we clone. Haldor is a friendly, idle-animated, non-combat
-        // humanoid with no AI — exactly what a stationary villager needs. The workbench
-        // is a known-good buildable piece.
+        // Vanilla prefabs we clone. Haldor is a friendly, stationary, non-combat trader with
+        // no Character/AI component — so we keep his Trader (real shop UI) for our merchant.
+        // The workbench is a known-good buildable piece.
         public const string NpcBasePrefab = "Haldor";
         public const string HallBasePrefab = "piece_workbench";
 
