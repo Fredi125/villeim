@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.8.1 — Wood pricing
+
+### Changed
+- Black Forest trader: **Fine Wood** and **Core Wood (round logs)** now cost **6 per stack of 30**
+  (up from 2). Existing `vendors.json` auto-updates to the new price.
+
 ## 3.8.0 — Bounty Board
 
 ### Added

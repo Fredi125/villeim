@@ -61,7 +61,7 @@ namespace VillageLife.NPC
         /// regenerates an out-of-date vendors.json from these defaults (keeping a .bak), so value
         /// tweaks here reach an existing install without a manual file delete.
         /// </summary>
-        public const int ConfigVersion = 3;
+        public const int ConfigVersion = 4;
 
         /// <summary>Built-in safety net, also used to seed vendors.json on first run.</summary>
         public static VendorType[] DefaultVendors => new[]
@@ -132,8 +132,8 @@ namespace VillageLife.NPC
                 Id = "blackforest", Title = "Black Forest Trader", Kind = "coin", Biome = "BlackForest",
                 Goods = new[]
                 {
-                    new VendorGood("FineWood",     2, 30),
-                    new VendorGood("RoundLog",     2, 30),
+                    new VendorGood("FineWood",     6, 30),
+                    new VendorGood("RoundLog",     6, 30),
                     new VendorGood("Coal",         2, 30),
                     new VendorGood("Copper",      50, 10),  // 5 coins/unit
                     new VendorGood("Tin",         50, 10),  // 5 coins/unit
