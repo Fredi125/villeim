@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.17.0 — The Meadows post is a house now
+
+### Changed
+- The **Meadows Trading Post** is now built as an **Old Wooden House V**, not a workbench — your
+  first real "building, not a crafting table" station. Build the house, press [Use] on it to summon
+  the Meadows merchant; the summon/dismiss toggle works exactly as before.
+- Stations can now clone any vanilla building as their model (new `BasePrefab` option), via a shared
+  `BuildablePrep` helper that the world-structures feature now uses too. Other posts still use the
+  workbench for now — say the word and they become houses as well.
+
 ## 3.16.3 — World structures: icon fix
 
 ### Fixed

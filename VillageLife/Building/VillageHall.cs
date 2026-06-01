@@ -21,6 +21,7 @@ namespace VillageLife.Building
         private struct StationDef
         {
             public string PrefabName;
+            public string BasePrefab;   // prefab to clone for the model; null/empty = the workbench.
             public string DisplayName;
             public string Description;
             public string VendorId;     // null = use the rotation (Village Hall); else a specific vendor id.
@@ -47,6 +48,7 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = "VL_Station_Meadows",
+                BasePrefab = "WoodHouse5",   // this post IS an Old Wooden House V, not a workbench
                 DisplayName = "Meadows Trading Post",
                 Description = "Press [Use] to summon the Meadows merchant.",
                 VendorId = "meadows",
@@ -166,7 +168,28 @@ namespace VillageLife.Building
                 Requirements = def.Requirements
             };
 
-            var piece = new CustomPiece(def.PrefabName, Constants.HallBasePrefab, config);
+            CustomPiece piece;
+            if (string.IsNullOrEmpty(def.BasePrefab) || def.BasePrefab == Constants.HallBasePrefab)
+            {
+                // Workbench-based station (proven path): the base already has Piece, ZNetView and icon.
+                piece = new CustomPiece(def.PrefabName, Constants.HallBasePrefab, config);
+            }
+            else
+            {
+                // Building-based station: clone a world building and make it placeable first, so the
+                // post itself looks like a real structure rather than a workbench.
+                GameObject clone = PrefabManager.Instance.CreateClonedPrefab(def.PrefabName, def.BasePrefab);
+                if (clone == null)
+                {
+                    Jotunn.Logger.LogWarning(
+                        $"[VillageLife] Station '{def.DisplayName}' base '{def.BasePrefab}' didn't resolve; skipped.");
+                    return;
+                }
+                BuildablePrep.Prepare(clone);
+                config.Icon = BuildablePrep.PlaceholderIcon();
+                piece = new CustomPiece(clone, false, config);
+            }
+
             GameObject prefab = piece.PiecePrefab;
             if (prefab != null)
             {
