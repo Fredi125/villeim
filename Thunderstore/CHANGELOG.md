@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.18.0 — Reputation is visible
+
+### Added
+- Bounty-givers now say **"Earns favor with the &lt;Trader&gt;"** in their hover text, so it's clear
+  that completing a bounty raises that biome trader's reputation (and unlocks its rare good).
+
 ## 3.17.1 — Villagers can stand inside
 
 ### Added

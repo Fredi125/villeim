@@ -64,9 +64,15 @@ namespace VillageLife.NPC
             VendorType t = VendorCatalog.ById(VendorTypeId);
             string offer = $"{t.CostAmount} {ItemNames.Display(t.CostPrefab)} → " +
                            $"{t.GiveAmount} {ItemNames.Display(t.GivePrefab)}";
+
+            // For bounties, tell the player it also builds reputation with the linked trader.
+            string favor = "";
+            if (!string.IsNullOrEmpty(t.UnlocksVendorId))
+                favor = $"\n<color=#aab4ff>Earns favor with the {VendorCatalog.ById(t.UnlocksVendorId).Title}</color>";
+
             return Localization.instance.Localize(
                 $"<color=yellow><b>{MerchantName}</b></color> ({t.Title})\n" +
-                $"{offer}\n[<color=yellow><b>$KEY_Use</b></color>] Trade");
+                $"{offer}{favor}\n[<color=yellow><b>$KEY_Use</b></color>] Trade");
         }
 
         #endregion
