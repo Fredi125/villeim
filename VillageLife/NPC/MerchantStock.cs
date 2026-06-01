@@ -5,13 +5,14 @@ namespace VillageLife.NPC
 {
     /// <summary>
     /// Resolves a vendor type's goods into vanilla <see cref="Trader.TradeItem"/> entries using
-    /// ObjectDB. Items that can't be resolved are skipped; the method returns an empty list (never
-    /// null) if ObjectDB isn't ready, so the caller can keep the merchant's existing (vanilla)
-    /// stock instead of showing an empty shop.
+    /// ObjectDB. Goods above the trader's current reputation <paramref name="level"/> are hidden,
+    /// and items that can't be resolved are skipped; the method returns an empty list (never null)
+    /// if ObjectDB isn't ready, so the caller can keep the merchant's existing (vanilla) stock
+    /// instead of showing an empty shop.
     /// </summary>
     public static class MerchantStock
     {
-        public static List<Trader.TradeItem> Build(VendorType type)
+        public static List<Trader.TradeItem> Build(VendorType type, int level)
         {
             var list = new List<Trader.TradeItem>();
             if (type?.Goods == null)
@@ -23,6 +24,9 @@ namespace VillageLife.NPC
 
             foreach (var g in type.Goods)
             {
+                if (g.Tier > level)
+                    continue;   // locked until the trader's reputation reaches this tier.
+
                 GameObject go = odb.GetItemPrefab(g.Prefab);
                 if (go == null)
                     continue;

@@ -66,18 +66,27 @@ namespace VillageLife.NPC
             ApplyVendorType();
         }
 
-        /// <summary>Set the shop title and goods for this merchant's vendor type.</summary>
+        /// <summary>Recompute the shop title and stock — call after this trader's reputation changes.</summary>
+        public void RefreshStock() => ApplyVendorType();
+
+        /// <summary>Set the shop title and goods for this merchant's vendor type and reputation.</summary>
         private void ApplyVendorType()
         {
             if (_trader == null)
                 return;
 
             VendorType type = VendorCatalog.ById(VendorTypeId);
-            _trader.m_name = $"{MerchantName} ({type.Title})";
+            int level = TraderReputation.Level(VendorTypeId);
+            int max = TraderReputation.MaxTier(type);
 
-            // Replace Haldor's default stock with ours — but only if ours actually built,
-            // otherwise leave the existing stock so the store still has something to sell.
-            var stock = MerchantStock.Build(type);
+            // Show reputation in the shop title when this trader has anything to unlock.
+            _trader.m_name = max > 0
+                ? $"{MerchantName} ({type.Title}) · Rep {level}/{max}"
+                : $"{MerchantName} ({type.Title})";
+
+            // Replace Haldor's default stock with ours (filtered by reputation) — but only if ours
+            // actually built, otherwise leave the existing stock so the store still has something.
+            var stock = MerchantStock.Build(type, level);
             if (stock.Count > 0)
                 _trader.m_items = stock;
             else

@@ -1,5 +1,21 @@
 # Changelog
 
+## 3.9.0 — Upgradeable traders (reputation)
+
+### Added
+- **Traders now level up as you complete their quests.** Each biome trader has a **reputation**
+  level; completing that biome's **bounty** raises it, and higher-tier goods unlock in the trader's
+  shop. The five rare items (Queen Bee, Surtling Core, Chain, Dragon Egg, Lox Pelt) now start
+  **locked** and become buyable once you've earned the trader's trust (Rep 1).
+- Reputation is **world-global** (stored like boss-defeat flags), so it persists across saves and is
+  shared in co-op. The shop title shows the current standing, e.g. `Sigrid (Mountain Trader) · Rep 1/1`.
+- A trader already standing in the world **restocks immediately** when its reputation changes.
+
+### Notes
+- This is the first reputation tier (one unlock per trader). The system is data-driven — goods carry
+  a `Tier` and bounties an `UnlocksVendorId` in `vendors.json` — so more tiers/quests are easy to add.
+- `vendors.json` auto-updates to enable this (old file kept as `.bak`).
+
 ## 3.8.2 — Tier-wide price rebalance
 
 ### Changed

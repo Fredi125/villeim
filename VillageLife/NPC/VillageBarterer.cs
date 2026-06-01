@@ -134,6 +134,31 @@ namespace VillageLife.NPC
             player.Message(MessageHud.MessageType.Center,
                 $"Traded {t.CostAmount} {ItemNames.Display(t.CostPrefab)} for " +
                 $"{t.GiveAmount} {ItemNames.Display(t.GivePrefab)}.");
+
+            // A bounty turn-in also builds reputation with the trader it's tied to, which can unlock
+            // higher-tier goods in that trader's shop.
+            GrantReputation(player, t);
+        }
+
+        /// <summary>If this barter is tied to a trader, advance that trader's world reputation and
+        /// refresh any of its merchants already standing in the world.</summary>
+        private static void GrantReputation(Player player, VendorType t)
+        {
+            if (t == null || string.IsNullOrEmpty(t.UnlocksVendorId))
+                return;
+
+            if (!TraderReputation.TryAdvance(t.UnlocksVendorId, out int level, out int max))
+                return;
+
+            VendorType trader = VendorCatalog.ById(t.UnlocksVendorId);
+            player.Message(MessageHud.MessageType.Center,
+                level >= max
+                    ? $"{trader.Title}: reputation {level}/{max} — all goods unlocked!"
+                    : $"{trader.Title}: reputation {level}/{max} — new goods unlocked!");
+
+            foreach (VillageMerchant m in Object.FindObjectsOfType<VillageMerchant>())
+                if (m != null && m.VendorTypeId == t.UnlocksVendorId)
+                    m.RefreshStock();
         }
     }
 }

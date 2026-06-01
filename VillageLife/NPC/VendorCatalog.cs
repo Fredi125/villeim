@@ -10,12 +10,16 @@ namespace VillageLife.NPC
         public string Prefab;
         public int Price;
         public int Stack;
+        public int Tier;        // reputation level required before this good appears (0 = always sold).
 
-        public VendorGood(string prefab, int price, int stack)
+        public VendorGood(string prefab, int price, int stack) : this(prefab, price, stack, 0) { }
+
+        public VendorGood(string prefab, int price, int stack, int tier)
         {
             Prefab = prefab;
             Price = price;
             Stack = stack;
+            Tier = tier;
         }
     }
 
@@ -41,6 +45,10 @@ namespace VillageLife.NPC
         public string GivePrefab;
         public int GiveAmount;
 
+        // If set, completing this barter (a bounty) raises world reputation with that trader id,
+        // unlocking the trader's higher-tier goods. Empty = the barter grants no reputation.
+        public string UnlocksVendorId = "";
+
         /// <summary>True when this vendor trades by barter rather than the coin shop.</summary>
         public bool IsBarter => string.Equals(Kind, "barter", StringComparison.OrdinalIgnoreCase);
     }
@@ -61,7 +69,7 @@ namespace VillageLife.NPC
         /// regenerates an out-of-date vendors.json from these defaults (keeping a .bak), so value
         /// tweaks here reach an existing install without a manual file delete.
         /// </summary>
-        public const int ConfigVersion = 5;
+        public const int ConfigVersion = 6;
 
         /// <summary>Built-in safety net, also used to seed vendors.json on first run.</summary>
         public static VendorType[] DefaultVendors => new[]
@@ -124,7 +132,7 @@ namespace VillageLife.NPC
                     new VendorGood("Flint",     15, 30),   // 0.5/unit
                     new VendorGood("Resin",     10, 20),   // 0.5/unit
                     new VendorGood("Dandelion", 10, 10),   // 1/unit
-                    new VendorGood("QueenBee", 800,  1),  // rare
+                    new VendorGood("QueenBee", 800,  1, 1),  // rare — unlocks at Rep 1
                 }
             },
             new VendorType
@@ -137,7 +145,7 @@ namespace VillageLife.NPC
                     new VendorGood("Coal",        15, 30),  // 0.5/unit
                     new VendorGood("Copper",      50, 10),  // 5 coins/unit
                     new VendorGood("Tin",         50, 10),  // 5 coins/unit
-                    new VendorGood("SurtlingCore", 200, 1), // rare
+                    new VendorGood("SurtlingCore", 200, 1, 1), // rare — unlocks at Rep 1
                 }
             },
             new VendorType
@@ -150,7 +158,7 @@ namespace VillageLife.NPC
                     new VendorGood("Bloodbag",     40, 20), // 2/unit
                     new VendorGood("WitheredBone", 30, 10), // 3/unit
                     new VendorGood("IronScrap",  100, 10),  // 10 coins/unit
-                    new VendorGood("Chain",      400,  1),  // rare
+                    new VendorGood("Chain",      400,  1, 1),  // rare — unlocks at Rep 1
                 }
             },
             new VendorType
@@ -164,7 +172,7 @@ namespace VillageLife.NPC
                     new VendorGood("Onion",       30, 10),   // 3/unit
                     new VendorGood("Crystal",     80, 20),   // 4/unit
                     new VendorGood("Silver",     80,  5),   // 16 coins/unit
-                    new VendorGood("DragonEgg", 9999, 1),   // rare
+                    new VendorGood("DragonEgg", 9999, 1, 1),   // rare — unlocks at Rep 1
                 }
             },
             new VendorType
@@ -178,7 +186,7 @@ namespace VillageLife.NPC
                     new VendorGood("Needle",     80, 20),   // 4/unit
                     new VendorGood("Tar",       120, 30),   // 4/unit
                     new VendorGood("BlackMetal", 100, 5),   // 20 coins/unit
-                    new VendorGood("LoxPelt",  300,  1),    // rare
+                    new VendorGood("LoxPelt",  300,  1, 1),    // rare — unlocks at Rep 1
                 }
             },
 
@@ -192,30 +200,35 @@ namespace VillageLife.NPC
                 Id = "bounty_meadows", Title = "Meadows Bounty", Kind = "barter",
                 CostPrefab = "TrophyBoar",      CostAmount = 2,
                 GivePrefab = "Coins",           GiveAmount = 10,
+                UnlocksVendorId = "meadows",
             },
             new VendorType
             {
                 Id = "bounty_forest", Title = "Forest Bounty", Kind = "barter",
                 CostPrefab = "TrophyGreydwarf", CostAmount = 3,
                 GivePrefab = "Coins",           GiveAmount = 24,
+                UnlocksVendorId = "blackforest",
             },
             new VendorType
             {
                 Id = "bounty_swamp", Title = "Swamp Bounty", Kind = "barter",
                 CostPrefab = "TrophyDraugr",    CostAmount = 2,
                 GivePrefab = "Coins",           GiveAmount = 45,
+                UnlocksVendorId = "swamp",
             },
             new VendorType
             {
                 Id = "bounty_mountain", Title = "Mountain Bounty", Kind = "barter",
                 CostPrefab = "TrophyWolf",      CostAmount = 2,
                 GivePrefab = "Coins",           GiveAmount = 70,
+                UnlocksVendorId = "mountain",
             },
             new VendorType
             {
                 Id = "bounty_plains", Title = "Plains Bounty", Kind = "barter",
                 CostPrefab = "TrophyGoblin",    CostAmount = 2,
                 GivePrefab = "Coins",           GiveAmount = 90,
+                UnlocksVendorId = "plains",
             },
         };
 
