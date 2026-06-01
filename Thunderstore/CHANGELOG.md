@@ -1,5 +1,20 @@
 # Changelog
 
+## 3.0.1 — Fix villager summoning
+
+### Fixed
+- **Villagers can now be summoned.** Registration was using Jötunn's
+  `CustomCreature(name, "Haldor", …)` string constructor, which resolves the base through
+  `CreatureManager.GetCreaturePrefab("Haldor")` — that returns null because Haldor is a
+  location-placed trader, not a spawn-system creature. The result was a "Failed to clone
+  'Haldor'" error at startup and a "Could not summon a villager" message in game.
+- Now the villager is cloned through `PrefabManager` (the same proven path the Village Hall
+  uses for the workbench, where Haldor is resolvable) and then registered with
+  `CreatureManager.AddCreature`.
+- Kept the Haldor clone faithful to vanilla — only the Trader component is removed (so our
+  E-interaction is unambiguous). Avoids the over-stripping that produced malformed NPCs
+  before.
+
 ## 3.0.0 — Reliable foundation (rebuild)
 
 A deliberate, from-scratch rebuild. Earlier versions tried to ship a large feature set

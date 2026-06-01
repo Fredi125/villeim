@@ -9,7 +9,7 @@ namespace VillageLife.Util
         // Plugin identity
         public const string PluginGuid = "com.villagelife.mod";
         public const string PluginName = "VillageLife";
-        public const string PluginVersion = "3.0.0";
+        public const string PluginVersion = "3.0.1";
 
         // Prefab names for the content we register (cloned from the vanilla prefabs below).
         public const string NpcPrefabName = "VL_Villager";

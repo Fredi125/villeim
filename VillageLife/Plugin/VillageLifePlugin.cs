@@ -27,9 +27,11 @@ namespace VillageLife.Plugin
                 "General", "SpawnDistance", 2.5f,
                 "How far in front of the Village Hall (in metres) a new villager spawns.");
 
-            // Register each piece of content once the vanilla prefab it clones is available.
-            // The creature clones Haldor (a creature) → CreatureManager event.
-            // The piece clones the workbench (a prefab) → PrefabManager event.
+            // Register each piece of content on the matching Jötunn event:
+            //  • The villager is a creature, so we register it on the CreatureManager event
+            //    (correct timing for AddCreature). It still CLONES Haldor via PrefabManager,
+            //    because Haldor is a location-placed trader and isn't in the creature registry.
+            //  • The Village Hall is a build piece, registered on the PrefabManager event.
             // Jötunn re-injects registered content on every world load, so we add it once
             // and unsubscribe to avoid duplicate-registration errors.
             CreatureManager.OnVanillaCreaturesAvailable += OnCreaturesAvailable;
