@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.8.2 — Tier-wide price rebalance
+
+### Changed
+- **Every sold resource is now priced by biome tier**, so the economy is coherent instead of having
+  cheap commons sitting next to expensive metals. Per-unit prices climb with progression, with each
+  tier's refined metal as the ceiling:
+  - Meadows / general: basics 0.2/unit (wood, stone), commons 0.5, herbs ~1
+  - Black Forest: fine/core wood 0.2, coal 0.5, copper & tin 5
+  - Swamp: guck/entrails/bloodbag 2, withered bone 3, iron 10
+  - Mountain: obsidian/onion 3, freeze gland/crystal 4, wolf pelt 5, silver 16
+  - Plains: barley/flax/cloudberry/needle/tar 4, black metal 20
+- Metals, wood, and the novelty "rare" items keep their prior prices. Existing `vendors.json`
+  auto-updates to the new curve (old file kept as `.bak`).
+
 ## 3.8.1 — Wood pricing
 
 ### Changed

@@ -61,7 +61,7 @@ namespace VillageLife.NPC
         /// regenerates an out-of-date vendors.json from these defaults (keeping a .bak), so value
         /// tweaks here reach an existing install without a manual file delete.
         /// </summary>
-        public const int ConfigVersion = 4;
+        public const int ConfigVersion = 5;
 
         /// <summary>Built-in safety net, also used to seed vendors.json on first run.</summary>
         public static VendorType[] DefaultVendors => new[]
@@ -71,11 +71,11 @@ namespace VillageLife.NPC
                 Id = "general", Title = "General Store", Kind = "coin",
                 Goods = new[]
                 {
-                    new VendorGood("Wood",   1, 50),
-                    new VendorGood("Stone",  1, 50),
-                    new VendorGood("Coal",   2, 20),
-                    new VendorGood("Flint",  3, 20),
-                    new VendorGood("Resin",  2, 20),
+                    new VendorGood("Wood",  10, 50),    // 0.2/unit
+                    new VendorGood("Stone", 10, 50),    // 0.2/unit
+                    new VendorGood("Coal",  10, 20),    // 0.5/unit
+                    new VendorGood("Flint", 10, 20),    // 0.5/unit
+                    new VendorGood("Resin", 10, 20),    // 0.5/unit
                 }
             },
             new VendorType
@@ -83,12 +83,12 @@ namespace VillageLife.NPC
                 Id = "forager", Title = "Forager", Kind = "coin",
                 Goods = new[]
                 {
-                    new VendorGood("Raspberry",   2, 20),
-                    new VendorGood("Mushroom",    2, 20),
-                    new VendorGood("Blueberries", 3, 20),
-                    new VendorGood("Honey",       5, 10),
-                    new VendorGood("Dandelion",   3, 10),
-                    new VendorGood("Thistle",     5, 10),
+                    new VendorGood("Raspberry",   10, 20),  // 0.5/unit
+                    new VendorGood("Mushroom",    10, 20),  // 0.5/unit
+                    new VendorGood("Blueberries", 10, 20),  // 0.5/unit
+                    new VendorGood("Honey",       10, 10),  // 1/unit
+                    new VendorGood("Dandelion",   10, 10),  // 1/unit
+                    new VendorGood("Thistle",     10, 10),  // 1/unit
                 }
             },
             new VendorType
@@ -96,11 +96,11 @@ namespace VillageLife.NPC
                 Id = "huntsman", Title = "Huntsman", Kind = "coin",
                 Goods = new[]
                 {
-                    new VendorGood("LeatherScraps", 3, 20),
-                    new VendorGood("DeerHide",      4, 15),
-                    new VendorGood("Feathers",      3, 20),
-                    new VendorGood("ArrowFlint",    4, 20),
-                    new VendorGood("Resin",         2, 20),
+                    new VendorGood("LeatherScraps", 10, 20),  // 0.5/unit
+                    new VendorGood("DeerHide",      10, 15),  // ~0.7/unit
+                    new VendorGood("Feathers",      10, 20),  // 0.5/unit
+                    new VendorGood("ArrowFlint",    10, 20),  // 0.5/unit
+                    new VendorGood("Resin",         10, 20),  // 0.5/unit
                 }
             },
             new VendorType
@@ -119,11 +119,11 @@ namespace VillageLife.NPC
                 Id = "meadows", Title = "Meadows Trader", Kind = "coin", Biome = "Meadows",
                 Goods = new[]
                 {
-                    new VendorGood("Wood",      1, 50),
-                    new VendorGood("Stone",     1, 50),
-                    new VendorGood("Flint",     2, 30),
-                    new VendorGood("Resin",     2, 20),
-                    new VendorGood("Dandelion", 3, 10),
+                    new VendorGood("Wood",      10, 50),   // 0.2/unit
+                    new VendorGood("Stone",     10, 50),   // 0.2/unit
+                    new VendorGood("Flint",     15, 30),   // 0.5/unit
+                    new VendorGood("Resin",     10, 20),   // 0.5/unit
+                    new VendorGood("Dandelion", 10, 10),   // 1/unit
                     new VendorGood("QueenBee", 800,  1),  // rare
                 }
             },
@@ -134,7 +134,7 @@ namespace VillageLife.NPC
                 {
                     new VendorGood("FineWood",     6, 30),
                     new VendorGood("RoundLog",     6, 30),
-                    new VendorGood("Coal",         2, 30),
+                    new VendorGood("Coal",        15, 30),  // 0.5/unit
                     new VendorGood("Copper",      50, 10),  // 5 coins/unit
                     new VendorGood("Tin",         50, 10),  // 5 coins/unit
                     new VendorGood("SurtlingCore", 200, 1), // rare
@@ -145,10 +145,10 @@ namespace VillageLife.NPC
                 Id = "swamp", Title = "Swamp Trader", Kind = "coin", Biome = "Swamp",
                 Goods = new[]
                 {
-                    new VendorGood("Guck",         3, 20),
-                    new VendorGood("Entrails",     3, 20),
-                    new VendorGood("Bloodbag",     3, 20),
-                    new VendorGood("WitheredBone", 6, 10),
+                    new VendorGood("Guck",         40, 20), // 2/unit
+                    new VendorGood("Entrails",     40, 20), // 2/unit
+                    new VendorGood("Bloodbag",     40, 20), // 2/unit
+                    new VendorGood("WitheredBone", 30, 10), // 3/unit
                     new VendorGood("IronScrap",  100, 10),  // 10 coins/unit
                     new VendorGood("Chain",      400,  1),  // rare
                 }
@@ -158,11 +158,11 @@ namespace VillageLife.NPC
                 Id = "mountain", Title = "Mountain Trader", Kind = "coin", Biome = "Mountain",
                 Goods = new[]
                 {
-                    new VendorGood("Obsidian",    4, 20),
-                    new VendorGood("FreezeGland", 4, 20),
-                    new VendorGood("WolfPelt",    6, 10),
-                    new VendorGood("Onion",       3, 10),
-                    new VendorGood("Crystal",     5, 20),
+                    new VendorGood("Obsidian",    60, 20),   // 3/unit
+                    new VendorGood("FreezeGland", 80, 20),   // 4/unit
+                    new VendorGood("WolfPelt",    50, 10),   // 5/unit
+                    new VendorGood("Onion",       30, 10),   // 3/unit
+                    new VendorGood("Crystal",     80, 20),   // 4/unit
                     new VendorGood("Silver",     80,  5),   // 16 coins/unit
                     new VendorGood("DragonEgg", 9999, 1),   // rare
                 }
@@ -172,11 +172,11 @@ namespace VillageLife.NPC
                 Id = "plains", Title = "Plains Trader", Kind = "coin", Biome = "Plains",
                 Goods = new[]
                 {
-                    new VendorGood("Barley",     4, 20),
-                    new VendorGood("Flax",       4, 20),
-                    new VendorGood("Cloudberry", 4, 20),
-                    new VendorGood("Needle",     3, 20),
-                    new VendorGood("Tar",        3, 30),
+                    new VendorGood("Barley",     80, 20),   // 4/unit
+                    new VendorGood("Flax",       80, 20),   // 4/unit
+                    new VendorGood("Cloudberry", 80, 20),   // 4/unit
+                    new VendorGood("Needle",     80, 20),   // 4/unit
+                    new VendorGood("Tar",       120, 30),   // 4/unit
                     new VendorGood("BlackMetal", 100, 5),   // 20 coins/unit
                     new VendorGood("LoxPelt",  300,  1),    // rare
                 }
