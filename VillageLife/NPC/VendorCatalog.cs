@@ -61,7 +61,7 @@ namespace VillageLife.NPC
         /// regenerates an out-of-date vendors.json from these defaults (keeping a .bak), so value
         /// tweaks here reach an existing install without a manual file delete.
         /// </summary>
-        public const int ConfigVersion = 2;
+        public const int ConfigVersion = 3;
 
         /// <summary>Built-in safety net, also used to seed vendors.json on first run.</summary>
         public static VendorType[] DefaultVendors => new[]
@@ -180,6 +180,42 @@ namespace VillageLife.NPC
                     new VendorGood("BlackMetal", 100, 5),   // 20 coins/unit
                     new VendorGood("LoxPelt",  300,  1),    // rare
                 }
+            },
+
+            // Turn-in bounties — barter villagers that buy monster trophies for Coins. They reuse the
+            // barter mechanic (one fixed turn-in each) and are the main early way to EARN the coins
+            // the pricey minerals above demand. A bounty scales with how dangerous its trophy is to
+            // collect. Trophy prefab names are verified by the startup ItemNameAudit; a wrong one
+            // just makes that bounty politely refuse rather than break anything.
+            new VendorType
+            {
+                Id = "bounty_meadows", Title = "Meadows Bounty", Kind = "barter",
+                CostPrefab = "TrophyBoar",      CostAmount = 2,
+                GivePrefab = "Coins",           GiveAmount = 10,
+            },
+            new VendorType
+            {
+                Id = "bounty_forest", Title = "Forest Bounty", Kind = "barter",
+                CostPrefab = "TrophyGreydwarf", CostAmount = 3,
+                GivePrefab = "Coins",           GiveAmount = 24,
+            },
+            new VendorType
+            {
+                Id = "bounty_swamp", Title = "Swamp Bounty", Kind = "barter",
+                CostPrefab = "TrophyDraugr",    CostAmount = 2,
+                GivePrefab = "Coins",           GiveAmount = 45,
+            },
+            new VendorType
+            {
+                Id = "bounty_mountain", Title = "Mountain Bounty", Kind = "barter",
+                CostPrefab = "TrophyWolf",      CostAmount = 2,
+                GivePrefab = "Coins",           GiveAmount = 70,
+            },
+            new VendorType
+            {
+                Id = "bounty_plains", Title = "Plains Bounty", Kind = "barter",
+                CostPrefab = "TrophyGoblin",    CostAmount = 2,
+                GivePrefab = "Coins",           GiveAmount = 90,
             },
         };
 

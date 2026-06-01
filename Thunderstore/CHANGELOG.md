@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.7.0 — Turn-in bounties
+
+### Added
+- **Bounty villagers** that buy monster trophies for Coins — the main early way to *earn* the coins
+  the (pricey) minerals demand. Five span the biome progression, scaling with how dangerous the
+  trophy is to collect:
+  - Meadows Bounty — 2× Boar trophy → 10 coins
+  - Forest Bounty — 3× Greydwarf trophy → 24 coins
+  - Swamp Bounty — 2× Draugr trophy → 45 coins
+  - Mountain Bounty — 2× Wolf trophy → 70 coins
+  - Plains Bounty — 2× Fuling trophy → 90 coins
+- These are barter villagers (one fixed turn-in each), summoned via the Village Hall's rotation.
+  They're fully data-driven in `vendors.json`, so amounts and trophies are easy to tune.
+
 ## 3.6.0 — Removable merchants + economy pass
 
 ### Changed
