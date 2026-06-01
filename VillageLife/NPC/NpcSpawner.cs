@@ -49,12 +49,15 @@ namespace VillageLife.NPC
             return RequestFor(creator, type.Id);
         }
 
+        /// <summary>A random Norse name from the pool (also used by the creation UI).</summary>
+        public static string RandomName() => NamePool[Random.Range(0, NamePool.Length)];
+
         /// <summary>Build a request for a specific vendor id (used by the biome stations).</summary>
         public static NpcRequest RequestFor(Player creator, string vendorTypeId)
         {
             return new NpcRequest
             {
-                Name = NamePool[Random.Range(0, NamePool.Length)],
+                Name = RandomName(),
                 VendorTypeId = vendorTypeId,
                 CreatorId = creator != null ? creator.GetPlayerID() : 0L
             };

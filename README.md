@@ -120,8 +120,16 @@ alongside them when zipping a release. Keep both `manifest.json` files on the sa
 
 1. ~~Coin merchant using Valheim's trade window.~~ ✅ Done (3.1.0)
 2. ~~Multiple merchant types, each selling different goods.~~ ✅ Done (3.2.0) — see `VendorCatalog`.
-3. **Barter vendors** — give a single product for a fixed resource (e.g. 40 Stone → 30 Wood),
-   via a small no-UI interaction (`VendorKind.Barter` is already scaffolded).
-4. Config-driven vendor catalogue (move `VendorCatalog` entries to a JSON file).
-5. Small creation UI to pick a villager's name/type — plugs into `NpcSpawner`.
-6. Visual variety so merchants aren't all Haldor look-alikes; later roles (quests, guards).
+3. ~~**Barter vendors** — give a single product for a fixed resource (e.g. 40 Stone → 30 Wood).~~ ✅ Done (3.3.0)
+4. ~~Config-driven vendor catalogue (`vendors.json`).~~ ✅ Done (3.4.0)
+5. ~~Small creation UI to pick a villager's name/type — plugs into `NpcSpawner`.~~ ✅ Done (3.14.0)
+6. ~~Visual variety so merchants aren't all Haldor look-alikes; later roles (quests, guards).~~ ✅ Done
+   — biome trading posts, bounties + reputation, blacksmith/tavern/farmer roles, guards, and
+   per-villager size variation (3.5–3.13).
+
+### Beyond the original roadmap (deferred — want in-game testing first)
+
+- **Localization** — its failure mode is visible (`$token` strings on working pieces), so best
+  verified live rather than pushed blind.
+- **Ambient chatter** — periodic chat bubbles; depends on `Chat.SetNpcText`, whose exact signature
+  needs confirming against the game build.

@@ -258,6 +258,13 @@ namespace VillageLife.Building
             }
 
             Quaternion rotation = Quaternion.LookRotation(-transform.forward);
+
+            // The Village Hall (no specific vendor) opens the creation panel to pick name + type; a
+            // specific post summons its vendor directly. If the panel can't open (older Jötunn, GUI
+            // not ready), fall through to the old instant rotation summon so the hall always works.
+            if (string.IsNullOrEmpty(_vendorId) && VillagerCreationUI.Open(frontCenter, rotation))
+                return true;
+
             NpcRequest request = string.IsNullOrEmpty(_vendorId)
                 ? NpcSpawner.DefaultRequest(player)
                 : NpcSpawner.RequestFor(player, _vendorId);

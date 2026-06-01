@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.14.0 — Villager creation panel
+
+### Added
+- The **Village Hall** now opens a **creation panel** instead of summoning a random villager: pick a
+  name (re-roll button) and click the **role** you want (General Store, Forager, Huntsman, Blacksmith,
+  Tavern Keeper, Farmer, Stonemason, or Guard), then it appears out front. Biome traders, bounties,
+  and the bounty board still have their own dedicated stations.
+- Safe fallback: if the panel can't be shown for any reason, the hall reverts to its previous instant
+  rotation-summon, so it always does *something*.
+
 ## 3.13.0 — Guards
 
 ### Added
