@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.15.0 — Buildable world structures (experimental)
+
+### Added
+- **Place real buildings**, not just crafting-table clones: a first set of vanilla world structures
+  (abandoned wooden houses, ruined stone towers) is registered as **Hammer → Misc** pieces. Spawner,
+  dungeon, and AI components are stripped so a placed structure is inert scenery.
+
+### Notes
+- **Experimental & self-diagnosing.** Exact prefab names / clone-ability can't be verified offline,
+  so each registration is guarded: a name that doesn't resolve is skipped and logged. Check the
+  BepInEx log for `World structures: N buildable, M skipped` and the per-name warnings — that tells
+  us exactly which to keep, prune, or add. Large structures may not preview/snap perfectly yet.
+
 ## 3.14.0 — Villager creation panel
 
 ### Added

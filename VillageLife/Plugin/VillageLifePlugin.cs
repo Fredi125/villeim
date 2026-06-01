@@ -47,6 +47,7 @@ namespace VillageLife.Plugin
             PrefabManager.OnVanillaPrefabsAvailable -= OnPrefabsAvailable;
             NpcPrefab.Register();
             VillageStations.Register();
+            WorldStructures.Register();
 
             // Now that vanilla prefabs (and ObjectDB items) are available, verify every item name
             // the mod references resolves, logging any that don't. This is the same moment Jötunn
