@@ -9,7 +9,7 @@ namespace VillageLife.Util
         // Plugin identity
         public const string PluginGuid = "com.villagelife.mod";
         public const string PluginName = "VillageLife";
-        public const string PluginVersion = "3.15.0";
+        public const string PluginVersion = "3.16.0";
 
         // Prefab names for the content we register (cloned from the vanilla prefabs below).
         // Two villager prefabs: one keeps Haldor's Trader (coin shop), one has it removed and
@@ -24,6 +24,10 @@ namespace VillageLife.Util
         // The workbench is a known-good buildable piece.
         public const string NpcBasePrefab = "Haldor";
         public const string HallBasePrefab = "piece_workbench";
+
+        // Single custom Hammer tab that groups every VillageLife buildable. Jötunn auto-creates the
+        // tab from this category name, so all our pieces live together instead of scattered in "Misc".
+        public const string BuildCategory = "VillageLife";
 
         // ZDO keys, namespaced so they never collide with the game or other mods.
         // Hashed once at startup (GetStableHashCode is pure and deterministic).

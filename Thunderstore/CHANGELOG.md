@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.16.0 — One build tab + structure discovery
+
+### Changed
+- **All VillageLife buildables now live in a single Hammer tab, "VillageLife"** — the Village Hall,
+  biome trading posts, Guard Post, Bounty Board, and any world structures — instead of being mixed
+  into vanilla *Misc*. (Uses Jötunn's custom-category support, the reliable path.)
+
+### Fixed / diagnostics
+- The first batch of world structures likely didn't appear because those prefab names don't resolve
+  as standalone cloneable prefabs. Registration now **pre-checks the prefab cache** and logs a clear
+  skip, and a new **discovery line** lists every building-like prefab actually present in ZNetScene
+  (`Building-prefab candidates in ZNetScene (N): ...`). That log is what we'll use to pick names that
+  really work.
+
 ## 3.15.0 — Buildable world structures (experimental)
 
 ### Added

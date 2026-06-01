@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using UnityEngine;
+using VillageLife.Util;
 
 namespace VillageLife.Building
 {
@@ -70,6 +72,8 @@ namespace VillageLife.Building
 
         public static void Register()
         {
+            LogBuildingCandidates();
+
             int ok = 0, skipped = 0;
             foreach (Def d in Structures)
             {
@@ -80,9 +84,16 @@ namespace VillageLife.Building
                         Name = d.DisplayName,
                         Description = d.Description,
                         PieceTable = "Hammer",
-                        Category = "Misc",
+                        Category = Constants.BuildCategory,
                         Requirements = d.Requirements
                     };
+
+                    if (PrefabManager.Instance.GetPrefab(d.Prefab) == null)
+                    {
+                        skipped++;
+                        Jotunn.Logger.LogWarning($"[VillageLife] Structure '{d.Prefab}' not found in the prefab cache; skipped.");
+                        continue;
+                    }
 
                     var piece = new CustomPiece(d.Prefab + "_VLBuild", d.Prefab, config);
                     GameObject prefab = piece.PiecePrefab;
@@ -108,6 +119,49 @@ namespace VillageLife.Building
 
             Jotunn.Logger.LogInfo(
                 $"[VillageLife] World structures: {ok} buildable, {skipped} skipped (see warnings for the names).");
+        }
+
+        /// <summary>
+        /// Log every prefab in ZNetScene whose name hints it's a building (house/tower/ruin/dvergr/…),
+        /// so we can see which structure names actually exist and are cloneable on this game version
+        /// instead of guessing. One-time, read-only, fully guarded.
+        /// </summary>
+        private static void LogBuildingCandidates()
+        {
+            try
+            {
+                ZNetScene zs = ZNetScene.instance;
+                if (zs == null || zs.m_prefabs == null)
+                {
+                    Jotunn.Logger.LogInfo("[VillageLife] Building-prefab discovery skipped (ZNetScene not ready yet).");
+                    return;
+                }
+
+                string[] keywords = { "house", "tower", "ruin", "dvergr", "cabin", "hut", "shack", "castle", "village" };
+                var found = new List<string>();
+                foreach (GameObject p in zs.m_prefabs)
+                {
+                    if (p == null)
+                        continue;
+                    string lower = p.name.ToLowerInvariant();
+                    foreach (string k in keywords)
+                    {
+                        if (lower.Contains(k))
+                        {
+                            found.Add(p.name);
+                            break;
+                        }
+                    }
+                }
+                found.Sort();
+                Jotunn.Logger.LogInfo(
+                    $"[VillageLife] Building-prefab candidates in ZNetScene ({found.Count}): " +
+                    (found.Count > 0 ? string.Join(", ", found) : "none"));
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogWarning($"[VillageLife] Building-prefab discovery failed: {e.Message}");
+            }
         }
 
         /// <summary>Remove components that would make a placed structure spawn enemies or a dungeon.</summary>

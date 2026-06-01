@@ -162,7 +162,7 @@ namespace VillageLife.Building
                 Name = def.DisplayName,
                 Description = def.Description,
                 PieceTable = "Hammer",
-                Category = "Misc",
+                Category = Constants.BuildCategory,
                 Requirements = def.Requirements
             };
 
