@@ -165,6 +165,11 @@ namespace VillageLife.Building
     /// </summary>
     public class StationInteraction : MonoBehaviour, Hoverable, Interactable
     {
+        // How close a villager counts as "this post's" for the summon/dismiss toggle. Big enough to
+        // catch the one we spawn just in front (and any old duplicate pile stacked there), small
+        // enough not to grab a neighbouring post's merchant in a tightly-packed trading hub.
+        private const float MerchantRadius = 3f;
+
         // Set on the prefab at registration; serialized by Unity so placed instances keep it.
         [SerializeField] private string _displayName = "Village Hall";
         [SerializeField] private string _vendorId = "";
@@ -180,7 +185,7 @@ namespace VillageLife.Building
         public string GetHoverText()
         {
             return Localization.instance.Localize(
-                $"{_displayName}\n[<color=yellow><b>$KEY_Use</b></color>] Summon a merchant");
+                $"{_displayName}\n[<color=yellow><b>$KEY_Use</b></color>] Summon / dismiss merchant");
         }
 
         public bool Interact(Humanoid user, bool hold, bool alt)
@@ -199,6 +204,20 @@ namespace VillageLife.Building
             Vector3 position = transform.position + transform.forward * distance;
             if (ZoneSystem.instance != null)
                 position.y = ZoneSystem.instance.GetGroundHeight(position);
+
+            // Toggle: if this post already has a merchant in front (or a leftover pile from older
+            // builds), dismiss them; otherwise summon one. This is how merchants are removed, and it
+            // doubles as cleanup for duplicates — so a single station can no longer breed an endless
+            // crowd of villagers.
+            int dismissed = NpcSpawner.RemoveNear(position, MerchantRadius);
+            if (dismissed > 0)
+            {
+                player.Message(MessageHud.MessageType.Center,
+                    dismissed == 1
+                        ? "The merchant has left your village."
+                        : $"Dismissed {dismissed} merchants.");
+                return true;
+            }
 
             // Face the new merchant back toward the station.
             Quaternion rotation = Quaternion.LookRotation(-transform.forward);

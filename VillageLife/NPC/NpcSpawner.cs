@@ -96,5 +96,45 @@ namespace VillageLife.NPC
             result.Success = true;
             return result;
         }
+
+        /// <summary>
+        /// Destroy every VillageLife villager (coin merchant or barterer) within <paramref name="radius"/>
+        /// of <paramref name="center"/> and return how many were removed. The station uses this to
+        /// dismiss its merchant on a second Use — and, because it removes <i>all</i> nearby villagers,
+        /// it also mops up the duplicate piles that earlier builds created by summoning without limit.
+        /// Networked-safe: ownership is claimed before the ZDO is destroyed.
+        /// </summary>
+        public static int RemoveNear(Vector3 center, float radius)
+        {
+            if (ZNetScene.instance == null)
+                return 0;
+
+            float r2 = radius * radius;
+            return DestroyNear(Object.FindObjectsOfType<VillageMerchant>(), center, r2)
+                 + DestroyNear(Object.FindObjectsOfType<VillageBarterer>(), center, r2);
+        }
+
+        private static int DestroyNear<T>(T[] components, Vector3 center, float radiusSqr) where T : Component
+        {
+            int removed = 0;
+            foreach (T comp in components)
+            {
+                if (comp == null || (comp.transform.position - center).sqrMagnitude > radiusSqr)
+                    continue;
+
+                ZNetView nview = comp.GetComponent<ZNetView>();
+                if (nview != null && nview.IsValid())
+                {
+                    nview.ClaimOwnership();
+                    ZNetScene.instance.Destroy(comp.gameObject);
+                }
+                else
+                {
+                    Object.Destroy(comp.gameObject);
+                }
+                removed++;
+            }
+            return removed;
+        }
     }
 }

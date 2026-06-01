@@ -56,6 +56,13 @@ namespace VillageLife.NPC
     /// </summary>
     public static class VendorCatalog
     {
+        /// <summary>
+        /// Bumped whenever the built-in defaults change (prices, goods, new vendors). The loader
+        /// regenerates an out-of-date vendors.json from these defaults (keeping a .bak), so value
+        /// tweaks here reach an existing install without a manual file delete.
+        /// </summary>
+        public const int ConfigVersion = 2;
+
         /// <summary>Built-in safety net, also used to seed vendors.json on first run.</summary>
         public static VendorType[] DefaultVendors => new[]
         {
@@ -128,8 +135,8 @@ namespace VillageLife.NPC
                     new VendorGood("FineWood",     2, 30),
                     new VendorGood("RoundLog",     2, 30),
                     new VendorGood("Coal",         2, 30),
-                    new VendorGood("Copper",       4, 20),
-                    new VendorGood("Tin",          4, 20),
+                    new VendorGood("Copper",      50, 10),  // 5 coins/unit
+                    new VendorGood("Tin",         50, 10),  // 5 coins/unit
                     new VendorGood("SurtlingCore", 200, 1), // rare
                 }
             },
@@ -142,7 +149,7 @@ namespace VillageLife.NPC
                     new VendorGood("Entrails",     3, 20),
                     new VendorGood("Bloodbag",     3, 20),
                     new VendorGood("WitheredBone", 6, 10),
-                    new VendorGood("IronScrap",    8, 10),
+                    new VendorGood("IronScrap",  100, 10),  // 10 coins/unit
                     new VendorGood("Chain",      400,  1),  // rare
                 }
             },
@@ -156,6 +163,7 @@ namespace VillageLife.NPC
                     new VendorGood("WolfPelt",    6, 10),
                     new VendorGood("Onion",       3, 10),
                     new VendorGood("Crystal",     5, 20),
+                    new VendorGood("Silver",     80,  5),   // 16 coins/unit
                     new VendorGood("DragonEgg", 9999, 1),   // rare
                 }
             },
@@ -169,6 +177,7 @@ namespace VillageLife.NPC
                     new VendorGood("Cloudberry", 4, 20),
                     new VendorGood("Needle",     3, 20),
                     new VendorGood("Tar",        3, 30),
+                    new VendorGood("BlackMetal", 100, 5),   // 20 coins/unit
                     new VendorGood("LoxPelt",  300,  1),    // rare
                 }
             },

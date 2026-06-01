@@ -20,6 +20,7 @@ namespace VillageLife.NPC
         [Serializable]
         private class Wrapper
         {
+            public int configVersion;
             public VendorType[] vendors;
         }
 
@@ -41,6 +42,26 @@ namespace VillageLife.NPC
 
                 string json = File.ReadAllText(path);
                 Wrapper parsed = JsonUtility.FromJson<Wrapper>(json);
+
+                // Value/goods upgrade: if the file predates the current built-in defaults, replace
+                // it with the new defaults (saving the old one to .bak) so price/goods changes here
+                // take effect without the player deleting the file. Player edits at the current
+                // version are preserved by the merge path below.
+                int fileVersion = parsed?.configVersion ?? 0;
+                if (fileVersion != VendorCatalog.ConfigVersion)
+                {
+                    string backup = path + ".bak";
+                    try { File.Copy(path, backup, overwrite: true); }
+                    catch { /* best-effort backup; regenerate regardless */ }
+
+                    File.WriteAllText(path, Serialize(VendorCatalog.DefaultVendors));
+                    VendorCatalog.Initialize(VendorCatalog.DefaultVendors);
+                    Jotunn.Logger.LogInfo(
+                        $"[VillageLife] vendors.json (v{fileVersion}) is older than the built-in " +
+                        $"defaults (v{VendorCatalog.ConfigVersion}); regenerated from defaults " +
+                        $"(previous saved to {Path.GetFileName(backup)}).");
+                    return;
+                }
 
                 if (parsed?.vendors == null || parsed.vendors.Length == 0)
                 {
@@ -73,7 +94,9 @@ namespace VillageLife.NPC
 
         private static string Serialize(VendorType[] vendors)
         {
-            return JsonUtility.ToJson(new Wrapper { vendors = vendors }, prettyPrint: true);
+            return JsonUtility.ToJson(
+                new Wrapper { configVersion = VendorCatalog.ConfigVersion, vendors = vendors },
+                prettyPrint: true);
         }
 
         /// <summary>

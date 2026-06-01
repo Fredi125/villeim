@@ -1,5 +1,23 @@
 # Changelog
 
+## 3.6.0 — Removable merchants + economy pass
+
+### Changed
+- **Stations no longer breed endless merchants.** A station's [Use] is now a **summon / dismiss
+  toggle**: press it with no merchant in front and one is summoned; press it again and the merchant
+  (plus any leftover pile a previous build stacked there) is removed. This is also the cleanup path
+  for worlds that already have a crowd of duplicate villagers — walk up to the post and press [Use].
+- **Minerals are now a real money sink** (per the design goal — basics are cheap, but building via
+  trade demands accumulated wealth). Prices are per unit: **Tin & Copper 5**, **Iron 10**,
+  **Silver 16**, **Black Metal 20** coins. Silver (Mountain) and Black Metal (Plains) are now sold —
+  previously they were only build-cost materials.
+
+### Added
+- **vendors.json auto-updates with the defaults.** The config now carries a version; when the
+  built-in defaults change, an out-of-date file is regenerated from them (the previous file is kept
+  as `vendors.json.bak`). Value tweaks now reach an existing install without deleting the file by
+  hand. Edits made at the current version are still merged/preserved as before.
+
 ## 3.5.2 — Item-name correctness + startup audit
 
 ### Fixed
