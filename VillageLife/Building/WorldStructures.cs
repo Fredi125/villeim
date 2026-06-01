@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
@@ -12,15 +11,10 @@ namespace VillageLife.Building
     /// Registers a curated set of vanilla WORLD structures (abandoned houses, ruined towers) as
     /// buildable Hammer pieces — so you can place real buildings, not just crafting-table clones.
     ///
-    /// Deliberately experimental and fully guarded, because the exact prefab names and whether a
-    /// given structure clones into a clean piece can't be verified offline:
-    ///   • each prefab is cloned in its own try/catch — a name that doesn't resolve, or a structure
-    ///     that won't clone, is logged and skipped, never fatal;
-    ///   • spawner / dungeon / AI components are stripped so a placed structure is inert scenery
-    ///     rather than a monster nest or a dungeon entrance;
-    ///   • a summary line reports how many registered, so the BepInEx log is the ground truth for
-    ///     which structure names are valid on this game version. Edit <see cref="Structures"/> from
-    ///     what the log shows.
+    /// These world prefabs ship without a <c>Piece</c> (or a usable <c>ZNetView</c>), and Jötunn
+    /// validates the Piece while constructing the CustomPiece — so we clone the prefab ourselves,
+    /// add those components, strip anything that would spawn creatures or a dungeon, and only then
+    /// wrap it as a CustomPiece. Each one is guarded; a name that won't clone is logged and skipped.
     /// </summary>
     public static class WorldStructures
     {
@@ -56,8 +50,7 @@ namespace VillageLife.Building
             Requirements = new[] { new RequirementConfig { Item = "Stone", Amount = 20, Recover = true } }
         };
 
-        // First pass: names confirmed to exist as Meadows/Mountain world prefabs. The log will tell
-        // us which actually clone into placeable pieces; we prune/extend from there.
+        // Names confirmed to resolve on 0.221.12 (per the in-game log). Prune/extend from testing.
         private static Def[] Structures => new[]
         {
             Wood("WoodHouse1", "Old Wooden House I"),
@@ -72,13 +65,23 @@ namespace VillageLife.Building
 
         public static void Register()
         {
-            LogBuildingCandidates();
-
             int ok = 0, skipped = 0;
             foreach (Def d in Structures)
             {
                 try
                 {
+                    // Clone the world prefab ourselves so we can add the components a buildable needs
+                    // BEFORE Jötunn validates the CustomPiece (these prefabs have no Piece).
+                    GameObject clone = PrefabManager.Instance.CreateClonedPrefab(d.Prefab + "_VLBuild", d.Prefab);
+                    if (clone == null)
+                    {
+                        skipped++;
+                        Jotunn.Logger.LogWarning($"[VillageLife] Structure '{d.Prefab}' didn't resolve; skipped.");
+                        continue;
+                    }
+
+                    PrepareClone(clone);
+
                     var config = new PieceConfig
                     {
                         Name = d.DisplayName,
@@ -88,24 +91,7 @@ namespace VillageLife.Building
                         Requirements = d.Requirements
                     };
 
-                    if (PrefabManager.Instance.GetPrefab(d.Prefab) == null)
-                    {
-                        skipped++;
-                        Jotunn.Logger.LogWarning($"[VillageLife] Structure '{d.Prefab}' not found in the prefab cache; skipped.");
-                        continue;
-                    }
-
-                    var piece = new CustomPiece(d.Prefab + "_VLBuild", d.Prefab, config);
-                    GameObject prefab = piece.PiecePrefab;
-                    if (prefab == null)
-                    {
-                        skipped++;
-                        Jotunn.Logger.LogWarning($"[VillageLife] Structure '{d.Prefab}' didn't resolve; skipped.");
-                        continue;
-                    }
-
-                    Neutralize(prefab);
-                    EnsureBuildable(prefab);
+                    var piece = new CustomPiece(clone, fixReference: false, config);
                     PieceManager.Instance.AddPiece(piece);
                     ok++;
                     Jotunn.Logger.LogInfo($"[VillageLife] Structure '{d.DisplayName}' ({d.Prefab}) registered.");
@@ -117,68 +103,27 @@ namespace VillageLife.Building
                 }
             }
 
-            Jotunn.Logger.LogInfo(
-                $"[VillageLife] World structures: {ok} buildable, {skipped} skipped (see warnings for the names).");
+            Jotunn.Logger.LogInfo($"[VillageLife] World structures: {ok} buildable, {skipped} skipped.");
         }
 
         /// <summary>
-        /// Log every prefab in ZNetScene whose name hints it's a building (house/tower/ruin/dvergr/…),
-        /// so we can see which structure names actually exist and are cloneable on this game version
-        /// instead of guessing. One-time, read-only, fully guarded.
+        /// Turn a cloned world structure into a clean, placeable static piece: strip spawner / dungeon /
+        /// AI components, then ensure it has a persistent ZNetView and a Piece (these prefabs ship with
+        /// neither, which is exactly why the first attempt was rejected as "no Piece component").
         /// </summary>
-        private static void LogBuildingCandidates()
-        {
-            try
-            {
-                ZNetScene zs = ZNetScene.instance;
-                if (zs == null || zs.m_prefabs == null)
-                {
-                    Jotunn.Logger.LogInfo("[VillageLife] Building-prefab discovery skipped (ZNetScene not ready yet).");
-                    return;
-                }
-
-                string[] keywords = { "house", "tower", "ruin", "dvergr", "cabin", "hut", "shack", "castle", "village" };
-                var found = new List<string>();
-                foreach (GameObject p in zs.m_prefabs)
-                {
-                    if (p == null)
-                        continue;
-                    string lower = p.name.ToLowerInvariant();
-                    foreach (string k in keywords)
-                    {
-                        if (lower.Contains(k))
-                        {
-                            found.Add(p.name);
-                            break;
-                        }
-                    }
-                }
-                found.Sort();
-                Jotunn.Logger.LogInfo(
-                    $"[VillageLife] Building-prefab candidates in ZNetScene ({found.Count}): " +
-                    (found.Count > 0 ? string.Join(", ", found) : "none"));
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogWarning($"[VillageLife] Building-prefab discovery failed: {e.Message}");
-            }
-        }
-
-        /// <summary>Remove components that would make a placed structure spawn enemies or a dungeon.</summary>
-        private static void Neutralize(GameObject go)
+        private static void PrepareClone(GameObject go)
         {
             foreach (Component comp in go.GetComponentsInChildren<Component>(true))
             {
-                if (comp == null)
-                    continue;
-                if (Array.IndexOf(Dangerous, comp.GetType().Name) >= 0)
+                if (comp != null && Array.IndexOf(Dangerous, comp.GetType().Name) >= 0)
                     UnityEngine.Object.DestroyImmediate(comp);
             }
-        }
 
-        /// <summary>Best-effort: ensure the clone has a Piece so the Hammer can place it.</summary>
-        private static void EnsureBuildable(GameObject go)
-        {
+            ZNetView nview = go.GetComponent<ZNetView>();
+            if (nview == null)
+                nview = go.AddComponent<ZNetView>();
+            nview.m_persistent = true;
+
             if (go.GetComponent<Piece>() == null)
                 go.AddComponent<Piece>();
         }

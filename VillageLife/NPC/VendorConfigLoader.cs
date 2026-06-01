@@ -65,9 +65,11 @@ namespace VillageLife.NPC
 
                 if (parsed?.vendors == null || parsed.vendors.Length == 0)
                 {
-                    VendorCatalog.Initialize(null); // fall back to defaults
+                    // Self-heal: rewrite the file with the defaults so it stops loading empty.
+                    VendorCatalog.Initialize(VendorCatalog.DefaultVendors);
+                    File.WriteAllText(path, Serialize(VendorCatalog.DefaultVendors));
                     Jotunn.Logger.LogWarning(
-                        $"[VillageLife] {path} had no vendors; using built-in defaults.");
+                        $"[VillageLife] {path} had no vendors; regenerated from built-in defaults.");
                     return;
                 }
 

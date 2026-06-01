@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.16.1 — World structures actually build now
+
+### Fixed
+- World structures registered but were **rejected as invalid** ("no Piece component") and never
+  appeared. The log confirmed the `WoodHouse#` / `StoneTowerRuins##` prefabs resolve but ship with
+  no `Piece`. Fixed by cloning the prefab ourselves and adding a `Piece` + persistent `ZNetView`
+  **before** wrapping it as a CustomPiece (using Jötunn's `CustomPiece(GameObject, …)` form), and
+  stripping spawner/dungeon/AI components so the placed structure is inert scenery. They now land in
+  the **VillageLife** Hammer tab.
+- Removed the early prefab-discovery scan that always no-op'd (ZNetScene isn't ready at that point).
+- Self-heal: a `vendors.json` that loads with no vendors is now **rewritten** from defaults instead
+  of just warning every launch.
+
 ## 3.16.0 — One build tab + structure discovery
 
 ### Changed
