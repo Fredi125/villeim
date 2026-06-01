@@ -11,11 +11,12 @@ grow the mod one tested feature at a time on top of this core.
 ## What it does today
 
 - Adds a **Village Hall** buildable to the Hammer's *Misc* tab (20 Wood, 10 Stone).
-- Pressing *Use* on the hall **summons a merchant** with a random Norse name in front of it.
-- Merchants open **Valheim's real trade window** — buy a starter stock of common resources
-  for coins, using the game's own shop UI (no custom panel).
-- Merchants are **non-hostile, stationary, persistent**, and work in **multiplayer** and on
-  **dedicated servers** (they're ordinary networked objects, like Haldor).
+- Pressing *Use* on the hall **summons a merchant** with a random Norse name, cycling through
+  several **types** (General Store, Forager, Huntsman) so each one sells different goods.
+- Merchants open **Valheim's real trade window** — buy their goods for coins, using the game's
+  own shop UI (no custom panel).
+- A merchant's name and type are **persisted** (survive save/reload, sync in multiplayer), and
+  merchants are **non-hostile, stationary** networked objects like Haldor.
 
 ## Project layout
 
@@ -24,8 +25,9 @@ VillageLife/
   Plugin/VillageLifePlugin.cs   BepInEx entry point; binds config; registers content
   Util/Constants.cs             Prefab names and hashed ZDO keys
   NPC/NpcPrefab.cs              Registers the merchant (Haldor clone) via PrefabManager
-  NPC/VillageMerchant.cs       Per-merchant companion: persists name, sets shop stock
-  NPC/MerchantStock.cs         Builds the goods list from ObjectDB (extend the economy here)
+  NPC/VendorCatalog.cs         The villager types and what each offers — add new types here
+  NPC/VillageMerchant.cs       Per-merchant companion: persists name + type, sets shop stock
+  NPC/MerchantStock.cs         Resolves a type's goods into trade items via ObjectDB
   NPC/NpcSpawner.cs            Single spawn entry point (NpcRequest) — UI plugs in here later
   Building/VillageHall.cs       Buildable piece (workbench clone) that summons a merchant
   lib/                          BepInEx / Jötunn / Harmony reference DLLs (committed)
@@ -110,8 +112,10 @@ alongside them when zipping a release. Keep both `manifest.json` files on the sa
 
 ## Roadmap
 
-1. ~~Merchant with simple buy/sell.~~ ✅ Done (3.1.0) — reuses Valheim's trade window.
-2. Config-driven / per-merchant shop stock (extend `MerchantStock`).
-3. Small creation UI (name + appearance) — plugs into `NpcSpawner`.
-4. Visual variety so merchants aren't all Haldor look-alikes.
-5. Further roles (quests, guards) and ambient behaviour.
+1. ~~Coin merchant using Valheim's trade window.~~ ✅ Done (3.1.0)
+2. ~~Multiple merchant types, each selling different goods.~~ ✅ Done (3.2.0) — see `VendorCatalog`.
+3. **Barter vendors** — give a single product for a fixed resource (e.g. 40 Stone → 30 Wood),
+   via a small no-UI interaction (`VendorKind.Barter` is already scaffolded).
+4. Config-driven vendor catalogue (move `VendorCatalog` entries to a JSON file).
+5. Small creation UI to pick a villager's name/type — plugs into `NpcSpawner`.
+6. Visual variety so merchants aren't all Haldor look-alikes; later roles (quests, guards).

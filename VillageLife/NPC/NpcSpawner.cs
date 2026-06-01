@@ -4,19 +4,21 @@ using VillageLife.Util;
 namespace VillageLife.NPC
 {
     /// <summary>
-    /// Describes the merchant to create. Today the Village Hall fills this in with a random
-    /// name; a creation UI can populate the same struct later without touching spawn logic.
+    /// Describes the merchant to create. Today the Village Hall fills this in with a random name
+    /// and the next vendor type in rotation; a creation UI can populate the same struct later
+    /// without touching spawn logic.
     /// </summary>
     public struct NpcRequest
     {
         public string Name;
+        public string VendorTypeId;
         public long CreatorId;
     }
 
     /// <summary>
-    /// The single entry point for summoning merchants. Both the current "instant summon" and
-    /// any future creation UI go through <see cref="Spawn"/>, so all placement, ownership and
-    /// ZDO-setup logic lives in one tested place.
+    /// The single entry point for summoning merchants. Both the current "instant summon" and any
+    /// future creation UI go through <see cref="Spawn"/>, so all placement, ownership and ZDO-setup
+    /// logic lives in one tested place.
     /// </summary>
     public static class NpcSpawner
     {
@@ -26,12 +28,18 @@ namespace VillageLife.NPC
             "Gunnar", "Helga", "Ragnar", "Ingrid", "Sven", "Thora"
         };
 
-        /// <summary>Build a default request (random name) for the given summoning player.</summary>
+        // Cycles the vendor types so each summon is a different shop (handy for testing).
+        // A creation UI would replace this with an explicit player choice.
+        private static int _rotation;
+
+        /// <summary>Build a default request: random name + next vendor type in rotation.</summary>
         public static NpcRequest DefaultRequest(Player creator)
         {
+            VendorType type = VendorCatalog.ByIndex(_rotation++);
             return new NpcRequest
             {
                 Name = NamePool[Random.Range(0, NamePool.Length)],
+                VendorTypeId = type.Id,
                 CreatorId = creator != null ? creator.GetPlayerID() : 0L
             };
         }
@@ -57,7 +65,7 @@ namespace VillageLife.NPC
             GameObject go = Object.Instantiate(prefab, position, rotation);
             var merchant = go.GetComponent<VillageMerchant>();
             if (merchant != null)
-                merchant.Initialize(request.Name, request.CreatorId);
+                merchant.Initialize(request.Name, request.VendorTypeId, request.CreatorId);
 
             return merchant;
         }

@@ -4,16 +4,17 @@ using VillageLife.Util;
 namespace VillageLife.NPC
 {
     /// <summary>
-    /// Turns a Haldor clone into a VillageLife merchant.
+    /// Turns a Haldor clone into a VillageLife merchant of a particular <see cref="VendorType"/>.
     ///
-    /// The vanilla <see cref="Trader"/> component (kept on the clone) already provides the hover
-    /// text, the Use interaction, and the real shop window — so we deliberately do NOT add our own
-    /// Hoverable/Interactable. That keeps exactly one thing handling the Use key (the ambiguity of
-    /// two interactables on one object was the kind of fragile assumption that bit earlier builds).
+    /// The vanilla <see cref="Trader"/> component (kept on the clone) provides the hover text, the
+    /// Use interaction, and the real shop window — so we deliberately add no Hoverable/Interactable
+    /// of our own. Exactly one thing handles the Use key (two interactables on one object was the
+    /// kind of fragile assumption that bit earlier builds).
     ///
-    /// This component only customises the merchant: a per-merchant name (persisted in the ZDO so it
-    /// survives saves and syncs to other clients) and the goods list. If our stock can't be built,
-    /// the Trader keeps whatever stock it already had, so the shop is never empty.
+    /// This component personalises the merchant: a name and a vendor-type id, both persisted in the
+    /// ZDO so they survive saves and sync to other clients. On load it rebuilds the right shop stock
+    /// from the type. If the stock can't be built, the Trader keeps its existing stock, so the shop
+    /// is never empty.
     /// </summary>
     public class VillageMerchant : MonoBehaviour
     {
@@ -21,6 +22,7 @@ namespace VillageLife.NPC
         private Trader _trader;
 
         public string MerchantName { get; private set; } = "Merchant";
+        public string VendorTypeId { get; private set; } = "general";
 
         private void Awake()
         {
@@ -30,42 +32,58 @@ namespace VillageLife.NPC
 
         private void Start()
         {
-            // Learn our name from the ZDO (this is how clients that received us over the network,
-            // and reloaded merchants, pick up the name set when we were first summoned).
+            // Learn name + type from the ZDO. This is how clients that received us over the network,
+            // and merchants reloaded with the world, recover what they were configured as.
             var zdo = _nview != null ? _nview.GetZDO() : null;
             if (zdo != null)
+            {
                 MerchantName = zdo.GetString(Constants.KeyName, MerchantName);
+                VendorTypeId = zdo.GetString(Constants.KeyVendorType, VendorTypeId);
+            }
 
-            if (_trader == null)
-                return;
-
-            _trader.m_name = MerchantName;
-
-            // Replace Haldor's default stock with ours — but only if ours actually built,
-            // otherwise leave the existing stock so the store still has something to sell.
-            var stock = MerchantStock.Build();
-            if (stock.Count > 0)
-                _trader.m_items = stock;
+            ApplyVendorType();
         }
 
         /// <summary>
         /// Called by <see cref="NpcSpawner"/> on the owning client right after instantiation,
         /// while this client still holds the fresh ZDO.
         /// </summary>
-        public void Initialize(string name, long creatorId)
+        public void Initialize(string name, string vendorTypeId, long creatorId)
         {
             if (!string.IsNullOrEmpty(name))
                 MerchantName = name;
+            if (!string.IsNullOrEmpty(vendorTypeId))
+                VendorTypeId = vendorTypeId;
 
             var zdo = _nview != null ? _nview.GetZDO() : null;
             if (zdo != null)
             {
                 zdo.Set(Constants.KeyName, MerchantName);
+                zdo.Set(Constants.KeyVendorType, VendorTypeId);
                 zdo.Set(Constants.KeyCreator, creatorId);
             }
 
-            if (_trader != null)
-                _trader.m_name = MerchantName;
+            ApplyVendorType();
+        }
+
+        /// <summary>Set the shop title and goods for this merchant's vendor type.</summary>
+        private void ApplyVendorType()
+        {
+            if (_trader == null)
+                return;
+
+            VendorType type = VendorCatalog.ById(VendorTypeId);
+            _trader.m_name = $"{MerchantName} ({type.Title})";
+
+            // Replace Haldor's default stock with ours — but only if ours actually built,
+            // otherwise leave the existing stock so the store still has something to sell.
+            var stock = MerchantStock.Build(type);
+            if (stock.Count > 0)
+                _trader.m_items = stock;
+            else
+                Jotunn.Logger.LogWarning(
+                    $"[VillageLife] Merchant '{MerchantName}' ({type.Id}) built no stock; " +
+                    "keeping default. ObjectDB may not have been ready.");
         }
     }
 }

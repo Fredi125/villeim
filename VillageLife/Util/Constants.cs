@@ -9,7 +9,7 @@ namespace VillageLife.Util
         // Plugin identity
         public const string PluginGuid = "com.villagelife.mod";
         public const string PluginName = "VillageLife";
-        public const string PluginVersion = "3.1.0";
+        public const string PluginVersion = "3.2.0";
 
         // Prefab names for the content we register (cloned from the vanilla prefabs below).
         public const string NpcPrefabName = "VL_Villager";
@@ -25,5 +25,6 @@ namespace VillageLife.Util
         // Hashed once at startup (GetStableHashCode is pure and deterministic).
         public static readonly int KeyName = "villagelife_name".GetStableHashCode();
         public static readonly int KeyCreator = "villagelife_creator".GetStableHashCode();
+        public static readonly int KeyVendorType = "villagelife_vendortype".GetStableHashCode();
     }
 }

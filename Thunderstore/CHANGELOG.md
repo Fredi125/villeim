@@ -1,5 +1,20 @@
 # Changelog
 
+## 3.2.0 — Villager types
+
+### Added
+- **Multiple merchant types**, each with its own goods: **General Store**, **Forager**, and
+  **Huntsman**. The Village Hall cycles through them, so each summon is a different shop.
+- The summoned merchant's type is shown on summon and in the shop title, and is **persisted** in
+  the ZDO (survives save/reload, syncs in multiplayer).
+- `VendorCatalog` is the single place to add a new villager type — append an entry and it joins
+  the rotation automatically.
+
+### Foundation for barter
+- Vendor types carry a `VendorKind` (`CoinShop` today; `Barter` planned). Barter vendors will give
+  a single product for a fixed resource (e.g. 40 Stone → 30 Wood) via a small no-UI interaction,
+  keeping the reliable coin shops on Valheim's vanilla trade window.
+
 ## 3.1.0 — Merchants
 
 ### Added
