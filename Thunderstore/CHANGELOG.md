@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.4.0 — Vendors are config-driven (JSON)
+
+### Added
+- The whole vendor catalogue now lives in **`BepInEx/config/VillageLife/vendors.json`** — edit
+  types, goods, prices, and barter rates without rebuilding the mod. Written with defaults on first
+  run.
+- Each vendor carries an optional **`biome`** tag and `kind` (`"coin"` / `"barter"`), so the planned
+  per-biome vendors (basic biome goods + one high-priced rare item) are just config entries.
+
+### Reliability
+- If `vendors.json` is missing, empty, or malformed, the mod logs a warning and **falls back to the
+  built-in defaults** — a bad edit can never leave you with no vendors or a failed load.
+- Uses Unity's built-in `JsonUtility` (no new dependency).
+
 ## 3.3.0 — Barter vendors
 
 ### Added

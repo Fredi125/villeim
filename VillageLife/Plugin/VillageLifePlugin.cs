@@ -27,6 +27,11 @@ namespace VillageLife.Plugin
                 "General", "SpawnDistance", 2.5f,
                 "How far in front of the Village Hall (in metres) a new villager spawns.");
 
+            // Load the vendor catalogue from BepInEx/config/VillageLife/vendors.json (writes
+            // defaults on first run; falls back to built-in defaults if the file is bad). Done
+            // here in Awake so the catalogue is ready before any villager is summoned.
+            VendorConfigLoader.Load(Paths.ConfigPath);
+
             // Both the villager and the Village Hall are clones of vanilla PREFABS (Haldor and
             // piece_workbench), so both register on the PrefabManager event — the recommended
             // time to access/clone vanilla prefabs. The villager is a plain prefab, not a

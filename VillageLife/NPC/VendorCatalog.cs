@@ -1,6 +1,10 @@
+using System;
+
 namespace VillageLife.NPC
 {
-    /// <summary>One thing a coin-shop vendor offers: a prefab, its price, and the stack size sold.</summary>
+    /// <summary>One thing a coin-shop vendor offers: a prefab, its price, and the stack size sold.
+    /// A "rare" item is simply a good with a high price — no separate type needed.</summary>
+    [Serializable]
     public struct VendorGood
     {
         public string Prefab;
@@ -16,25 +20,19 @@ namespace VillageLife.NPC
     }
 
     /// <summary>
-    /// How a vendor does business.
-    ///   • <see cref="CoinShop"/> — sells goods for coins through Valheim's own trade window.
-    ///   • <see cref="Barter"/>   — gives a single product for a fixed resource (e.g. 40 Stone →
-    ///     30 Wood) via a small no-UI interaction. No coins, no custom window.
+    /// A kind of villager: a display title plus what it offers. Serializable so the whole catalogue
+    /// can live in <c>vendors.json</c>. <see cref="Kind"/> is a string ("coin" or "barter") rather
+    /// than an enum so the config file stays human-readable.
     /// </summary>
-    public enum VendorKind
-    {
-        CoinShop,
-        Barter
-    }
-
-    /// <summary>A kind of villager: a display title plus what it offers.</summary>
+    [Serializable]
     public class VendorType
     {
         public string Id;
         public string Title;
-        public VendorKind Kind;
+        public string Kind = "coin";   // "coin" = vanilla shop window; "barter" = fixed swap.
+        public string Biome = "";      // Optional tag for biome-themed vendors (forward-looking).
 
-        // CoinShop: the goods sold for coins.
+        // Coin shop: the goods sold for coins (include a high-priced "rare" entry if desired).
         public VendorGood[] Goods;
 
         // Barter: "give CostAmount × CostPrefab, receive GiveAmount × GivePrefab".
@@ -42,24 +40,28 @@ namespace VillageLife.NPC
         public int CostAmount;
         public string GivePrefab;
         public int GiveAmount;
+
+        /// <summary>True when this vendor trades by barter rather than the coin shop.</summary>
+        public bool IsBarter => string.Equals(Kind, "barter", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
-    /// The catalogue of villager types. This is the single, obvious place to add a new kind of
-    /// vendor — append an entry and it joins the rotation automatically. Prefab names are resolved
-    /// at runtime and any that don't exist are skipped, so a typo offers fewer goods (or a barter
-    /// that politely refuses) rather than crashing.
+    /// The in-memory catalogue of villager types. Populated from <c>vendors.json</c> at startup
+    /// (see <see cref="VendorConfigLoader"/>); if that file is missing or invalid we fall back to
+    /// <see cref="DefaultVendors"/>, so a bad edit can never leave the mod with no vendors.
     ///
-    /// Planned: this catalogue will move to a JSON config so types/goods/prices are editable
-    /// without rebuilding (see README roadmap).
+    /// To add a vendor: edit vendors.json (no rebuild), or add to <see cref="DefaultVendors"/> here.
+    /// Prefab names are resolved at runtime and any that don't exist are skipped, so a typo offers
+    /// fewer goods (or a barter that politely refuses) rather than crashing.
     /// </summary>
     public static class VendorCatalog
     {
-        public static readonly VendorType[] All =
+        /// <summary>Built-in safety net, also used to seed vendors.json on first run.</summary>
+        public static VendorType[] DefaultVendors => new[]
         {
             new VendorType
             {
-                Id = "general", Title = "General Store", Kind = VendorKind.CoinShop,
+                Id = "general", Title = "General Store", Kind = "coin",
                 Goods = new[]
                 {
                     new VendorGood("Wood",   1, 50),
@@ -71,7 +73,7 @@ namespace VillageLife.NPC
             },
             new VendorType
             {
-                Id = "forager", Title = "Forager", Kind = VendorKind.CoinShop,
+                Id = "forager", Title = "Forager", Kind = "coin",
                 Goods = new[]
                 {
                     new VendorGood("Raspberries", 2, 20),
@@ -84,7 +86,7 @@ namespace VillageLife.NPC
             },
             new VendorType
             {
-                Id = "huntsman", Title = "Huntsman", Kind = VendorKind.CoinShop,
+                Id = "huntsman", Title = "Huntsman", Kind = "coin",
                 Goods = new[]
                 {
                     new VendorGood("LeatherScraps", 3, 20),
@@ -96,18 +98,29 @@ namespace VillageLife.NPC
             },
             new VendorType
             {
-                Id = "stonemason", Title = "Stonemason", Kind = VendorKind.Barter,
+                Id = "stonemason", Title = "Stonemason", Kind = "barter",
                 CostPrefab = "Stone", CostAmount = 40,
                 GivePrefab = "Wood",  GiveAmount = 30,
             },
         };
+
+        private static VendorType[] _all;
+
+        /// <summary>The active catalogue (defaults until <see cref="Initialize"/> is called).</summary>
+        public static VendorType[] All => _all ?? (_all = DefaultVendors);
+
+        /// <summary>Replace the catalogue. Null or empty input falls back to the built-in defaults.</summary>
+        public static void Initialize(VendorType[] vendors)
+        {
+            _all = (vendors != null && vendors.Length > 0) ? vendors : DefaultVendors;
+        }
 
         /// <summary>Look up a type by id, falling back to the first type if unknown.</summary>
         public static VendorType ById(string id)
         {
             if (!string.IsNullOrEmpty(id))
                 foreach (var v in All)
-                    if (v.Id == id)
+                    if (v != null && v.Id == id)
                         return v;
             return All[0];
         }

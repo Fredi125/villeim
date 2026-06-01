@@ -24,14 +24,20 @@ grow the mod one tested feature at a time on top of this core.
 VillageLife/
   Plugin/VillageLifePlugin.cs   BepInEx entry point; binds config; registers content
   Util/Constants.cs             Prefab names and hashed ZDO keys
-  NPC/NpcPrefab.cs              Registers the merchant (Haldor clone) via PrefabManager
-  NPC/VendorCatalog.cs         The villager types and what each offers — add new types here
-  NPC/VillageMerchant.cs       Per-merchant companion: persists name + type, sets shop stock
-  NPC/MerchantStock.cs         Resolves a type's goods into trade items via ObjectDB
-  NPC/NpcSpawner.cs            Single spawn entry point (NpcRequest) — UI plugs in here later
-  Building/VillageHall.cs       Buildable piece (workbench clone) that summons a merchant
+  NPC/NpcPrefab.cs              Registers the two villager prefabs (Haldor clones) via PrefabManager
+  NPC/VendorCatalog.cs         Vendor data model + built-in defaults; in-memory catalogue
+  NPC/VendorConfigLoader.cs    Loads/writes vendors.json (falls back to defaults on any error)
+  NPC/VillageMerchant.cs       Coin-shop companion: persists name + type, sets vanilla shop stock
+  NPC/VillageBarterer.cs       Barter villager: sole interactable, fixed resource→product swap
+  NPC/MerchantStock.cs         Resolves a coin vendor's goods into trade items via ObjectDB
+  NPC/ItemNames.cs             Resolves prefab vs. shared item names (safe inventory moves)
+  NPC/NpcSpawner.cs            Single spawn entry point; routes coin/barter by vendor kind
+  Building/VillageHall.cs       Buildable piece (workbench clone) that summons a villager
   lib/                          BepInEx / Jötunn / Harmony reference DLLs (committed)
 ```
+
+Vendors are defined in `BepInEx/config/VillageLife/vendors.json` (written with defaults on first
+run). Edit it to change types, goods, prices, or barter rates — no rebuild needed.
 
 ### Design principles (why it should stay reliable)
 

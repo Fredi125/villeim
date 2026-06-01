@@ -17,7 +17,7 @@ namespace VillageLife.NPC
 
     /// <summary>
     /// The single entry point for summoning villagers. Both the current "instant summon" and any
-    /// future creation UI go through <see cref="Spawn"/>. The vendor type's <see cref="VendorKind"/>
+    /// future creation UI go through <see cref="Spawn"/>. The vendor type's kind (coin vs. barter)
     /// decides which prefab is used (coin merchant vs. barterer); the caller gets back the spawned
     /// name and title without needing to know which kind it was.
     /// </summary>
@@ -65,7 +65,7 @@ namespace VillageLife.NPC
             if (ZNetScene.instance == null)
                 return result;
 
-            string prefabName = type.Kind == VendorKind.Barter
+            string prefabName = type.IsBarter
                 ? Constants.BartererPrefabName
                 : Constants.MerchantPrefabName;
 
