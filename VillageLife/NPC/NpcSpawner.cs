@@ -38,6 +38,7 @@ namespace VillageLife.NPC
         {
             public string Name;
             public string Title;
+            public string Greeting;
             public bool Success;
         }
 
@@ -66,7 +67,13 @@ namespace VillageLife.NPC
         public static Result Spawn(Vector3 position, Quaternion rotation, NpcRequest request)
         {
             VendorType type = VendorCatalog.ById(request.VendorTypeId);
-            var result = new Result { Name = request.Name, Title = type.Title, Success = false };
+            var result = new Result
+            {
+                Name = request.Name,
+                Title = type.Title,
+                Greeting = Greetings.Line(type),
+                Success = false
+            };
 
             if (ZNetScene.instance == null)
                 return result;

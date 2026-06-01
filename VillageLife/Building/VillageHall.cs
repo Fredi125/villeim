@@ -256,7 +256,7 @@ namespace VillageLife.Building
             NpcSpawner.Result result = NpcSpawner.Spawn(frontCenter, rotation, request);
             player.Message(MessageHud.MessageType.Center,
                 result.Success
-                    ? $"{result.Name} the {result.Title} has joined your village!"
+                    ? $"{result.Name} the {result.Title} joined your village — \"{result.Greeting}\""
                     : "Could not summon a villager.");
             return true;
         }

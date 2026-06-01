@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.10.0 — Villager greetings
+
+### Added
+- Summoned villagers now greet you with a **flavour line** themed to their trade (shop talk for
+  merchants, hunt talk for bounty-givers) — a first dash of personality. Purely cosmetic.
+
 ## 3.9.0 — Upgradeable traders (reputation)
 
 ### Added
