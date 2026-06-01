@@ -230,6 +230,10 @@ namespace VillageLife.Building
         // enough not to grab a neighbouring post's merchant in a tightly-packed trading hub.
         private const float MerchantRadius = 3f;
 
+        // Lift for inside-spawned villagers so they stand on the floor instead of sinking into it
+        // (the structure's pivot sits at the foundation, a bit below the floor surface).
+        private const float InsideLift = 1f;
+
         // Set on the prefab at registration; serialized by Unity so placed instances keep them.
         [SerializeField] private string _displayName = "Village Hall";
         [SerializeField] private string _vendorId = "";
@@ -271,8 +275,9 @@ namespace VillageLife.Building
             Vector3 frontCenter;
             if (_spawnInside)
             {
-                // Building-based posts (e.g. the Meadows house) put the villager inside, at the base.
-                frontCenter = transform.position;
+                // Building-based posts (e.g. the Meadows house) put the villager inside, lifted onto
+                // the floor rather than sunk into it.
+                frontCenter = transform.position + Vector3.up * InsideLift;
             }
             else
             {

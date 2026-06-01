@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.19.1 — Lift inside-spawned villagers
+
+### Fixed
+- Villagers spawned inside a building were sinking into the floor (spawned at the structure's
+  foundation pivot). They're now lifted ~1 m so they stand on the floor.
+
 ## 3.19.0 — More posts become buildings
 
 ### Changed
