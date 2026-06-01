@@ -47,6 +47,11 @@ namespace VillageLife.Plugin
             PrefabManager.OnVanillaPrefabsAvailable -= OnPrefabsAvailable;
             NpcPrefab.Register();
             VillageStations.Register();
+
+            // Now that vanilla prefabs (and ObjectDB items) are available, verify every item name
+            // the mod references resolves, logging any that don't. This is the same moment Jötunn
+            // resolves the station requirements above, so the audit sees exactly what the game will.
+            ItemNameAudit.Run();
         }
     }
 }

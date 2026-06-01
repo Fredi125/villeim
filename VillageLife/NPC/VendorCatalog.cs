@@ -76,7 +76,7 @@ namespace VillageLife.NPC
                 Id = "forager", Title = "Forager", Kind = "coin",
                 Goods = new[]
                 {
-                    new VendorGood("Raspberries", 2, 20),
+                    new VendorGood("Raspberry",   2, 20),
                     new VendorGood("Mushroom",    2, 20),
                     new VendorGood("Blueberries", 3, 20),
                     new VendorGood("Honey",       5, 10),

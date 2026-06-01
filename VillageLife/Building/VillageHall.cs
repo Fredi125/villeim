@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
@@ -101,6 +102,22 @@ namespace VillageLife.Building
             for (int i = 0; i < items.Length; i++)
                 reqs[i] = new RequirementConfig { Item = items[i].item, Amount = items[i].amount, Recover = true };
             return reqs;
+        }
+
+        /// <summary>
+        /// Every (station display name, requirement item) pair referenced by the build costs, for
+        /// the startup <see cref="VillageLife.NPC.ItemNameAudit"/>. Lets the audit surface a mistyped
+        /// requirement, which Jötunn would otherwise drop silently.
+        /// </summary>
+        public static IEnumerable<(string station, string item)> RequirementItems()
+        {
+            foreach (StationDef s in Stations)
+            {
+                if (s.Requirements == null)
+                    continue;
+                foreach (RequirementConfig r in s.Requirements)
+                    yield return (s.DisplayName, r.Item);
+            }
         }
 
         public static void Register()

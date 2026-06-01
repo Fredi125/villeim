@@ -1,5 +1,21 @@
 # Changelog
 
+## 3.5.2 — Item-name correctness + startup audit
+
+### Fixed
+- The Forager sold **`Raspberries`**, which is not the prefab name — the item is **`Raspberry`**
+  (singular). Valheim is inconsistent here: `Blueberries` is plural, `Cloudberry` is singular; both
+  of those were already correct. New installs get the fix automatically; existing `vendors.json`
+  files keep the old entry (player edits are never overwritten) — the new audit below will flag it.
+
+### Added
+- **Startup item-name audit.** On load, the mod now checks every item prefab it references — vendor
+  goods, barter cost/give items, and station build requirements — against ObjectDB and logs a single
+  consolidated warning naming any that don't resolve (and where each is used). Previously these
+  failed silently: an unknown good was skipped and an unknown build requirement was dropped, with no
+  hint as to why. The audit runs at the same moment Jötunn resolves requirements, so it reports
+  exactly what the game will see.
+
 ## 3.5.1 — Biome-themed build costs
 
 ### Changed
