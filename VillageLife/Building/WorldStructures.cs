@@ -91,7 +91,7 @@ namespace VillageLife.Building
                         Requirements = d.Requirements
                     };
 
-                    var piece = new CustomPiece(clone, fixReference: false, config);
+                    var piece = new CustomPiece(clone, false, config);
                     PieceManager.Instance.AddPiece(piece);
                     ok++;
                     Jotunn.Logger.LogInfo($"[VillageLife] Structure '{d.DisplayName}' ({d.Prefab}) registered.");

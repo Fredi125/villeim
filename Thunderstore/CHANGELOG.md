@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.16.2 — Build hardening
+
+### Fixed
+- Use the positional `CustomPiece(GameObject, bool, PieceConfig)` form the Jötunn DLL documents,
+  removing a named-argument dependency. (Folds into the 3.16.1 world-structures fix.)
+
 ## 3.16.1 — World structures actually build now
 
 ### Fixed
