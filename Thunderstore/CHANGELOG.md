@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.16.3 — World structures: icon fix
+
+### Fixed
+- World structures registered but were rejected with **"has no icon"** (build pieces need one). Each
+  now gets a stand-in icon borrowed from a vanilla piece, so they pass validation and appear in the
+  **VillageLife** tab. All vanilla-sourced — no external art. (Real per-building icons via Jötunn's
+  RenderManager are a planned polish once placement is confirmed.)
+
 ## 3.16.2 — Build hardening
 
 ### Fixed

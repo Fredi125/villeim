@@ -88,6 +88,7 @@ namespace VillageLife.Building
                         Description = d.Description,
                         PieceTable = "Hammer",
                         Category = Constants.BuildCategory,
+                        Icon = PlaceholderIcon(),
                         Requirements = d.Requirements
                     };
 
@@ -124,8 +125,30 @@ namespace VillageLife.Building
                 nview = go.AddComponent<ZNetView>();
             nview.m_persistent = true;
 
-            if (go.GetComponent<Piece>() == null)
-                go.AddComponent<Piece>();
+            Piece piece = go.GetComponent<Piece>();
+            if (piece == null)
+                piece = go.AddComponent<Piece>();
+            if (piece.m_icon == null)
+                piece.m_icon = PlaceholderIcon();
+        }
+
+        private static Sprite _placeholderIcon;
+
+        /// <summary>
+        /// A stand-in build-menu icon borrowed from a vanilla piece (the workbench), so the structures
+        /// pass Jötunn's "must have an icon" validation and actually appear in the tab. It's only a
+        /// placeholder — real per-building icons can be rendered from each prefab later via Jötunn's
+        /// RenderManager. Still entirely vanilla-sourced; no external art.
+        /// </summary>
+        private static Sprite PlaceholderIcon()
+        {
+            if (_placeholderIcon != null)
+                return _placeholderIcon;
+
+            GameObject src = PrefabManager.Instance.GetPrefab(Constants.HallBasePrefab);
+            Piece p = src != null ? src.GetComponent<Piece>() : null;
+            _placeholderIcon = p != null ? p.m_icon : null;
+            return _placeholderIcon;
         }
     }
 }
