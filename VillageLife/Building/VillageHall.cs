@@ -26,6 +26,11 @@ namespace VillageLife.Building
             public RequirementConfig[] Requirements;
         }
 
+        // Each biome station's build cost is a spread of materials from that biome (per the design:
+        // "the building's resource requirements will have many resources from that biome"). Prefab
+        // names are standard vanilla items; if one can't be resolved at runtime, Jötunn skips that
+        // single requirement (logged) rather than failing the piece — fix the name if a station
+        // ends up cheaper than intended.
         private static readonly StationDef[] Stations =
         {
             new StationDef
@@ -34,39 +39,68 @@ namespace VillageLife.Building
                 DisplayName = "Village Hall",
                 Description = "Press [Use] to summon a villager (cycles through all types).",
                 VendorId = null,
-                Requirements = new[]
-                {
-                    new RequirementConfig { Item = "Wood", Amount = 20, Recover = true },
-                    new RequirementConfig { Item = "Stone", Amount = 10, Recover = true },
-                }
+                Requirements = Req(
+                    ("Wood", 20), ("Stone", 10)),
             },
-            BiomeStation("VL_Station_Meadows",     "Meadows Trading Post",      "meadows",
-                         "Wood", 20, "Stone", 10),
-            BiomeStation("VL_Station_BlackForest",  "Black Forest Trading Post", "blackforest",
-                         "FineWood", 20, "Stone", 10),
-            BiomeStation("VL_Station_Swamp",        "Swamp Trading Post",        "swamp",
-                         "FineWood", 20, "Bronze", 2),
-            BiomeStation("VL_Station_Mountain",     "Mountain Trading Post",     "mountain",
-                         "Stone", 20, "Iron", 2),
-            BiomeStation("VL_Station_Plains",       "Plains Trading Post",       "plains",
-                         "FineWood", 20, "BlackMetal", 2),
+            new StationDef
+            {
+                PrefabName = "VL_Station_Meadows",
+                DisplayName = "Meadows Trading Post",
+                Description = "Press [Use] to summon the Meadows merchant.",
+                VendorId = "meadows",
+                Requirements = Req(
+                    ("Wood", 30), ("Stone", 15), ("Resin", 10),
+                    ("LeatherScraps", 10), ("Feathers", 10), ("Dandelion", 5)),
+            },
+            new StationDef
+            {
+                PrefabName = "VL_Station_BlackForest",
+                DisplayName = "Black Forest Trading Post",
+                Description = "Press [Use] to summon the Black Forest merchant.",
+                VendorId = "blackforest",
+                Requirements = Req(
+                    ("FineWood", 30), ("RoundLog", 20), ("Coal", 15),
+                    ("Copper", 10), ("Tin", 10), ("GreydwarfEye", 10)),
+            },
+            new StationDef
+            {
+                PrefabName = "VL_Station_Swamp",
+                DisplayName = "Swamp Trading Post",
+                Description = "Press [Use] to summon the Swamp merchant.",
+                VendorId = "swamp",
+                Requirements = Req(
+                    ("ElderBark", 30), ("Iron", 5), ("Guck", 10),
+                    ("WitheredBone", 5), ("Bloodbag", 5), ("Entrails", 5)),
+            },
+            new StationDef
+            {
+                PrefabName = "VL_Station_Mountain",
+                DisplayName = "Mountain Trading Post",
+                Description = "Press [Use] to summon the Mountain merchant.",
+                VendorId = "mountain",
+                Requirements = Req(
+                    ("Stone", 30), ("Obsidian", 10), ("Silver", 5),
+                    ("WolfPelt", 5), ("FreezeGland", 5), ("Crystal", 5)),
+            },
+            new StationDef
+            {
+                PrefabName = "VL_Station_Plains",
+                DisplayName = "Plains Trading Post",
+                Description = "Press [Use] to summon the Plains merchant.",
+                VendorId = "plains",
+                Requirements = Req(
+                    ("FineWood", 30), ("BlackMetal", 5), ("Flax", 10),
+                    ("Barley", 10), ("Tar", 15), ("LoxPelt", 5)),
+            },
         };
 
-        private static StationDef BiomeStation(string prefab, string name, string vendorId,
-            string item1, int amt1, string item2, int amt2)
+        /// <summary>Concise builder for a recovery-on-deconstruct requirement list.</summary>
+        private static RequirementConfig[] Req(params (string item, int amount)[] items)
         {
-            return new StationDef
-            {
-                PrefabName = prefab,
-                DisplayName = name,
-                Description = $"Press [Use] to summon the {name} merchant.",
-                VendorId = vendorId,
-                Requirements = new[]
-                {
-                    new RequirementConfig { Item = item1, Amount = amt1, Recover = true },
-                    new RequirementConfig { Item = item2, Amount = amt2, Recover = true },
-                }
-            };
+            var reqs = new RequirementConfig[items.Length];
+            for (int i = 0; i < items.Length; i++)
+                reqs[i] = new RequirementConfig { Item = items[i].item, Amount = items[i].amount, Recover = true };
+            return reqs;
         }
 
         public static void Register()

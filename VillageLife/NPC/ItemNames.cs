@@ -21,6 +21,13 @@ namespace VillageLife.NPC
         /// <summary>True if the prefab resolves to a real ItemDrop in ObjectDB.</summary>
         public static bool Exists(string prefabName) => ResolveDrop(prefabName) != null;
 
+        /// <summary>The item prefab GameObject (for Inventory.AddItem), or null if unresolved.</summary>
+        public static GameObject Prefab(string prefabName)
+        {
+            ItemDrop drop = ResolveDrop(prefabName);
+            return drop != null ? drop.gameObject : null;
+        }
+
         /// <summary>A friendly display label for messages (the localized shared name, else the prefab).</summary>
         public static string Display(string prefabName)
         {

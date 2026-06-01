@@ -30,7 +30,7 @@ namespace VillageLife.Plugin
             // Load the vendor catalogue from BepInEx/config/VillageLife/vendors.json (writes
             // defaults on first run; falls back to built-in defaults if the file is bad). Done
             // here in Awake so the catalogue is ready before any villager is summoned.
-            VendorConfigLoader.Load(Paths.ConfigPath);
+            VendorConfigLoader.Load(BepInEx.Paths.ConfigPath);
 
             // Both the villager and the Village Hall are clones of vanilla PREFABS (Haldor and
             // piece_workbench), so both register on the PrefabManager event — the recommended

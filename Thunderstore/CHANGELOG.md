@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.5.1 — Biome-themed build costs
+
+### Changed
+- Each biome trading post now costs **a spread of ~6 materials from that biome** instead of two
+  generic items — e.g. Black Forest needs fine wood, round logs, coal, copper, tin and greydwarf
+  eyes; Mountain needs stone, obsidian, silver, wolf pelt, freeze glands and crystal. Makes each
+  post a meaningful biome-progression goal.
+- If a build-cost item name can't be resolved, Jötunn skips just that requirement (logged), so a
+  typo makes a post cheaper rather than unbuildable.
+
 ## 3.5.0 — Biome trading posts
 
 ### Added

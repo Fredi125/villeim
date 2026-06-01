@@ -125,9 +125,11 @@ namespace VillageLife.NPC
                 return;
             }
 
-            // Take payment, then give the reward.
+            // Take payment, then give the reward. AddItem's full overload (name, stack, quality,
+            // variant, crafterID, crafterName) is the one we can rely on; quality 1, variant 0,
+            // and an empty crafter mirror how plain resources are created.
             inv.RemoveItem(costShared, t.CostAmount);
-            inv.AddItem(t.GivePrefab, t.GiveAmount);
+            inv.AddItem(t.GivePrefab, t.GiveAmount, 1, 0, 0L, "");
 
             player.Message(MessageHud.MessageType.Center,
                 $"Traded {t.CostAmount} {ItemNames.Display(t.CostPrefab)} for " +
