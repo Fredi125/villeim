@@ -69,7 +69,7 @@ namespace VillageLife.NPC
         /// regenerates an out-of-date vendors.json from these defaults (keeping a .bak), so value
         /// tweaks here reach an existing install without a manual file delete.
         /// </summary>
-        public const int ConfigVersion = 6;
+        public const int ConfigVersion = 7;
 
         /// <summary>Built-in safety net, also used to seed vendors.json on first run.</summary>
         public static VendorType[] DefaultVendors => new[]
@@ -116,6 +116,43 @@ namespace VillageLife.NPC
                 Id = "stonemason", Title = "Stonemason", Kind = "barter",
                 CostPrefab = "Stone", CostAmount = 40,
                 GivePrefab = "Wood",  GiveAmount = 30,
+            },
+
+            // Trade-skill shops — extra village roles, each with a themed line of goods.
+            new VendorType
+            {
+                Id = "blacksmith", Title = "Blacksmith", Kind = "coin",
+                Goods = new[]
+                {
+                    new VendorGood("Coal",        10, 20),  // 0.5/unit
+                    new VendorGood("BronzeNails", 10, 20),  // 0.5/unit
+                    new VendorGood("IronNails",   20, 20),  // 1/unit
+                    new VendorGood("Bronze",      50, 10),  // 5/unit
+                }
+            },
+            new VendorType
+            {
+                Id = "tavern", Title = "Tavern Keeper", Kind = "coin",
+                Goods = new[]
+                {
+                    new VendorGood("Mushroom",    10, 20),  // 0.5/unit
+                    new VendorGood("Raspberry",   10, 20),  // 0.5/unit
+                    new VendorGood("Blueberries", 10, 20),  // 0.5/unit
+                    new VendorGood("Honey",       10, 10),  // 1/unit
+                    new VendorGood("CookedMeat",  15, 10),  // 1.5/unit
+                }
+            },
+            new VendorType
+            {
+                Id = "farmer", Title = "Farmer", Kind = "coin",
+                Goods = new[]
+                {
+                    new VendorGood("Carrot",      10, 20),  // 0.5/unit
+                    new VendorGood("Turnip",      10, 20),  // 0.5/unit
+                    new VendorGood("CarrotSeeds", 15, 20),  // 0.75/unit
+                    new VendorGood("TurnipSeeds", 15, 20),  // 0.75/unit
+                    new VendorGood("OnionSeeds",  15, 20),  // 0.75/unit
+                }
             },
 
             // Biome vendors — summoned by their matching biome station. Each sells basic biome

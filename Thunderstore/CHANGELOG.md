@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.11.0 — More village roles
+
+### Added
+- Three new coin-shop villagers, each with a themed stock: **Blacksmith** (coal, nails, bronze),
+  **Tavern Keeper** (food & honey), and **Farmer** (crops & seeds). They join the Village Hall's
+  summon rotation and are fully editable in `vendors.json`.
+
 ## 3.10.0 — Villager greetings
 
 ### Added
