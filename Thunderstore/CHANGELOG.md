@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.22.0 — Reusable spawn panel + Dismiss
+
+### Added
+- The spawn panel now has a **"Dismiss nearby villager"** button, so you can send a villager away
+  from the same menu you summoned it from.
+
+### Changed
+- The panel is now built from a **given list of villagers** (and rebuilt per open), so the same UI
+  can serve the Village Hall's general roles *and* per-biome spawners (coming next). Village Hall
+  behaviour is unchanged otherwise.
+
 ## 3.21.0 — Fix error flood + split decoration from spawning
 
 ### Fixed

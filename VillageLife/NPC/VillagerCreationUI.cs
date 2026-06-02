@@ -7,44 +7,43 @@ using UnityEngine.UI;
 namespace VillageLife.NPC
 {
     /// <summary>
-    /// A small panel for the Village Hall: pick a villager's name (re-roll button) and type (one
-    /// button per general role), then summon. Built with Jötunn's GUIManager.
+    /// A small spawn panel: pick a villager name (re-roll) and a type from a given list, or dismiss a
+    /// nearby villager. The Village Hall opens it with the "general" roles; a biome spawner opens it
+    /// with that biome's villagers. Built with Jötunn's GUIManager and rebuilt on each open so the
+    /// button list can differ per spawner.
     ///
-    /// IMPORTANT — this is the highest-risk piece in the mod: it depends on Jötunn's GUI helper
-    /// signatures, which couldn't be verified offline. It is therefore written defensively:
-    ///   • <see cref="Open"/> returns false (rather than throwing) on any problem, so the Village
-    ///     Hall can fall back to its old instant summon and always works;
-    ///   • only the simplest helpers (CreateWoodpanel / CreateButton) are used — no input fields or
-    ///     dropdowns — and the panel is built once, then reused.
-    /// If anything here is wrong it affects only this feature; revert this one commit.
+    /// Defensive on purpose (Jötunn GUI signatures can't be verified offline): <see cref="Open"/>
+    /// returns false rather than throwing, so a station can fall back to an instant summon; only the
+    /// simplest helpers (CreateWoodpanel / CreateButton) are used.
     /// </summary>
     public static class VillagerCreationUI
     {
+        private const float DismissRadius = 4f;
+
         private static GameObject _panel;
         private static Text _nameLabel;
         private static string _name = "Villager";
         private static Vector3 _pos;
         private static Quaternion _rot;
 
-        /// <summary>Open the panel for a summon at the given spot. Returns false if it can't be shown.</summary>
-        public static bool Open(Vector3 pos, Quaternion rot)
+        /// <summary>Open the panel offering the given vendor types. Returns false if it can't be shown.</summary>
+        public static bool Open(Vector3 pos, Quaternion rot, List<string> vendorIds)
         {
             try
             {
                 if (GUIManager.Instance == null || GUIManager.CustomGUIFront == null)
+                    return false;
+                if (vendorIds == null || vendorIds.Count == 0)
                     return false;
 
                 _pos = pos;
                 _rot = rot;
                 _name = NpcSpawner.RandomName();
 
-                if (_panel == null)
-                    Build();
+                Teardown();           // rebuild fresh so the list matches this spawner
+                Build(vendorIds);
                 if (_panel == null)
                     return false;
-
-                if (_nameLabel != null)
-                    _nameLabel.text = $"Name: {_name}";
 
                 _panel.SetActive(true);
                 GUIManager.BlockInput(true);
@@ -58,20 +57,27 @@ namespace VillageLife.NPC
             }
         }
 
-        private static void Build()
+        /// <summary>Village Hall entry point: the general roles.</summary>
+        public static bool Open(Vector3 pos, Quaternion rot) => Open(pos, rot, GeneralRoleIds());
+
+        private static void Build(List<string> vendorIds)
         {
             Transform parent = GUIManager.CustomGUIFront.transform;
+
+            const float rowH = 40f;
+            int rows = vendorIds.Count + 3; // name + each vendor + dismiss + close
+            float height = rows * rowH + 60f;
 
             _panel = GUIManager.Instance.CreateWoodpanel(
                 parent,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 0f),
-                440f, 540f, false);
+                460f, height, false);
             _panel.SetActive(false);
 
+            float y = (rows - 1) * rowH * 0.5f;
+
             // Re-rollable name button.
-            GameObject nameBtn = GUIManager.Instance.CreateButton(
-                $"Name: {_name}", _panel.transform,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 215f), 380f, 38f);
+            GameObject nameBtn = Button($"Name: {_name}", y);
             _nameLabel = nameBtn.GetComponentInChildren<Text>();
             nameBtn.GetComponent<Button>().onClick.AddListener(() =>
             {
@@ -79,31 +85,35 @@ namespace VillageLife.NPC
                 if (_nameLabel != null)
                     _nameLabel.text = $"Name: {_name}";
             });
+            y -= rowH;
 
-            // One button per general role (biome traders, bounties and the like keep their stations).
-            float y = 165f;
-            foreach (VendorType type in GeneralRoles())
+            foreach (string id in vendorIds)
             {
-                string id = type.Id;
-                GameObject btn = GUIManager.Instance.CreateButton(
-                    type.Title, _panel.transform,
-                    new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, y), 380f, 36f);
-                btn.GetComponent<Button>().onClick.AddListener(() => Summon(id));
-                y -= 40f;
+                string vid = id;
+                string label = VendorCatalog.ById(vid).Title;
+                Button(label, y).GetComponent<Button>().onClick.AddListener(() => Summon(vid));
+                y -= rowH;
             }
 
-            GameObject close = GUIManager.Instance.CreateButton(
-                "Close", _panel.transform,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, y - 8f), 380f, 36f);
-            close.GetComponent<Button>().onClick.AddListener(Close);
+            Button("Dismiss nearby villager", y).GetComponent<Button>().onClick.AddListener(DismissNearby);
+            y -= rowH;
+
+            Button("Close", y).GetComponent<Button>().onClick.AddListener(Close);
         }
 
+        private static GameObject Button(string text, float y) =>
+            GUIManager.Instance.CreateButton(
+                text, _panel.transform,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, y), 400f, 36f);
+
         /// <summary>The roles offered by the hall: everything that isn't a biome trader or a bounty.</summary>
-        private static IEnumerable<VendorType> GeneralRoles()
+        private static List<string> GeneralRoleIds()
         {
+            var ids = new List<string>();
             foreach (VendorType v in VendorCatalog.All)
                 if (v != null && string.IsNullOrEmpty(v.Biome) && string.IsNullOrEmpty(v.UnlocksVendorId))
-                    yield return v;
+                    ids.Add(v.Id);
+            return ids;
         }
 
         private static void Summon(string vendorTypeId)
@@ -130,11 +140,30 @@ namespace VillageLife.NPC
             Close();
         }
 
+        private static void DismissNearby()
+        {
+            int removed = NpcSpawner.RemoveNear(_pos, DismissRadius);
+            if (Player.m_localPlayer != null)
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center,
+                    removed > 0 ? $"Dismissed {removed} villager(s)." : "No villager nearby to dismiss.");
+            Close();
+        }
+
         public static void Close()
         {
             if (_panel != null)
                 _panel.SetActive(false);
             try { GUIManager.BlockInput(false); } catch { /* never let closing throw */ }
+        }
+
+        private static void Teardown()
+        {
+            if (_panel == null)
+                return;
+            try { GUIManager.BlockInput(false); } catch { }
+            UnityEngine.Object.Destroy(_panel);
+            _panel = null;
+            _nameLabel = null;
         }
     }
 }
