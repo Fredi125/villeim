@@ -13,12 +13,15 @@ namespace VillageLife.Building
     /// </summary>
     public static class BuildablePrep
     {
-        // Component type names (matched by reflection, so no compile dependency on them) that would
-        // make a placed structure spawn creatures or generate a dungeon. Stripped on registration.
+        // Component type names (matched by reflection, so no compile dependency on them) that must
+        // be removed from a cloned world prefab: spawners/dungeon generators (would spawn creatures),
+        // and MusicLocation (a location-only component that throws a NullReferenceException every
+        // frame once the piece is detached from a real world Location).
         private static readonly string[] Dangerous =
         {
             "CreatureSpawner", "SpawnArea", "SpawnSystem", "DungeonGenerator",
-            "FishSpawner", "MonsterAI", "AnimalAI", "BaseAI", "Tameable", "Character"
+            "FishSpawner", "MonsterAI", "AnimalAI", "BaseAI", "Tameable", "Character",
+            "MusicLocation", "LocationProxy"
         };
 
         private static Sprite _placeholderIcon;

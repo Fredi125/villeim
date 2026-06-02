@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.21.0 — Fix error flood + split decoration from spawning
+
+### Fixed
+- **Massive `MusicLocation` NullReferenceException spam every frame.** The cloned world structures
+  carried a vanilla `MusicLocation` (and `LocationProxy`) component that crashes once detached from
+  a real world Location. These are now stripped on registration, so placed structures are silent
+  scenery. (Reload the world to clear it from already-placed pieces.)
+
+### Changed
+- **Decoration and spawning are now separate.** The biome posts no longer clone a building — they're
+  plain spawners again. The houses/towers remain as their own *decorative* buildables that don't
+  spawn anything. Place a structure for looks, a spawner for villagers. (Groundwork for the small
+  crafting-table spawners.)
+
 ## 3.20.0 — Building discovery scan (redesign groundwork)
 
 ### Added
