@@ -1,5 +1,23 @@
 # Changelog
 
+## 3.25.0 — Every biome fleshed out + themed spawners
+
+### Added
+- **All five biomes now match the Meadows template**: each spawner offers **6 villagers** — the
+  biome trader plus **2 themed shops** and **3 barterers** (its bounty-giver, a material-conversion
+  trade, and a sell-for-coins trade). New roles include the Black Forest **Miner**/**Carpenter**,
+  Swamp **Alchemist**/**Digger**, Mountain **Miner**/**Herbalist**, and Plains **Farmer**/
+  **Blacksmith**, with charcoaler/smelter/bonegrinder/renderer/furrier/jeweler/weaver/rancher barters.
+
+### Changed
+- **Prices now follow the full per-tier scale** (gold per unit = biome tier): Meadows **1**, Black
+  Forest **2**, Swamp **3**, Mountain **4**, Plains **5**. Swamp now stocks **ancient wood**
+  (ElderBark) at 3/unit; Black Forest's **fine wood** unlocks at **reputation tier 1**. `vendors.json`
+  auto-updates to the new catalogue.
+- **Each biome spawner now has its own look** — a distinct small crafting station instead of the
+  workbench: Meadows = cauldron, Black Forest = artisan table, Swamp = stonecutter, Mountain = forge,
+  Plains = spinning wheel. (Function is unchanged; they're placed with the Hammer as before.)
+
 ## 3.24.0 — Meadows fully fleshed out (template)
 
 ### Added

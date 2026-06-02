@@ -69,7 +69,7 @@ namespace VillageLife.NPC
         /// regenerates an out-of-date vendors.json from these defaults (keeping a .bak), so value
         /// tweaks here reach an existing install without a manual file delete.
         /// </summary>
-        public const int ConfigVersion = 9;
+        public const int ConfigVersion = 10;
 
         /// <summary>Built-in safety net, also used to seed vendors.json on first run.</summary>
         public static VendorType[] DefaultVendors => new[]
@@ -180,12 +180,12 @@ namespace VillageLife.NPC
                 Id = "blackforest", Title = "Black Forest Trader", Kind = "coin", Biome = "BlackForest",
                 Goods = new[]
                 {
-                    new VendorGood("FineWood",     6, 30),
-                    new VendorGood("RoundLog",     6, 30),
-                    new VendorGood("Coal",        15, 30),  // 0.5/unit
-                    new VendorGood("Copper",      50, 10),  // 5 coins/unit
-                    new VendorGood("Tin",         50, 10),  // 5 coins/unit
-                    new VendorGood("SurtlingCore", 200, 1, 1), // rare — unlocks at Rep 1
+                    new VendorGood("RoundLog",      60, 30),     // 2/unit (core wood)
+                    new VendorGood("Coal",          60, 30),     // 2/unit
+                    new VendorGood("Copper",        40, 20),     // 2/unit
+                    new VendorGood("Tin",           40, 20),     // 2/unit
+                    new VendorGood("FineWood",      60, 30, 1),  // 2/unit — fine wood unlocks at Rep 1
+                    new VendorGood("SurtlingCore", 200,  1, 1),  // rare — unlocks at Rep 1
                 }
             },
             new VendorType
@@ -193,12 +193,13 @@ namespace VillageLife.NPC
                 Id = "swamp", Title = "Swamp Trader", Kind = "coin", Biome = "Swamp",
                 Goods = new[]
                 {
-                    new VendorGood("Guck",         40, 20), // 2/unit
-                    new VendorGood("Entrails",     40, 20), // 2/unit
-                    new VendorGood("Bloodbag",     40, 20), // 2/unit
-                    new VendorGood("WitheredBone", 30, 10), // 3/unit
-                    new VendorGood("IronScrap",  100, 10),  // 10 coins/unit
-                    new VendorGood("Chain",      400,  1, 1),  // rare — unlocks at Rep 1
+                    new VendorGood("Guck",          60, 20),  // 3/unit
+                    new VendorGood("Entrails",      60, 20),  // 3/unit
+                    new VendorGood("Bloodbag",      60, 20),  // 3/unit
+                    new VendorGood("WitheredBone",  30, 10),  // 3/unit
+                    new VendorGood("ElderBark",     60, 20),  // 3/unit (ancient wood)
+                    new VendorGood("IronScrap",     60, 20),  // 3/unit
+                    new VendorGood("Chain",        400,  1, 1),  // rare — unlocks at Rep 1
                 }
             },
             new VendorType
@@ -206,13 +207,13 @@ namespace VillageLife.NPC
                 Id = "mountain", Title = "Mountain Trader", Kind = "coin", Biome = "Mountain",
                 Goods = new[]
                 {
-                    new VendorGood("Obsidian",    60, 20),   // 3/unit
-                    new VendorGood("FreezeGland", 80, 20),   // 4/unit
-                    new VendorGood("WolfPelt",    50, 10),   // 5/unit
-                    new VendorGood("Onion",       30, 10),   // 3/unit
-                    new VendorGood("Crystal",     80, 20),   // 4/unit
-                    new VendorGood("Silver",     80,  5),   // 16 coins/unit
-                    new VendorGood("DragonEgg", 9999, 1, 1),   // rare — unlocks at Rep 1
+                    new VendorGood("Obsidian",      80, 20),  // 4/unit
+                    new VendorGood("FreezeGland",   80, 20),  // 4/unit
+                    new VendorGood("WolfPelt",      80, 20),  // 4/unit
+                    new VendorGood("Onion",         40, 10),  // 4/unit
+                    new VendorGood("Crystal",       80, 20),  // 4/unit
+                    new VendorGood("Silver",        80, 20),  // 4/unit
+                    new VendorGood("DragonEgg",   9999,  1, 1),  // rare — unlocks at Rep 1
                 }
             },
             new VendorType
@@ -220,13 +221,13 @@ namespace VillageLife.NPC
                 Id = "plains", Title = "Plains Trader", Kind = "coin", Biome = "Plains",
                 Goods = new[]
                 {
-                    new VendorGood("Barley",     80, 20),   // 4/unit
-                    new VendorGood("Flax",       80, 20),   // 4/unit
-                    new VendorGood("Cloudberry", 80, 20),   // 4/unit
-                    new VendorGood("Needle",     80, 20),   // 4/unit
-                    new VendorGood("Tar",       120, 30),   // 4/unit
-                    new VendorGood("BlackMetal", 100, 5),   // 20 coins/unit
-                    new VendorGood("LoxPelt",  300,  1, 1),    // rare — unlocks at Rep 1
+                    new VendorGood("Barley",      100, 20),  // 5/unit
+                    new VendorGood("Flax",        100, 20),  // 5/unit
+                    new VendorGood("Cloudberry",  100, 20),  // 5/unit
+                    new VendorGood("Needle",      100, 20),  // 5/unit
+                    new VendorGood("Tar",         100, 20),  // 5/unit
+                    new VendorGood("BlackMetal",  100, 20),  // 5/unit
+                    new VendorGood("LoxPelt",     300,  1, 1),  // rare — unlocks at Rep 1
                 }
             },
 
@@ -308,6 +309,159 @@ namespace VillageLife.NPC
                 Id = "meadows_beekeeper", Title = "Meadows Beekeeper", Kind = "barter", Biome = "Meadows",
                 CostPrefab = "Honey", CostAmount = 5,
                 GivePrefab = "Coins", GiveAmount = 10,
+            },
+
+            // --- Black Forest biome villagers (tier 2 ≈ 2 gold/unit): 2 shops + 2 barterers that,
+            // with the trader and the Forest Bounty, make the spawner's 3 shops + 3 barterers. ---
+            new VendorType
+            {
+                Id = "blackforest_miner", Title = "Black Forest Miner", Kind = "coin", Biome = "BlackForest",
+                Goods = new[]
+                {
+                    new VendorGood("Copper", 40, 20),  // 2/unit
+                    new VendorGood("Tin",    40, 20),  // 2/unit
+                    new VendorGood("Coal",   60, 30),  // 2/unit
+                    new VendorGood("Stone",  40, 20),  // 2/unit
+                    new VendorGood("Flint",  40, 20),  // 2/unit
+                }
+            },
+            new VendorType
+            {
+                Id = "blackforest_carpenter", Title = "Black Forest Carpenter", Kind = "coin", Biome = "BlackForest",
+                Goods = new[]
+                {
+                    new VendorGood("RoundLog",     60, 30),  // 2/unit
+                    new VendorGood("Wood",         40, 20),  // 2/unit
+                    new VendorGood("Resin",        40, 20),  // 2/unit
+                    new VendorGood("GreydwarfEye", 40, 20),  // 2/unit
+                    new VendorGood("BronzeNails",  40, 20),  // 2/unit
+                }
+            },
+            new VendorType
+            {
+                Id = "blackforest_charcoal", Title = "Black Forest Charcoaler", Kind = "barter", Biome = "BlackForest",
+                CostPrefab = "Wood", CostAmount = 5,
+                GivePrefab = "Coal", GiveAmount = 10,
+            },
+            new VendorType
+            {
+                Id = "blackforest_smelter", Title = "Black Forest Smelter", Kind = "barter", Biome = "BlackForest",
+                CostPrefab = "GreydwarfEye", CostAmount = 5,
+                GivePrefab = "Coins",        GiveAmount = 20,
+            },
+
+            // --- Swamp biome villagers (tier 3 ≈ 3 gold/unit). ---
+            new VendorType
+            {
+                Id = "swamp_alchemist", Title = "Swamp Alchemist", Kind = "coin", Biome = "Swamp",
+                Goods = new[]
+                {
+                    new VendorGood("Guck",         60, 20),  // 3/unit
+                    new VendorGood("Bloodbag",     60, 20),  // 3/unit
+                    new VendorGood("Entrails",     60, 20),  // 3/unit
+                    new VendorGood("Thistle",      60, 20),  // 3/unit
+                    new VendorGood("WitheredBone", 30, 10),  // 3/unit
+                }
+            },
+            new VendorType
+            {
+                Id = "swamp_digger", Title = "Swamp Digger", Kind = "coin", Biome = "Swamp",
+                Goods = new[]
+                {
+                    new VendorGood("IronScrap",    60, 20),  // 3/unit
+                    new VendorGood("ElderBark",    60, 20),  // 3/unit
+                    new VendorGood("Coal",         90, 30),  // 3/unit
+                    new VendorGood("Stone",        60, 20),  // 3/unit
+                    new VendorGood("WitheredBone", 30, 10),  // 3/unit
+                }
+            },
+            new VendorType
+            {
+                Id = "swamp_grinder", Title = "Swamp Bonegrinder", Kind = "barter", Biome = "Swamp",
+                CostPrefab = "WitheredBone",  CostAmount = 5,
+                GivePrefab = "BoneFragments", GiveAmount = 10,
+            },
+            new VendorType
+            {
+                Id = "swamp_renderer", Title = "Swamp Renderer", Kind = "barter", Biome = "Swamp",
+                CostPrefab = "Bloodbag", CostAmount = 5,
+                GivePrefab = "Coins",    GiveAmount = 30,
+            },
+
+            // --- Mountain biome villagers (tier 4 ≈ 4 gold/unit). ---
+            new VendorType
+            {
+                Id = "mountain_miner", Title = "Mountain Miner", Kind = "coin", Biome = "Mountain",
+                Goods = new[]
+                {
+                    new VendorGood("Silver",   80, 20),  // 4/unit
+                    new VendorGood("Obsidian", 80, 20),  // 4/unit
+                    new VendorGood("Crystal",  80, 20),  // 4/unit
+                    new VendorGood("Stone",    80, 20),  // 4/unit
+                    new VendorGood("Coal",    120, 30),  // 4/unit
+                }
+            },
+            new VendorType
+            {
+                Id = "mountain_herbalist", Title = "Mountain Herbalist", Kind = "coin", Biome = "Mountain",
+                Goods = new[]
+                {
+                    new VendorGood("Onion",       40, 10),  // 4/unit
+                    new VendorGood("OnionSeeds",  40, 10),  // 4/unit
+                    new VendorGood("FreezeGland", 80, 20),  // 4/unit
+                    new VendorGood("WolfPelt",    80, 20),  // 4/unit
+                    new VendorGood("Crystal",     80, 20),  // 4/unit
+                }
+            },
+            new VendorType
+            {
+                Id = "mountain_furrier", Title = "Mountain Furrier", Kind = "barter", Biome = "Mountain",
+                CostPrefab = "WolfPelt",      CostAmount = 5,
+                GivePrefab = "LeatherScraps", GiveAmount = 10,
+            },
+            new VendorType
+            {
+                Id = "mountain_jeweler", Title = "Mountain Jeweler", Kind = "barter", Biome = "Mountain",
+                CostPrefab = "FreezeGland", CostAmount = 5,
+                GivePrefab = "Coins",       GiveAmount = 40,
+            },
+
+            // --- Plains biome villagers (tier 5 ≈ 5 gold/unit). ---
+            new VendorType
+            {
+                Id = "plains_farmer", Title = "Plains Farmer", Kind = "coin", Biome = "Plains",
+                Goods = new[]
+                {
+                    new VendorGood("Barley",      100, 20),  // 5/unit
+                    new VendorGood("Flax",        100, 20),  // 5/unit
+                    new VendorGood("Cloudberry",  100, 20),  // 5/unit
+                    new VendorGood("BarleyFlour", 100, 20),  // 5/unit
+                    new VendorGood("Needle",      100, 20),  // 5/unit
+                }
+            },
+            new VendorType
+            {
+                Id = "plains_smith", Title = "Plains Blacksmith", Kind = "coin", Biome = "Plains",
+                Goods = new[]
+                {
+                    new VendorGood("BlackMetal", 100, 20),  // 5/unit
+                    new VendorGood("Tar",        100, 20),  // 5/unit
+                    new VendorGood("Needle",     100, 20),  // 5/unit
+                    new VendorGood("Barley",     100, 20),  // 5/unit
+                    new VendorGood("Flax",       100, 20),  // 5/unit
+                }
+            },
+            new VendorType
+            {
+                Id = "plains_weaver", Title = "Plains Weaver", Kind = "barter", Biome = "Plains",
+                CostPrefab = "Flax",        CostAmount = 5,
+                GivePrefab = "LinenThread", GiveAmount = 10,
+            },
+            new VendorType
+            {
+                Id = "plains_rancher", Title = "Plains Rancher", Kind = "barter", Biome = "Plains",
+                CostPrefab = "Cloudberry", CostAmount = 5,
+                GivePrefab = "Coins",      GiveAmount = 50,
             },
         };
 

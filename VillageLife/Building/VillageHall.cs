@@ -10,11 +10,14 @@ using VillageLife.Util;
 namespace VillageLife.Building
 {
     /// <summary>
-    /// Registers all VillageLife buildable stations. Every station is a workbench clone (the proven,
-    /// reliable path) placed in the Hammer's built-in "Misc" tab; interacting summons a villager in
-    /// front of it. The only thing that varies between stations is which vendor they summon:
-    ///   • the <b>Village Hall</b> cycles through all vendor types (general sampler), while
-    ///   • each <b>biome station</b> summons that biome's specific vendor.
+    /// Registers all VillageLife buildable stations, grouped in the Hammer's "VillageLife" tab.
+    /// Each is a clone of a vanilla build piece (the proven, reliable path) — the Village Hall and
+    /// utility posts use the workbench, while each biome spawner uses a different small crafting
+    /// station purely for a distinct look. Interacting summons a villager in front of it; the only
+    /// behavioural difference is which vendor(s) a station offers:
+    ///   • the <b>Village Hall</b> cycles through all vendor types (general sampler),
+    ///   • each <b>biome spawner</b> opens a menu to pick from that biome's villagers, and
+    ///   • the <b>Bounty Board</b> posts every bounty-giver at once.
     /// </summary>
     public static class VillageStations
     {
@@ -30,6 +33,16 @@ namespace VillageLife.Building
             public bool SpawnInside;    // spawn the villager inside the structure (for building-based posts).
             public RequirementConfig[] Requirements;
         }
+
+        // Vanilla build pieces we can clone by name for a station's model: each already carries a
+        // Piece, ZNetView and its own icon (like the workbench), so no BuildablePrep is needed — we
+        // just strip the CraftingStation below. Biome spawners each pick a different one purely for a
+        // distinct look. Anything NOT in this set is treated as a world structure (BuildablePrep path).
+        private static readonly HashSet<string> NativeStationBases = new HashSet<string>
+        {
+            "piece_workbench", "piece_cauldron", "piece_stonecutter",
+            "piece_spinningwheel", "piece_artisanstation", "forge",
+        };
 
         // Each biome station's build cost is a spread of materials from that biome (per the design:
         // "the building's resource requirements will have many resources from that biome"). Prefab
@@ -50,6 +63,7 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = "VL_Station_Meadows",
+                BasePrefab = "piece_cauldron",
                 DisplayName = "Meadows Spawner",
                 Description = "Press [Use] to choose a Meadows villager.",
                 MenuVendorIds = new[]
@@ -64,9 +78,14 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = "VL_Station_BlackForest",
+                BasePrefab = "piece_artisanstation",
                 DisplayName = "Black Forest Spawner",
                 Description = "Press [Use] to choose a Black Forest villager.",
-                MenuVendorIds = new[] { "blackforest", "bounty_forest" },
+                MenuVendorIds = new[]
+                {
+                    "blackforest", "blackforest_miner", "blackforest_carpenter",
+                    "bounty_forest", "blackforest_charcoal", "blackforest_smelter",
+                },
                 Requirements = Req(
                     ("FineWood", 30), ("RoundLog", 20), ("Coal", 15),
                     ("Copper", 10), ("Tin", 10), ("GreydwarfEye", 10)),
@@ -74,9 +93,14 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = "VL_Station_Swamp",
+                BasePrefab = "piece_stonecutter",
                 DisplayName = "Swamp Spawner",
                 Description = "Press [Use] to choose a Swamp villager.",
-                MenuVendorIds = new[] { "swamp", "bounty_swamp" },
+                MenuVendorIds = new[]
+                {
+                    "swamp", "swamp_alchemist", "swamp_digger",
+                    "bounty_swamp", "swamp_grinder", "swamp_renderer",
+                },
                 Requirements = Req(
                     ("ElderBark", 30), ("Iron", 5), ("Guck", 10),
                     ("WitheredBone", 5), ("Bloodbag", 5), ("Entrails", 5)),
@@ -84,9 +108,14 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = "VL_Station_Mountain",
+                BasePrefab = "forge",
                 DisplayName = "Mountain Spawner",
                 Description = "Press [Use] to choose a Mountain villager.",
-                MenuVendorIds = new[] { "mountain", "bounty_mountain" },
+                MenuVendorIds = new[]
+                {
+                    "mountain", "mountain_miner", "mountain_herbalist",
+                    "bounty_mountain", "mountain_furrier", "mountain_jeweler",
+                },
                 Requirements = Req(
                     ("Stone", 30), ("Obsidian", 10), ("Silver", 5),
                     ("WolfPelt", 5), ("FreezeGland", 5), ("Crystal", 5)),
@@ -94,9 +123,14 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = "VL_Station_Plains",
+                BasePrefab = "piece_spinningwheel",
                 DisplayName = "Plains Spawner",
                 Description = "Press [Use] to choose a Plains villager.",
-                MenuVendorIds = new[] { "plains", "bounty_plains" },
+                MenuVendorIds = new[]
+                {
+                    "plains", "plains_farmer", "plains_smith",
+                    "bounty_plains", "plains_weaver", "plains_rancher",
+                },
                 Requirements = Req(
                     ("FineWood", 30), ("BlackMetal", 5), ("Flax", 10),
                     ("Barley", 10), ("Tar", 15), ("LoxPelt", 5)),
@@ -174,10 +208,20 @@ namespace VillageLife.Building
             };
 
             CustomPiece piece;
-            if (string.IsNullOrEmpty(def.BasePrefab) || def.BasePrefab == Constants.HallBasePrefab)
+            string baseName = string.IsNullOrEmpty(def.BasePrefab) ? Constants.HallBasePrefab : def.BasePrefab;
+            if (NativeStationBases.Contains(baseName))
             {
-                // Workbench-based station (proven path): the base already has Piece, ZNetView and icon.
-                piece = new CustomPiece(def.PrefabName, Constants.HallBasePrefab, config);
+                // Native build piece (workbench or a themed crafting station): clone by name so it
+                // keeps its own model, icon, Piece and ZNetView. The CraftingStation is stripped below.
+                // If a themed base unexpectedly doesn't resolve, fall back to the workbench so the
+                // spawner still appears in the build menu rather than silently vanishing.
+                if (baseName != Constants.HallBasePrefab && PrefabManager.Instance.GetPrefab(baseName) == null)
+                {
+                    Jotunn.Logger.LogWarning(
+                        $"[VillageLife] Station '{def.DisplayName}' base '{baseName}' not found; using the workbench model.");
+                    baseName = Constants.HallBasePrefab;
+                }
+                piece = new CustomPiece(def.PrefabName, baseName, config);
             }
             else
             {
@@ -204,6 +248,12 @@ namespace VillageLife.Building
                 var station = prefab.GetComponent<CraftingStation>();
                 if (station != null)
                     Object.DestroyImmediate(station);
+
+                // Build with just the Hammer (no nearby workbench/forge required), matching the
+                // workbench-based stations — the themed model shouldn't change how it's placed.
+                var pieceComp = prefab.GetComponent<Piece>();
+                if (pieceComp != null)
+                    pieceComp.m_craftingStation = null;
 
                 var interaction = prefab.GetComponent<StationInteraction>();
                 if (interaction == null)
