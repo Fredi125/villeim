@@ -177,14 +177,13 @@ The original roadmap is complete:
 
 Built on top of that core since: a **single VillageLife build tab**, **per-biome spawners** that open
 a choice menu, a full **3 shops + 3 barterers per biome**, **per-tier coin pricing**, **reputation**
-that unlocks higher-tier goods, themed **crafting-station models** per spawner, and a **Dismiss**
-button — see `Thunderstore/CHANGELOG.md` for the per-version history.
+that unlocks higher-tier goods, distinct **per-tier station models** (a maypole Village Hall, an
+armor-stand Guard Post, and a cauldron/chairs/thrones for the biome spawners), **ambient chatter**
+for every villager, and a **Dismiss** button — see `Thunderstore/CHANGELOG.md` for the full history.
 
 ### Deferred (want in-game testing first)
 
 - **Localization** — its failure mode is visible (`$token` strings on working pieces), so it's best
   verified live rather than pushed blind.
-- **Ambient chatter** — periodic villager chat bubbles; coin merchants can drive these through the
-  vanilla `Trader`, but barterers/guards would need confirming against the live build first.
 - **Deeper quests** — the turn-in bounties are a lightweight first step; anything larger is the most
   likely to need extensive new code, so it comes last.

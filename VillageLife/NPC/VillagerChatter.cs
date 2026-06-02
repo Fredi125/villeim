@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Reflection;
+using UnityEngine;
 
 namespace VillageLife.NPC
 {
@@ -71,6 +73,100 @@ namespace VillageLife.NPC
             SetList(trader, "m_randomBuy", Buy);
             SetList(trader, "m_randomSell", Buy);
             SetList(trader, "m_randomTalk", Talk(type));
+        }
+
+        // --- Ambient bubbles for villagers WITHOUT a Trader (barterers, guards). The Trader drives
+        // merchant chatter itself; here we trigger Chat.SetNpcText ourselves, resolved by reflection
+        // so a signature change just means no bubble rather than a crash. ---
+
+        public static readonly string[] BartererTalk =
+        {
+            "Fair trades, always.",
+            "Got something to swap?",
+            "One villager's scrap is another's treasure.",
+            "No coin needed here — just goods.",
+            "Bring me what you've got.",
+        };
+
+        public static readonly string[] BountyTalk =
+        {
+            "Trophies for coin — that's the deal.",
+            "The wilds won't cull themselves.",
+            "Dangerous work, good pay.",
+            "Bring me proof of the kill.",
+            "Another beast for the bounty?",
+        };
+
+        public static readonly string[] GuardTalk =
+        {
+            "All quiet on the watch.",
+            "Nothing gets past me.",
+            "Stay sharp out there.",
+            "Eyes on the perimeter.",
+            "Let them come.",
+        };
+
+        private static MethodInfo _setNpcText;
+        private static bool _setNpcTextLookedUp;
+
+        private static MethodInfo NpcTextMethod()
+        {
+            if (!_setNpcTextLookedUp)
+            {
+                _setNpcTextLookedUp = true;
+                try { _setNpcText = typeof(Chat).GetMethod("SetNpcText", BindingFlags.Public | BindingFlags.Instance); }
+                catch { _setNpcText = null; }
+            }
+            return _setNpcText;
+        }
+
+        /// <summary>Show a random line as a chat bubble over a villager that has no Trader of its own.
+        /// Uses the vanilla bubble call via reflection; any mismatch simply shows nothing.</summary>
+        public static void Say(GameObject npc, string[] lines)
+        {
+            if (npc == null || lines == null || lines.Length == 0)
+                return;
+
+            Chat chat = Chat.instance;
+            MethodInfo method = NpcTextMethod();
+            if (chat == null || method == null)
+                return;
+
+            try
+            {
+                string text = lines[UnityEngine.Random.Range(0, lines.Length)];
+                method.Invoke(chat, BuildNpcTextArgs(method.GetParameters(), npc, text));
+            }
+            catch
+            {
+                // Cosmetic only — a chatter bubble must never throw.
+            }
+        }
+
+        /// <summary>Build an argument list for Chat.SetNpcText by matching parameter types, so it works
+        /// across signature variants: the talker GameObject, an upward offset, ranges, and the text
+        /// (assumed to be the last string parameter; an earlier string is the optional topic).</summary>
+        private static object[] BuildNpcTextArgs(ParameterInfo[] pars, GameObject npc, string text)
+        {
+            int lastString = -1;
+            for (int i = 0; i < pars.Length; i++)
+                if (pars[i].ParameterType == typeof(string))
+                    lastString = i;
+
+            var args = new object[pars.Length];
+            int floatsSeen = 0;
+            for (int i = 0; i < pars.Length; i++)
+            {
+                Type pt = pars[i].ParameterType;
+                if (pt == typeof(GameObject)) args[i] = npc;
+                else if (pt == typeof(Vector3)) args[i] = Vector3.up * 1.6f;
+                else if (pt == typeof(string)) args[i] = (i == lastString) ? text : "";
+                else if (pt == typeof(float)) args[i] = (floatsSeen++ == 0) ? 24f : 8f;
+                else if (pt == typeof(bool)) args[i] = false;
+                else if (pt == typeof(int)) args[i] = 0;
+                else args[i] = pt.IsValueType ? Activator.CreateInstance(pt) : null;
+            }
+            return args;
         }
 
         /// <summary>Generic idle lines plus any that suit the vendor's biome.</summary>

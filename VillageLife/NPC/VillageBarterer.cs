@@ -36,6 +36,26 @@ namespace VillageLife.NPC
             }
 
             VillagerAppearance.Apply(gameObject, zdo);
+            InvokeRepeating(nameof(ChatterTick), 6f, 14f);
+        }
+
+        private void OnDestroy() => CancelInvoke();
+
+        /// <summary>Occasionally show a flavour line over the barterer when a player is nearby. Purely
+        /// visual (a local chat bubble), so it runs on every client and needs no ownership check.</summary>
+        private void ChatterTick()
+        {
+            Player p = Player.m_localPlayer;
+            if (p == null || Vector3.Distance(p.transform.position, transform.position) > 16f)
+                return;
+            if (UnityEngine.Random.value > 0.5f)
+                return;
+
+            VendorType t = VendorCatalog.ById(VendorTypeId);
+            string[] lines = (t != null && !string.IsNullOrEmpty(t.UnlocksVendorId))
+                ? VillagerChatter.BountyTalk
+                : VillagerChatter.BartererTalk;
+            VillagerChatter.Say(gameObject, lines);
         }
 
         /// <summary>Called by <see cref="NpcSpawner"/> on the owning client right after spawn.</summary>

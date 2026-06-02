@@ -42,11 +42,24 @@ namespace VillageLife.NPC
 
             VillagerAppearance.Apply(gameObject, zdo);
             InvokeRepeating(nameof(GuardTick), TickSeconds, TickSeconds);
+            InvokeRepeating(nameof(ChatterTick), 7f, 14f);
         }
 
         private void OnDestroy()
         {
-            CancelInvoke(nameof(GuardTick));
+            CancelInvoke();
+        }
+
+        /// <summary>Occasionally show a watch-flavour line over the guard when a player is nearby.
+        /// Purely visual (a local chat bubble), so it runs on every client.</summary>
+        private void ChatterTick()
+        {
+            Player p = Player.m_localPlayer;
+            if (p == null || Vector3.Distance(p.transform.position, transform.position) > 16f)
+                return;
+            if (UnityEngine.Random.value > 0.5f)
+                return;
+            VillagerChatter.Say(gameObject, VillagerChatter.GuardTalk);
         }
 
         /// <summary>Called by <see cref="NpcSpawner"/> on the owning client right after spawn.</summary>

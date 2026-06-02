@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.30.0 — Barterers and guards speak up too
+
+### Added
+- **Barterers and guards now chatter** as well, finishing the "alive village" pass (merchants got it
+  in 3.26). Barterers murmur trade lines, bounty-givers talk up the hunt, and guards call the watch —
+  occasional bubbles when you're nearby. They have no vanilla trader to speak through, so the bubble
+  is shown via the game's own NPC-text call, resolved defensively (no bubble rather than a crash if a
+  future update changes it).
+
 ## 3.29.1 — Fix Guard Post (armor stand) interaction
 
 ### Fixed
