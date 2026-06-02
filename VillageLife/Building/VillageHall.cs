@@ -11,11 +11,11 @@ namespace VillageLife.Building
 {
     /// <summary>
     /// Registers all VillageLife buildable stations, grouped in the Hammer's "VillageLife" tab.
-    /// Each is a clone of a vanilla build piece (the proven, reliable path) — the Village Hall and
-    /// utility posts use the workbench, while each biome spawner uses a different seat or station
-    /// (a cauldron for the Meadows, chairs and thrones for the rest) purely for a distinct look.
-    /// Interacting summons a villager in front of it; the only behavioural difference is which
-    /// vendor(s) a station offers:
+    /// Each is a clone of a vanilla build piece or world structure (the proven, reliable path): the
+    /// Village Hall is a wooden house, the Guard Post a stone watchtower, the Bounty Board a
+    /// workbench, and each biome spawner a different seat (a cauldron for the Meadows, chairs and
+    /// thrones for the rest) — purely for a distinct look. Interacting summons a villager in front
+    /// of it; the only behavioural difference is which vendor(s) a station offers:
     ///   • the <b>Village Hall</b> cycles through all vendor types (general sampler),
     ///   • each <b>biome spawner</b> opens a menu to pick from that biome's villagers, and
     ///   • the <b>Bounty Board</b> posts every bounty-giver at once.
@@ -56,6 +56,7 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = Constants.VillageHallPrefabName,
+                BasePrefab = "WoodHouse5",
                 DisplayName = "Village Hall",
                 Description = "Press [Use] to summon a villager (cycles through all types).",
                 VendorId = null,
@@ -140,6 +141,7 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = "VL_Station_GuardPost",
+                BasePrefab = "StoneTowerRuins04",
                 DisplayName = "Guard Post",
                 Description = "Press [Use] to post (or dismiss) a guard who wards off nearby monsters.",
                 VendorId = "guard",
@@ -232,13 +234,19 @@ namespace VillageLife.Building
                 GameObject clone = PrefabManager.Instance.CreateClonedPrefab(def.PrefabName, def.BasePrefab);
                 if (clone == null)
                 {
+                    // Don't drop the piece — fall back to the workbench so the station still exists
+                    // (and stays usable) rather than vanishing from the build menu.
                     Jotunn.Logger.LogWarning(
-                        $"[VillageLife] Station '{def.DisplayName}' base '{def.BasePrefab}' didn't resolve; skipped.");
-                    return;
+                        $"[VillageLife] Station '{def.DisplayName}' base '{def.BasePrefab}' didn't resolve; " +
+                        "using the workbench model.");
+                    piece = new CustomPiece(def.PrefabName, Constants.HallBasePrefab, config);
                 }
-                BuildablePrep.Prepare(clone);
-                config.Icon = BuildablePrep.PlaceholderIcon();
-                piece = new CustomPiece(clone, false, config);
+                else
+                {
+                    BuildablePrep.Prepare(clone);
+                    config.Icon = BuildablePrep.PlaceholderIcon();
+                    piece = new CustomPiece(clone, false, config);
+                }
             }
 
             GameObject prefab = piece.PiecePrefab;

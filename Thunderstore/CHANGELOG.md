@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.28.0 — A home for the hall, a tower for the guard
+
+### Changed
+- The **Village Hall** is now a **wooden house** and the **Guard Post** a **stone watchtower**,
+  instead of plain workbenches — actual buildings to anchor your village. Function is unchanged
+  (Hall opens the creation panel; Guard Post posts/dismisses a guard), and already-placed ones pick
+  up the new model on world reload. *(These use the world-structure path, so their build-menu icon
+  is the shared placeholder; the in-world model is the real building.)*
+
+### Fixed
+- A structure-based station whose base prefab fails to resolve now falls back to the workbench model
+  instead of disappearing from the build menu.
+
 ## 3.27.0 — A seat for every biome
 
 ### Changed
