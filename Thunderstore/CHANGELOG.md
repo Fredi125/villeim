@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.35.0 — Villagers come in different colours
+
+### Added
+- Each villager now gets a **gentle, random clothing-colour tint** (on top of the existing size
+  variation), stored per-villager so it persists and syncs. It's deliberately subtle — a wash, not a
+  full recolour — and applied safely with a material property block, so if a model's shader has no
+  colour channel it simply stays its normal colour.
+
 ## 3.34.0 — Quests rotate and pay off more
 
 ### Added
