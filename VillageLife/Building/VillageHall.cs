@@ -259,16 +259,22 @@ namespace VillageLife.Building
                 if (station != null)
                     Object.DestroyImmediate(station);
 
-                // Some model bases bring their own Interactable or a seasonal lock: a chair's "sit"
-                // prompt, an armor stand's equip slots, a maypole's midsummer restriction. Strip them
-                // by type name (so this compiles on any game build) so our StationInteraction owns the
-                // Use key and the piece stays buildable year-round.
-                foreach (string comp in new[] { "Chair", "ArmorStand", "SeasonalItem" })
+                // The model base may also carry its own Hoverable/Interactable anywhere in its
+                // hierarchy — a chair's "sit" prompt, an armor stand's equip slots — and sometimes on a
+                // CHILD object (which is why the armor stand kept swallowing the Use key). Remove every
+                // one except ours, so our StationInteraction alone answers hover and the Use key.
+                foreach (var mb in prefab.GetComponentsInChildren<MonoBehaviour>(true))
                 {
-                    var extra = prefab.GetComponent(comp);
-                    if (extra != null)
-                        Object.DestroyImmediate(extra);
+                    if (mb == null || mb is StationInteraction)
+                        continue;
+                    if (mb is Hoverable || mb is Interactable)
+                        Object.DestroyImmediate(mb);
                 }
+
+                // Drop any seasonal lock (e.g. the maypole's midsummer restriction) by type name.
+                var seasonal = prefab.GetComponent("SeasonalItem");
+                if (seasonal != null)
+                    Object.DestroyImmediate(seasonal);
 
                 // Build with just the Hammer (no nearby workbench/forge required), matching the
                 // workbench-based stations — the themed model shouldn't change how it's placed.

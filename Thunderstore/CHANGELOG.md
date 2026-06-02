@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.29.1 — Fix Guard Post (armor stand) interaction
+
+### Fixed
+- The **Guard Post** armor stand had no Use interaction: the armor stand's own equip prompt lives on
+  a **child** object, so the previous root-only strip missed it and it swallowed the Use key. Station
+  registration now sweeps the **whole hierarchy** and removes every Hoverable/Interactable except our
+  own, so [Use] reliably posts/dismisses the guard. (Applies to every station model, not just this one.)
+
 ## 3.29.0 — Maypole hall + armor-stand guard post
 
 ### Changed
