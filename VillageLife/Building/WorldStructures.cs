@@ -51,7 +51,7 @@ namespace VillageLife.Building
             Wood("WoodHouse5", "Old Wooden House V"),
             Wood("WoodHouse6", "Old Wooden House VI"),
             Stone("StoneTowerRuins04", "Ruined Stone Tower I"),
-            Stone("StoneTowerRuins05", "Ruined Stone Tower II"),
+            Stone("StoneTowerRuins05", "Castle"),
         };
 
         public static void Register()

@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.26.1 — Rename a structure
+
+### Changed
+- The buildable **Ruined Stone Tower II** is now simply called **Castle**. Display name only —
+  already-placed pieces keep working and just show the new name.
+
 ## 3.26.0 — Merchants come alive (ambient chatter)
 
 ### Added
