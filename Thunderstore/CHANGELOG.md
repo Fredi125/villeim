@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.32.0 — Quests (proof of concept)
+
+### Added
+- A first take on **deeper quests**: a buildable **Quest Board** posts **multi-item quest-givers** —
+  hand in *several* different items at once for a reward, a step beyond the single-item bounties.
+  Two starter quests ship: **Provisioner's Request** (20 Wood + 10 Resin + 5 Leather Scraps → 40
+  Coins) and **Smith's Commission** (10 Coal + 5 Copper + 5 Tin → 60 Coins). Quests reuse the
+  existing barter/reputation rails — nothing is taken unless you have everything — so they're a safe
+  foundation to grow larger objectives on. Quest-givers chatter too.
+
 ## 3.31.0 — Resin bounty
 
 ### Added

@@ -24,8 +24,8 @@ grows.
   biome's trader, which **unlocks its higher-tier goods** (premium materials and rare items).
 - **Per-tier pricing** — goods cost roughly **1 gold/unit in the Meadows**, climbing **+1 per tier**
   up to the Plains, so prices stay sensible as you progress.
-- **Bounty Board & Guard Post** — post every bounty-giver at once, or station a guard who wards off
-  nearby monsters.
+- **Bounty Board, Quest Board & Guard Post** — post every bounty-giver at once, take on multi-item
+  quests for rewards, or station a guard who wards off nearby monsters.
 - **Named, persistent, multiplayer-ready** — each villager keeps its name, type, size and reputation
   across saves, and syncs to every client and dedicated server.
 
@@ -69,8 +69,9 @@ regenerates automatically (keeping a `.bak`) when a new version changes the buil
 
 ## Roadmap
 
-The trading-village core is complete, and villagers now chatter ambiently. Next up: **deeper quests**
-beyond the current turn-in bounties. (Localization was considered and deliberately dropped.)
+The trading-village core is complete, villagers chatter ambiently, and **deeper quests** have a first
+proof of concept (a Quest Board with multi-item turn-ins) — with larger objectives to follow.
+(Localization was considered and deliberately dropped.)
 
 ---
 

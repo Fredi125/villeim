@@ -167,6 +167,19 @@ namespace VillageLife.Building
                 Requirements = Req(
                     ("Wood", 20), ("FineWood", 10), ("Coal", 5)),
             },
+
+            // Quest Board — posts the multi-item quest-givers (the proof of concept for deeper
+            // quests). Like the Bounty Board, its Use toggles the whole row on/off.
+            new StationDef
+            {
+                PrefabName = "VL_Station_QuestBoard",
+                DisplayName = "Quest Board",
+                Description = "Press [Use] to post (or dismiss) the quest-givers.",
+                VendorId = null,
+                VendorIds = new[] { "quest_provisions", "quest_smith" },
+                Requirements = Req(
+                    ("Wood", 20), ("FineWood", 10), ("BronzeNails", 5)),
+            },
         };
 
         /// <summary>Concise builder for a recovery-on-deconstruct requirement list.</summary>
@@ -333,7 +346,7 @@ namespace VillageLife.Building
             if (!string.IsNullOrEmpty(_menuVendorIds))
                 action = "Choose a villager";
             else if (!string.IsNullOrEmpty(_vendorIds))
-                action = "Post / dismiss bounties";
+                action = "Post / dismiss villagers";
             else
                 action = "Summon / dismiss villager";
             return Localization.instance.Localize(

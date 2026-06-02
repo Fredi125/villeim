@@ -23,6 +23,22 @@ namespace VillageLife.NPC
         }
     }
 
+    /// <summary>One required item in a quest turn-in: a prefab and how many. Its own small
+    /// serializable type (rather than reusing <see cref="VendorGood"/>) so quests read clearly in
+    /// <c>vendors.json</c>.</summary>
+    [Serializable]
+    public struct QuestItem
+    {
+        public string Prefab;
+        public int Amount;
+
+        public QuestItem(string prefab, int amount)
+        {
+            Prefab = prefab;
+            Amount = amount;
+        }
+    }
+
     /// <summary>
     /// A kind of villager: a display title plus what it offers. Serializable so the whole catalogue
     /// can live in <c>vendors.json</c>. <see cref="Kind"/> is a string ("coin" or "barter") rather
@@ -49,8 +65,16 @@ namespace VillageLife.NPC
         // unlocking the trader's higher-tier goods. Empty = the barter grants no reputation.
         public string UnlocksVendorId = "";
 
+        // Quest: a multi-item turn-in (deeper than a single-item barter). When non-empty, this
+        // villager is a quest-giver — hand in ALL of these at once for the reward (GivePrefab ×
+        // GiveAmount, plus any UnlocksVendorId reputation). Spawned via the barter path (Kind="barter").
+        public QuestItem[] QuestItems;
+
         /// <summary>True when this vendor trades by barter rather than the coin shop.</summary>
         public bool IsBarter => string.Equals(Kind, "barter", StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>True when this villager is a multi-item quest-giver.</summary>
+        public bool IsQuest => QuestItems != null && QuestItems.Length > 0;
     }
 
     /// <summary>
@@ -69,7 +93,7 @@ namespace VillageLife.NPC
         /// regenerates an out-of-date vendors.json from these defaults (keeping a .bak), so value
         /// tweaks here reach an existing install without a manual file delete.
         /// </summary>
-        public const int ConfigVersion = 11;
+        public const int ConfigVersion = 12;
 
         /// <summary>Built-in safety net, also used to seed vendors.json on first run.</summary>
         public static VendorType[] DefaultVendors => new[]
@@ -278,6 +302,32 @@ namespace VillageLife.NPC
                 Id = "bounty_resin", Title = "Resin Bounty", Kind = "barter",
                 CostPrefab = "Resin", CostAmount = 5,
                 GivePrefab = "Coins", GiveAmount = 10,
+            },
+
+            // --- Quests (proof of concept) — multi-item turn-ins, a step beyond the single-item
+            // bounties: hand in everything listed at once for the reward. Spawned like barterers
+            // (Kind="barter") and posted at the Quest Board. ---
+            new VendorType
+            {
+                Id = "quest_provisions", Title = "Provisioner's Request", Kind = "barter",
+                QuestItems = new[]
+                {
+                    new QuestItem("Wood", 20),
+                    new QuestItem("Resin", 10),
+                    new QuestItem("LeatherScraps", 5),
+                },
+                GivePrefab = "Coins", GiveAmount = 40,
+            },
+            new VendorType
+            {
+                Id = "quest_smith", Title = "Smith's Commission", Kind = "barter",
+                QuestItems = new[]
+                {
+                    new QuestItem("Coal",   10),
+                    new QuestItem("Copper",  5),
+                    new QuestItem("Tin",     5),
+                },
+                GivePrefab = "Coins", GiveAmount = 60,
             },
 
             // --- Meadows biome villagers (tier 1 ≈ 1 gold/unit) — the template for every biome's

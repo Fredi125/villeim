@@ -52,9 +52,13 @@ namespace VillageLife.NPC
                 return;
 
             VendorType t = VendorCatalog.ById(VendorTypeId);
-            string[] lines = (t != null && !string.IsNullOrEmpty(t.UnlocksVendorId))
-                ? VillagerChatter.BountyTalk
-                : VillagerChatter.BartererTalk;
+            string[] lines;
+            if (t != null && t.IsQuest)
+                lines = VillagerChatter.QuestTalk;
+            else if (t != null && !string.IsNullOrEmpty(t.UnlocksVendorId))
+                lines = VillagerChatter.BountyTalk;
+            else
+                lines = VillagerChatter.BartererTalk;
             VillagerChatter.Say(gameObject, lines);
         }
 
@@ -82,17 +86,32 @@ namespace VillageLife.NPC
         public string GetHoverText()
         {
             VendorType t = VendorCatalog.ById(VendorTypeId);
-            string offer = $"{t.CostAmount} {ItemNames.Display(t.CostPrefab)} → " +
-                           $"{t.GiveAmount} {ItemNames.Display(t.GivePrefab)}";
 
-            // For bounties, tell the player it also builds reputation with the linked trader.
+            // For bounties/quests tied to a trader, note the reputation gain.
             string favor = "";
             if (!string.IsNullOrEmpty(t.UnlocksVendorId))
                 favor = $"\n<color=#aab4ff>Earns favor with the {VendorCatalog.ById(t.UnlocksVendorId).Title}</color>";
 
+            string body;
+            string action;
+            if (t.IsQuest)
+            {
+                string list = "";
+                foreach (QuestItem q in t.QuestItems)
+                    list += (list.Length > 0 ? ", " : "") + $"{q.Amount} {ItemNames.Display(q.Prefab)}";
+                body = $"Quest: {list}\nReward: {t.GiveAmount} {ItemNames.Display(t.GivePrefab)}";
+                action = "Hand in";
+            }
+            else
+            {
+                body = $"{t.CostAmount} {ItemNames.Display(t.CostPrefab)} → " +
+                       $"{t.GiveAmount} {ItemNames.Display(t.GivePrefab)}";
+                action = "Trade";
+            }
+
             return Localization.instance.Localize(
                 $"<color=yellow><b>{MerchantName}</b></color> ({t.Title})\n" +
-                $"{offer}{favor}\n[<color=yellow><b>$KEY_Use</b></color>] Trade");
+                $"{body}{favor}\n[<color=yellow><b>$KEY_Use</b></color>] {action}");
         }
 
         #endregion
@@ -109,7 +128,10 @@ namespace VillageLife.NPC
                 return false;
 
             VendorType t = VendorCatalog.ById(VendorTypeId);
-            TryBarter(player, t);
+            if (t.IsQuest)
+                TryQuest(player, t);
+            else
+                TryBarter(player, t);
             return true;
         }
 
@@ -165,6 +187,58 @@ namespace VillageLife.NPC
 
             // A bounty turn-in also builds reputation with the trader it's tied to, which can unlock
             // higher-tier goods in that trader's shop.
+            GrantReputation(player, t);
+        }
+
+        /// <summary>Multi-item quest turn-in: require ALL listed items at once, then take them and give
+        /// the reward. Like the barter path, nothing is removed unless the whole turn-in succeeds.</summary>
+        private void TryQuest(Player player, VendorType t)
+        {
+            Inventory inv = player.GetInventory();
+            if (inv == null)
+                return;
+
+            if (!ItemNames.Exists(t.GivePrefab))
+            {
+                player.Message(MessageHud.MessageType.Center, "This quest can't be completed right now.");
+                Jotunn.Logger.LogWarning($"[VillageLife] Quest '{t.Id}' reward '{t.GivePrefab}' didn't resolve.");
+                return;
+            }
+
+            // First pass: resolve and verify every requirement, removing nothing.
+            foreach (QuestItem q in t.QuestItems)
+            {
+                string shared = ItemNames.SharedName(q.Prefab);
+                if (string.IsNullOrEmpty(shared))
+                {
+                    player.Message(MessageHud.MessageType.Center, "This quest can't be completed right now.");
+                    Jotunn.Logger.LogWarning($"[VillageLife] Quest '{t.Id}' item '{q.Prefab}' didn't resolve.");
+                    return;
+                }
+
+                int have = inv.CountItems(shared);
+                if (have < q.Amount)
+                {
+                    player.Message(MessageHud.MessageType.Center,
+                        $"Quest needs {q.Amount} {ItemNames.Display(q.Prefab)} (you have {have}).");
+                    return;
+                }
+            }
+
+            if (!inv.HaveEmptySlot())
+            {
+                player.Message(MessageHud.MessageType.Center, "Your inventory is full.");
+                return;
+            }
+
+            // Second pass: requirements met — take everything, then give the reward.
+            foreach (QuestItem q in t.QuestItems)
+                inv.RemoveItem(ItemNames.SharedName(q.Prefab), q.Amount);
+            inv.AddItem(t.GivePrefab, t.GiveAmount, 1, 0, 0L, "");
+
+            player.Message(MessageHud.MessageType.Center,
+                $"Quest complete! Received {t.GiveAmount} {ItemNames.Display(t.GivePrefab)}.");
+
             GrantReputation(player, t);
         }
 

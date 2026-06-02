@@ -22,7 +22,10 @@ so they're grouped together instead of scattered through *Misc*.
   crafting station (cauldron, artisan table, stonecutter, forge, spinning wheel). *Use* opens a menu
   to **choose one of that biome's six villagers**: the biome trader, two themed coin shops, the biome
   bounty-giver, and two barterers. The same panel has a **Dismiss nearby villager** button.
-- **Bounty Board** — posts (or dismisses) all five bounty-givers in a row at once.
+- **Bounty Board** — posts (or dismisses) every bounty-giver in a row at once (the five biome
+  trophy bounties plus a Resin bounty).
+- **Quest Board** — posts multi-item **quest-givers**: hand in several different items at once for a
+  reward (a first step toward deeper quests, beyond the single-item bounties).
 - **Guard Post** — posts (or dismisses) a guard that wards off nearby monsters.
 - **Decorative world structures** — a curated set of vanilla buildings (abandoned houses, ruins)
   registered as plain buildable scenery.
@@ -74,7 +77,7 @@ VillageLife/
     ItemNames.cs                Resolves prefab vs. shared item names (safe inventory moves)
     ItemNameAudit.cs            Startup audit: logs any referenced item/requirement name that won't resolve
   Building/
-    VillageHall.cs              Buildable stations: Village Hall, 5 themed biome spawners, Guard Post, Bounty Board
+    VillageHall.cs              Buildable stations: Village Hall, 5 biome spawners, Guard Post, Bounty Board, Quest Board
     BuildablePrep.cs            Turns a cloned vanilla prefab into a safe placeable piece (strips crash-prone parts)
     WorldStructures.cs          Registers decorative vanilla world buildings (abandoned houses, ruins) as pieces
   lib/                          BepInEx / Jötunn / Harmony reference DLLs (committed)
@@ -183,8 +186,8 @@ for every villager, and a **Dismiss** button — see `Thunderstore/CHANGELOG.md`
 
 ### Still to come
 
-- **Deeper quests** — the turn-in bounties (and the multi-item quest board) are the first steps;
-  larger objectives build on those rails.
+- **Deeper quests** — the turn-in bounties and the new multi-item **Quest Board** are the first
+  steps; larger objectives (staged goals, varied rewards, kill/explore tasks) build on those rails.
 
 Localization was considered and **deliberately dropped** — it adds churn and a visible failure mode
 (`$token` strings) for little benefit in a single-language setup.

@@ -58,6 +58,10 @@ namespace VillageLife.NPC
                     foreach (VendorGood g in v.Goods)
                         Check(g.Prefab, $"vendor '{v.Id}'");
                 }
+
+                if (v.QuestItems != null)
+                    foreach (QuestItem q in v.QuestItems)
+                        Check(q.Prefab, $"quest '{v.Id}'");
             }
 
             foreach ((string station, string item) in VillageStations.RequirementItems())

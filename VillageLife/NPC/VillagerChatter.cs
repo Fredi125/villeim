@@ -97,6 +97,15 @@ namespace VillageLife.NPC
             "Another beast for the bounty?",
         };
 
+        public static readonly string[] QuestTalk =
+        {
+            "Help wanted, if you're able.",
+            "I've a task that pays.",
+            "Bring me what the list asks.",
+            "Lend a hand, earn a reward.",
+            "There's work, if you want it.",
+        };
+
         public static readonly string[] GuardTalk =
         {
             "All quiet on the watch.",
