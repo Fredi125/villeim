@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.29.0 — Maypole hall + armor-stand guard post
+
+### Changed
+- The **Village Hall** is now a **maypole** and the **Guard Post** an **armor stand** — small,
+  instantly-recognizable models (the v3.28 house/tower were too big) that, via the clean clone path,
+  keep their **own proper build-menu icons**. The armor stand's equip interaction is stripped so
+  [Use] still posts/dismisses the guard. Because the Hall is our own renamed clone (not the vanilla
+  maypole), it isn't bound to the maypole's midsummer build window. Reload to update placed ones.
+
 ## 3.28.0 — A home for the hall, a tower for the guard
 
 ### Changed

@@ -11,11 +11,11 @@ namespace VillageLife.Building
 {
     /// <summary>
     /// Registers all VillageLife buildable stations, grouped in the Hammer's "VillageLife" tab.
-    /// Each is a clone of a vanilla build piece or world structure (the proven, reliable path): the
-    /// Village Hall is a wooden house, the Guard Post a stone watchtower, the Bounty Board a
-    /// workbench, and each biome spawner a different seat (a cauldron for the Meadows, chairs and
-    /// thrones for the rest) — purely for a distinct look. Interacting summons a villager in front
-    /// of it; the only behavioural difference is which vendor(s) a station offers:
+    /// Each is a clone of a vanilla build piece (the proven, reliable path): the Village Hall is a
+    /// maypole, the Guard Post an armor stand, the Bounty Board a workbench, and each biome spawner a
+    /// different seat (a cauldron for the Meadows, chairs and thrones for the rest) — purely for a
+    /// distinct look. Interacting summons a villager in front of it; the only behavioural difference
+    /// is which vendor(s) a station offers:
     ///   • the <b>Village Hall</b> cycles through all vendor types (general sampler),
     ///   • each <b>biome spawner</b> opens a menu to pick from that biome's villagers, and
     ///   • the <b>Bounty Board</b> posts every bounty-giver at once.
@@ -42,7 +42,7 @@ namespace VillageLife.Building
         // thrones for the rest). Anything NOT in this set is a world structure (BuildablePrep path).
         private static readonly HashSet<string> NativeStationBases = new HashSet<string>
         {
-            "piece_workbench", "piece_cauldron",
+            "piece_workbench", "piece_cauldron", "piece_maypole", "ArmorStand",
             "piece_chair", "piece_bone_throne", "piece_throne01", "piece_blackmarble_throne",
         };
 
@@ -56,7 +56,7 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = Constants.VillageHallPrefabName,
-                BasePrefab = "WoodHouse5",
+                BasePrefab = "piece_maypole",
                 DisplayName = "Village Hall",
                 Description = "Press [Use] to summon a villager (cycles through all types).",
                 VendorId = null,
@@ -141,7 +141,7 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = "VL_Station_GuardPost",
-                BasePrefab = "StoneTowerRuins04",
+                BasePrefab = "ArmorStand",
                 DisplayName = "Guard Post",
                 Description = "Press [Use] to post (or dismiss) a guard who wards off nearby monsters.",
                 VendorId = "guard",
@@ -259,12 +259,16 @@ namespace VillageLife.Building
                 if (station != null)
                     Object.DestroyImmediate(station);
 
-                // Chairs/thrones carry a Chair component that is itself Interactable (the "sit"
-                // prompt). Remove it — by type name, so this compiles regardless of the game build —
-                // so our StationInteraction owns the Use key instead of competing with it.
-                var seat = prefab.GetComponent("Chair");
-                if (seat != null)
-                    Object.DestroyImmediate(seat);
+                // Some model bases bring their own Interactable or a seasonal lock: a chair's "sit"
+                // prompt, an armor stand's equip slots, a maypole's midsummer restriction. Strip them
+                // by type name (so this compiles on any game build) so our StationInteraction owns the
+                // Use key and the piece stays buildable year-round.
+                foreach (string comp in new[] { "Chair", "ArmorStand", "SeasonalItem" })
+                {
+                    var extra = prefab.GetComponent(comp);
+                    if (extra != null)
+                        Object.DestroyImmediate(extra);
+                }
 
                 // Build with just the Hammer (no nearby workbench/forge required), matching the
                 // workbench-based stations — the themed model shouldn't change how it's placed.
