@@ -12,9 +12,10 @@ namespace VillageLife.Building
     /// <summary>
     /// Registers all VillageLife buildable stations, grouped in the Hammer's "VillageLife" tab.
     /// Each is a clone of a vanilla build piece (the proven, reliable path) — the Village Hall and
-    /// utility posts use the workbench, while each biome spawner uses a different small crafting
-    /// station purely for a distinct look. Interacting summons a villager in front of it; the only
-    /// behavioural difference is which vendor(s) a station offers:
+    /// utility posts use the workbench, while each biome spawner uses a different seat or station
+    /// (a cauldron for the Meadows, chairs and thrones for the rest) purely for a distinct look.
+    /// Interacting summons a villager in front of it; the only behavioural difference is which
+    /// vendor(s) a station offers:
     ///   • the <b>Village Hall</b> cycles through all vendor types (general sampler),
     ///   • each <b>biome spawner</b> opens a menu to pick from that biome's villagers, and
     ///   • the <b>Bounty Board</b> posts every bounty-giver at once.
@@ -36,12 +37,13 @@ namespace VillageLife.Building
 
         // Vanilla build pieces we can clone by name for a station's model: each already carries a
         // Piece, ZNetView and its own icon (like the workbench), so no BuildablePrep is needed — we
-        // just strip the CraftingStation below. Biome spawners each pick a different one purely for a
-        // distinct look. Anything NOT in this set is treated as a world structure (BuildablePrep path).
+        // strip its crafting/seat interaction below so our own Use handler wins. Biome spawners each
+        // pick a different seat purely for a distinct look (a cauldron for the Meadows, chairs and
+        // thrones for the rest). Anything NOT in this set is a world structure (BuildablePrep path).
         private static readonly HashSet<string> NativeStationBases = new HashSet<string>
         {
-            "piece_workbench", "piece_cauldron", "piece_stonecutter",
-            "piece_spinningwheel", "piece_artisanstation", "forge",
+            "piece_workbench", "piece_cauldron",
+            "piece_chair", "piece_bone_throne", "piece_throne01", "piece_blackmarble_throne",
         };
 
         // Each biome station's build cost is a spread of materials from that biome (per the design:
@@ -78,7 +80,7 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = "VL_Station_BlackForest",
-                BasePrefab = "piece_artisanstation",
+                BasePrefab = "piece_chair",
                 DisplayName = "Black Forest Spawner",
                 Description = "Press [Use] to choose a Black Forest villager.",
                 MenuVendorIds = new[]
@@ -93,7 +95,7 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = "VL_Station_Swamp",
-                BasePrefab = "piece_stonecutter",
+                BasePrefab = "piece_bone_throne",
                 DisplayName = "Swamp Spawner",
                 Description = "Press [Use] to choose a Swamp villager.",
                 MenuVendorIds = new[]
@@ -108,7 +110,7 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = "VL_Station_Mountain",
-                BasePrefab = "forge",
+                BasePrefab = "piece_throne01",
                 DisplayName = "Mountain Spawner",
                 Description = "Press [Use] to choose a Mountain villager.",
                 MenuVendorIds = new[]
@@ -123,7 +125,7 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = "VL_Station_Plains",
-                BasePrefab = "piece_spinningwheel",
+                BasePrefab = "piece_blackmarble_throne",
                 DisplayName = "Plains Spawner",
                 Description = "Press [Use] to choose a Plains villager.",
                 MenuVendorIds = new[]
@@ -248,6 +250,13 @@ namespace VillageLife.Building
                 var station = prefab.GetComponent<CraftingStation>();
                 if (station != null)
                     Object.DestroyImmediate(station);
+
+                // Chairs/thrones carry a Chair component that is itself Interactable (the "sit"
+                // prompt). Remove it — by type name, so this compiles regardless of the game build —
+                // so our StationInteraction owns the Use key instead of competing with it.
+                var seat = prefab.GetComponent("Chair");
+                if (seat != null)
+                    Object.DestroyImmediate(seat);
 
                 // Build with just the Hammer (no nearby workbench/forge required), matching the
                 // workbench-based stations — the themed model shouldn't change how it's placed.

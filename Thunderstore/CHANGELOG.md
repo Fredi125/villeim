@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.27.0 — A seat for every biome
+
+### Changed
+- Each biome spawner now has its **own chair or throne**, growing grander by tier: the Meadows keeps
+  its **cauldron**, then Black Forest a **rugged chair**, Swamp a **bone throne**, Mountain a **raven
+  throne**, and Plains a **black marble throne**. The seat's own "sit" interaction is removed so
+  pressing [Use] still opens the spawner's villager menu. Already-placed spawners pick up the new
+  model on world reload.
+
 ## 3.26.1 — Rename a structure
 
 ### Changed
