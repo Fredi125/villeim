@@ -1,34 +1,40 @@
 # Village Life — Valheim NPC Mod
 
-**Build a Village Hall and summon friendly, named villagers to your settlement.**
+**Build biome-themed stations and summon friendly, named villagers — merchants, barterers,
+bounty-givers and guards — to populate, supply and defend your settlement.**
 
-Village Life is being rebuilt as a small, reliable foundation that we grow one tested
-feature at a time. This release does one thing well: it lets you place a Village Hall and
-populate your base with friendly villagers you can greet.
+Village Life is a small, reliable mod grown one tested feature at a time. Everything is built by
+cloning vanilla prefabs — no Harmony patches, no per-frame managers — so it stays dependable as it
+grows.
 
 ---
 
-## Features (v3.0)
+## Features
 
-- **Village Hall** — a buildable structure available in the Hammer's *Misc* tab
-  (costs 20 Wood, 10 Stone).
-- **Summon villagers** — press *Use* on the Village Hall to summon a friendly villager
-  with a random Norse name, who appears just in front of the hall.
-- **Friendly & persistent** — villagers are non-hostile, stand at their post, and are
-  saved with your world.
-- **Talk to them** — hover to see a villager's name; press *Use* for a greeting.
-- **Multiplayer-ready** — villagers are standard networked creatures, so they sync to
-  every client and persist on dedicated servers.
-
-> **Heads-up:** villagers are passive for now — they don't wander, trade, fight, or give
-> quests. Those return as separate, tested updates on top of this foundation.
+- **One build tab.** Every piece lives in a dedicated **"VillageLife"** tab in the build Hammer.
+- **Village Hall** — press *Use* to open a panel and summon a villager (a sampler of the general
+  roles).
+- **Biome spawners** — Meadows, Black Forest, Swamp, Mountain and Plains stations, each a distinct
+  small crafting station. *Use* opens a menu to **choose one of six villagers** for that biome (a
+  trader, two themed shops, a bounty-giver, and two barterers), plus a **Dismiss nearby villager**
+  button.
+- **Coin merchants** — open **Valheim's own trade window** and sell that biome's goods for coins.
+- **Barterers** — make one fixed swap, like 5 Deer Hide → 10 Leather Scraps.
+- **Bounties & reputation** — turn monster trophies in for coins to raise your **reputation** with a
+  biome's trader, which **unlocks its higher-tier goods** (premium materials and rare items).
+- **Per-tier pricing** — goods cost roughly **1 gold/unit in the Meadows**, climbing **+1 per tier**
+  up to the Plains, so prices stay sensible as you progress.
+- **Bounty Board & Guard Post** — post every bounty-giver at once, or station a guard who wards off
+  nearby monsters.
+- **Named, persistent, multiplayer-ready** — each villager keeps its name, type, size and reputation
+  across saves, and syncs to every client and dedicated server.
 
 ---
 
 ## Installation
 
 1. Install [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/) (5.4+)
-2. Install [Jötunn (Valheim Library)](https://valheim.thunderstore.io/package/ValheimModding/Jotunn/) (2.20+)
+2. Install [Jötunn (Valheim Library)](https://valheim.thunderstore.io/package/ValheimModding/Jotunn/) (2.27+)
 3. Place `VillageLife.dll` in your `BepInEx/plugins/` folder
 4. Launch Valheim!
 
@@ -38,9 +44,12 @@ populate your base with friendly villagers you can greet.
 
 ## Getting Started
 
-1. Open the build hammer, go to the **Misc** tab, and place a **Village Hall**.
-2. Walk up to it and press **Use** (default **E**) to summon a villager.
-3. Hover over the villager to see their name; press **Use** to say hello.
+1. Open the build Hammer and go to the **VillageLife** tab.
+2. Place a **Village Hall**, or a **biome spawner** (its build cost is a spread of that biome's
+   materials).
+3. Press **Use** (default **E**) on a spawner to open its menu and choose a villager to summon.
+4. Buy from merchants in the vanilla trade window, trade with barterers, and turn trophies in at the
+   bounty-givers to build reputation and unlock better goods.
 
 ---
 
@@ -50,17 +59,18 @@ populate your base with friendly villagers you can greet.
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| SpawnDistance | 2.5 | How far in front of the Village Hall (metres) a villager spawns |
+| SpawnDistance | 2.5 | How far in front of a station (metres) a villager appears |
+
+Villagers themselves are defined in `BepInEx/config/VillageLife/vendors.json`, written with defaults
+on first run. Edit it to tweak types, goods, prices and barter rates with no rebuild — the file
+regenerates automatically (keeping a `.bak`) when a new version changes the built-in defaults.
 
 ---
 
 ## Roadmap
 
-This 3.0 rebuild is the reliable base. Planned increments, each added only once it works:
-
-1. A small creation UI (choose a villager's name and look).
-2. A merchant role with simple buy/sell.
-3. Quests, then ambient behaviour.
+The trading-village core is complete. Still on the list, to be added once verified in-game:
+localization, ambient villager chatter, and deeper quests beyond the current turn-in bounties.
 
 ---
 

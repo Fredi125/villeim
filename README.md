@@ -1,60 +1,107 @@
 # VillageLife
 
-A Valheim mod that lets you build a **Village Hall** and summon friendly, named
-**merchants** to your settlement.
+A Valheim mod that lets you build a small **trading village**: place biome-themed stations and
+summon friendly, named **villagers** — coin merchants, barterers, bounty-givers and guards — to
+populate and defend your settlement.
 
-This is a deliberately small, reliable foundation rebuilt from scratch. Earlier versions
-tried to ship quests, merchants, guards, ambient dialog, localization and a custom
-multiplayer layer all at once, and never reached a dependable state. The plan now is to
-grow the mod one tested feature at a time on top of this core.
+The mod is a deliberately small, reliable core grown one tested feature at a time. Earlier versions
+tried to ship quests, merchants, guards, ambient dialog, localization and a custom multiplayer layer
+all at once and never reached a dependable state. Everything here is built by **cloning vanilla
+prefabs** (no hand-built prefabs, no Harmony patches, no per-frame managers).
 
 ## What it does today
 
-- Adds a **Village Hall** buildable to the Hammer's *Misc* tab (20 Wood, 10 Stone).
-- Pressing *Use* on the hall **summons a merchant** with a random Norse name, cycling through
-  several **types** (General Store, Forager, Huntsman) so each one sells different goods.
-- Merchants open **Valheim's real trade window** — buy their goods for coins, using the game's
-  own shop UI (no custom panel).
-- A merchant's name and type are **persisted** (survive save/reload, sync in multiplayer), and
-  merchants are **non-hostile, stationary** networked objects like Haldor.
+All buildables live in a single **"VillageLife" tab** in the build Hammer (Jötunn creates the tab),
+so they're grouped together instead of scattered through *Misc*.
+
+**Stations you can build**
+
+- **Village Hall** — press *Use* to open the creation panel and summon a villager, sampling across
+  all the general roles.
+- **Biome spawners** (Meadows, Black Forest, Swamp, Mountain, Plains) — each is a distinct small
+  crafting station (cauldron, artisan table, stonecutter, forge, spinning wheel). *Use* opens a menu
+  to **choose one of that biome's six villagers**: the biome trader, two themed coin shops, the biome
+  bounty-giver, and two barterers. The same panel has a **Dismiss nearby villager** button.
+- **Bounty Board** — posts (or dismisses) all five bounty-givers in a row at once.
+- **Guard Post** — posts (or dismisses) a guard that wards off nearby monsters.
+- **Decorative world structures** — a curated set of vanilla buildings (abandoned houses, ruins)
+  registered as plain buildable scenery.
+
+**Villager kinds**
+
+- **Coin merchants** open **Valheim's real trade window** — buy biome goods for coins using the
+  game's own shop UI (no custom panel).
+- **Barterers** make one fixed swap (e.g. 5 Deer Hide → 10 Leather Scraps), via a small interaction.
+- **Bounty-givers** are barterers that buy monster trophies for coins *and* raise your **reputation**
+  with that biome's trader.
+- **Guards** periodically damage nearby hostile creatures (owner-only, never players or tamed).
+
+**Economy & progression**
+
+- **Per-tier pricing** — a good's coin cost scales with its biome tier: ~**1 gold/unit** in the
+  Meadows, +1 per tier up to ~**5 gold/unit** in the Plains.
+- **Reputation** — completing a biome's bounty raises a world-global reputation level for that
+  trader, which **unlocks higher-tier goods** (for example, the Black Forest's fine wood and each
+  biome's premium "rare" item). Reputation is shown in the shop title and the bounty hover text.
+- **Named & persistent** — every villager's name, type, size and reputation are persisted in the ZDO,
+  so they survive save/reload and sync in co-op. Villagers are non-hostile, stationary networked
+  objects like Haldor.
+
+Villagers are defined in `BepInEx/config/VillageLife/vendors.json` (written with defaults on first
+run). Edit it to change types, goods, prices, or barter rates — no rebuild needed. The file carries a
+version; when the built-in defaults change, an out-of-date file is **regenerated** automatically
+(keeping a `.bak`).
 
 ## Project layout
 
 ```
 VillageLife/
-  Plugin/VillageLifePlugin.cs   BepInEx entry point; binds config; registers content
-  Util/Constants.cs             Prefab names and hashed ZDO keys
-  NPC/NpcPrefab.cs              Registers the two villager prefabs (Haldor clones) via PrefabManager
-  NPC/VendorCatalog.cs         Vendor data model + built-in defaults; in-memory catalogue
-  NPC/VendorConfigLoader.cs    Loads/writes vendors.json (falls back to defaults on any error)
-  NPC/VillageMerchant.cs       Coin-shop companion: persists name + type, sets vanilla shop stock
-  NPC/VillageBarterer.cs       Barter villager: sole interactable, fixed resource→product swap
-  NPC/MerchantStock.cs         Resolves a coin vendor's goods into trade items via ObjectDB
-  NPC/ItemNames.cs             Resolves prefab vs. shared item names (safe inventory moves)
-  NPC/NpcSpawner.cs            Single spawn entry point; routes coin/barter by vendor kind
-  Building/VillageHall.cs       Buildable stations (workbench clones): Village Hall + 5 biome posts
+  Plugin/VillageLifePlugin.cs   BepInEx entry point; binds config; registers content on the PrefabManager event
+  Util/Constants.cs             Prefab names, the "VillageLife" build-tab name, hashed ZDO keys, version
+  NPC/
+    NpcPrefab.cs                Registers the three villager prefabs (Haldor clones): merchant, barterer, guard
+    NpcSpawner.cs               Single spawn seam; routes coin/barter/guard by vendor kind; RemoveNear() dismisses
+    VendorCatalog.cs            Vendor data model + built-in defaults + ConfigVersion; the in-memory catalogue
+    VendorConfigLoader.cs       Loads/writes vendors.json; regenerates on a version change; falls back to defaults
+    VillageMerchant.cs          Coin-shop companion: persists name+type, sets the vanilla shop stock by reputation
+    VillageBarterer.cs          Barter villager: sole interactable; fixed resource→product swap; bounties grant rep
+    VillageGuard.cs             Guard villager: periodic owner-only tick that harms nearby monsters
+    MerchantStock.cs            Resolves a coin vendor's goods into trade items (reputation-filtered) via ObjectDB
+    TraderReputation.cs         World-global reputation levels (global keys) that gate higher-tier goods
+    VillagerCreationUI.cs       The spawn panel: choose a villager, reroll the name, dismiss a nearby one
+    VillagerAppearance.cs       Cosmetic per-villager size variation, persisted in the ZDO
+    Greetings.cs                Flavour one-liners shown when a villager is summoned
+    ItemNames.cs                Resolves prefab vs. shared item names (safe inventory moves)
+    ItemNameAudit.cs            Startup audit: logs any referenced item/requirement name that won't resolve
+  Building/
+    VillageHall.cs              Buildable stations: Village Hall, 5 themed biome spawners, Guard Post, Bounty Board
+    BuildablePrep.cs            Turns a cloned vanilla prefab into a safe placeable piece (strips crash-prone parts)
+    WorldStructures.cs          Registers decorative vanilla world buildings (abandoned houses, ruins) as pieces
   lib/                          BepInEx / Jötunn / Harmony reference DLLs (committed)
 ```
 
-Vendors are defined in `BepInEx/config/VillageLife/vendors.json` (written with defaults on first
-run). Edit it to change types, goods, prices, or barter rates — no rebuild needed.
-
 ### Design principles (why it should stay reliable)
 
-- **Clone vanilla, don't hand-build.** The merchant is a Haldor clone registered through
-  Jötunn's `PrefabManager`; the hall is a Jötunn `CustomPiece` cloned from the workbench.
-  No manual prefab construction. We keep Haldor's own `Trader` so the shop UI is vanilla.
-- **Use built-ins.** The hall lives in the vanilla *Misc* build tab (custom tabs caused
-  bugs before).
-- **No incidental complexity.** No Harmony patches, no custom RPC, no per-frame managers.
-- **One spawn seam.** Everything that creates a merchant goes through `NpcSpawner.Spawn`,
-  so a future creation UI only has to fill in an `NpcRequest`.
+- **Clone vanilla, don't hand-build.** Villagers are Haldor clones registered through Jötunn's
+  `PrefabManager`; stations are Jötunn `CustomPiece`s cloned from vanilla build pieces. No manual
+  prefab construction. Coin merchants keep Haldor's own `Trader`, so the shop UI is vanilla.
+- **One build tab.** Every piece is placed in a single Jötunn-created **"VillageLife"** Hammer tab so
+  the content groups together. (An earlier rebuild used the vanilla *Misc* tab as a precaution; the
+  custom tab now works reliably through Jötunn.)
+- **No incidental complexity.** No Harmony patches and no custom RPC. The only timed code is the
+  guard's low-frequency tick and a one-shot startup scan — both owner/once-guarded and wrapped so a
+  surprise disables that behaviour and logs once, never a per-frame crash.
+- **One spawn seam.** Everything that creates a villager goes through `NpcSpawner.Spawn`, so the
+  creation UI and every station just fill in an `NpcRequest`.
+- **Fail safe.** Unresolved item names are skipped and surfaced by the startup audit; a bad
+  `vendors.json` falls back to the built-in defaults; cloned structures are stripped of crash-prone
+  components before they're ever placed.
 
 ## Building
 
-The build needs a local Valheim install for the game assemblies (they are **not** committed).
-The BepInEx, Jötunn and Harmony reference DLLs *are* committed under `VillageLife/lib/`, so you
-don't need to pre-install any mods to compile.
+The build needs a local Valheim install for the game assemblies (they are **not** committed). The
+BepInEx, Jötunn and Harmony reference DLLs *are* committed under `VillageLife/lib/`, so you don't
+need to pre-install any mods to compile.
 
 ### Find your Valheim folder
 
@@ -78,8 +125,8 @@ setx VALHEIM_INSTALL "D:\YourPath\steamapps\common\Valheim"
 
 …or edit the `ValheimDir` line in `VillageLife/VillageLife.csproj`.
 
-If the assemblies still can't be found, the build stops with a clear message telling you which
-path it checked — that's expected, just set `VALHEIM_INSTALL` to the right folder.
+If the assemblies still can't be found, the build stops with a clear message telling you which path
+it checked — that's expected, just set `VALHEIM_INSTALL` to the right folder.
 
 ### Build
 
@@ -91,8 +138,8 @@ path it checked — that's expected, just set `VALHEIM_INSTALL` to the right fol
 dotnet build VillageLife.sln -c Release
 ```
 
-**Output:** `VillageLife/bin/<Config>/net472/VillageLife.dll`. If BepInEx is found under your
-Valheim folder, the DLL is also copied to `BepInEx/plugins/VillageLife/` automatically.
+**Output:** `VillageLife/bin/<Config>/net472/VillageLife.dll`. If BepInEx is found under your Valheim
+folder, the DLL is also copied to `BepInEx/plugins/VillageLife/` automatically.
 
 ### Testing through r2modman (auto-copy)
 
@@ -106,30 +153,38 @@ setx R2_PROFILE "C:\Users\<you>\AppData\Roaming\r2modmanPlus-local\Valheim\profi
 ```
 
 With `R2_PROFILE` set, the build copies `VillageLife.dll` into
-`<profile>\BepInEx\plugins\VillageLife\`. Then the loop is just **Rebuild → Start modded**. The
-step is inert if `R2_PROFILE` is unset, so it never affects other machines. Make sure that
-profile has **BepInExPack_Valheim** and **Jotunn** installed.
+`<profile>\BepInEx\plugins\VillageLife\`. Then the loop is just **Rebuild → Start modded**. The step
+is inert if `R2_PROFILE` is unset, so it never affects other machines. Make sure that profile has
+**BepInExPack_Valheim** and **Jotunn** installed.
 
 ## Packaging for Thunderstore
 
-`Thunderstore/` holds the package metadata (`manifest.json`, `README.md`, `CHANGELOG.md`)
-and `VillageLife/thunderstore/` holds the icon. Drop a freshly built `VillageLife.dll`
-alongside them when zipping a release. Keep both `manifest.json` files on the same version.
+`Thunderstore/` holds the package metadata (`manifest.json`, `README.md`, `CHANGELOG.md`) and
+`VillageLife/thunderstore/` holds the icon. Drop a freshly built `VillageLife.dll` alongside them
+when zipping a release. Keep both `manifest.json` files on the same version as `Constants.PluginVersion`
+and the `<Version>` in `VillageLife.csproj`.
 
 ## Roadmap
 
-1. ~~Coin merchant using Valheim's trade window.~~ ✅ Done (3.1.0)
-2. ~~Multiple merchant types, each selling different goods.~~ ✅ Done (3.2.0) — see `VendorCatalog`.
-3. ~~**Barter vendors** — give a single product for a fixed resource (e.g. 40 Stone → 30 Wood).~~ ✅ Done (3.3.0)
-4. ~~Config-driven vendor catalogue (`vendors.json`).~~ ✅ Done (3.4.0)
-5. ~~Small creation UI to pick a villager's name/type — plugs into `NpcSpawner`.~~ ✅ Done (3.14.0)
-6. ~~Visual variety so merchants aren't all Haldor look-alikes; later roles (quests, guards).~~ ✅ Done
-   — biome trading posts, bounties + reputation, blacksmith/tavern/farmer roles, guards, and
-   per-villager size variation (3.5–3.13).
+The original roadmap is complete:
 
-### Beyond the original roadmap (deferred — want in-game testing first)
+1. ~~Coin merchant using Valheim's trade window.~~ ✅
+2. ~~Multiple merchant types, each selling different goods.~~ ✅
+3. ~~Barter vendors — a fixed product for a fixed resource.~~ ✅
+4. ~~Config-driven vendor catalogue (`vendors.json`).~~ ✅
+5. ~~Creation UI to pick a villager's name/type — plugs into `NpcSpawner`.~~ ✅
+6. ~~Visual variety, plus later roles (guards, bounties + reputation, trade-skill shops).~~ ✅
 
-- **Localization** — its failure mode is visible (`$token` strings on working pieces), so best
+Built on top of that core since: a **single VillageLife build tab**, **per-biome spawners** that open
+a choice menu, a full **3 shops + 3 barterers per biome**, **per-tier coin pricing**, **reputation**
+that unlocks higher-tier goods, themed **crafting-station models** per spawner, and a **Dismiss**
+button — see `Thunderstore/CHANGELOG.md` for the per-version history.
+
+### Deferred (want in-game testing first)
+
+- **Localization** — its failure mode is visible (`$token` strings on working pieces), so it's best
   verified live rather than pushed blind.
-- **Ambient chatter** — periodic chat bubbles; depends on `Chat.SetNpcText`, whose exact signature
-  needs confirming against the game build.
+- **Ambient chatter** — periodic villager chat bubbles; coin merchants can drive these through the
+  vanilla `Trader`, but barterers/guards would need confirming against the live build first.
+- **Deeper quests** — the turn-in bounties are a lightweight first step; anything larger is the most
+  likely to need extensive new code, so it comes last.

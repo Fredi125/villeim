@@ -1,6 +1,7 @@
 # Village Life — Valheim NPC Mod
 
-Build a Village Hall and summon friendly, named villagers to your settlement.
+Build biome-themed stations and summon friendly, named villagers — merchants, barterers,
+bounty-givers and guards — to populate, supply and defend your settlement.
 
-A small, reliable foundation we grow one tested feature at a time. See the full README
-and roadmap on GitHub: https://github.com/Fredi125/villeim
+A small, reliable mod grown one tested feature at a time. See the full README and changelog on
+GitHub: https://github.com/Fredi125/villeim
