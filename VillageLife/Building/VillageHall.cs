@@ -26,6 +26,7 @@ namespace VillageLife.Building
             public string Description;
             public string VendorId;     // null = use the rotation (Village Hall); else a specific vendor id.
             public string[] VendorIds;  // when set, the station posts several specific vendors at once (Bounty Board).
+            public string[] MenuVendorIds; // when set, [Use] opens the spawn panel to pick from these (biome spawners).
             public bool SpawnInside;    // spawn the villager inside the structure (for building-based posts).
             public RequirementConfig[] Requirements;
         }
@@ -49,9 +50,9 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = "VL_Station_Meadows",
-                DisplayName = "Meadows Trading Post",
-                Description = "Press [Use] to summon the Meadows merchant.",
-                VendorId = "meadows",
+                DisplayName = "Meadows Spawner",
+                Description = "Press [Use] to choose a Meadows villager.",
+                MenuVendorIds = new[] { "meadows", "bounty_meadows" },
                 Requirements = Req(
                     ("Wood", 30), ("Stone", 15), ("Resin", 10),
                     ("LeatherScraps", 10), ("Feathers", 10), ("Dandelion", 5)),
@@ -59,9 +60,9 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = "VL_Station_BlackForest",
-                DisplayName = "Black Forest Trading Post",
-                Description = "Press [Use] to summon the Black Forest merchant.",
-                VendorId = "blackforest",
+                DisplayName = "Black Forest Spawner",
+                Description = "Press [Use] to choose a Black Forest villager.",
+                MenuVendorIds = new[] { "blackforest", "bounty_forest" },
                 Requirements = Req(
                     ("FineWood", 30), ("RoundLog", 20), ("Coal", 15),
                     ("Copper", 10), ("Tin", 10), ("GreydwarfEye", 10)),
@@ -69,9 +70,9 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = "VL_Station_Swamp",
-                DisplayName = "Swamp Trading Post",
-                Description = "Press [Use] to summon the Swamp merchant.",
-                VendorId = "swamp",
+                DisplayName = "Swamp Spawner",
+                Description = "Press [Use] to choose a Swamp villager.",
+                MenuVendorIds = new[] { "swamp", "bounty_swamp" },
                 Requirements = Req(
                     ("ElderBark", 30), ("Iron", 5), ("Guck", 10),
                     ("WitheredBone", 5), ("Bloodbag", 5), ("Entrails", 5)),
@@ -79,9 +80,9 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = "VL_Station_Mountain",
-                DisplayName = "Mountain Trading Post",
-                Description = "Press [Use] to summon the Mountain merchant.",
-                VendorId = "mountain",
+                DisplayName = "Mountain Spawner",
+                Description = "Press [Use] to choose a Mountain villager.",
+                MenuVendorIds = new[] { "mountain", "bounty_mountain" },
                 Requirements = Req(
                     ("Stone", 30), ("Obsidian", 10), ("Silver", 5),
                     ("WolfPelt", 5), ("FreezeGland", 5), ("Crystal", 5)),
@@ -89,9 +90,9 @@ namespace VillageLife.Building
             new StationDef
             {
                 PrefabName = "VL_Station_Plains",
-                DisplayName = "Plains Trading Post",
-                Description = "Press [Use] to summon the Plains merchant.",
-                VendorId = "plains",
+                DisplayName = "Plains Spawner",
+                Description = "Press [Use] to choose a Plains villager.",
+                MenuVendorIds = new[] { "plains", "bounty_plains" },
                 Requirements = Req(
                     ("FineWood", 30), ("BlackMetal", 5), ("Flax", 10),
                     ("Barley", 10), ("Tar", 15), ("LoxPelt", 5)),
@@ -203,7 +204,7 @@ namespace VillageLife.Building
                 var interaction = prefab.GetComponent<StationInteraction>();
                 if (interaction == null)
                     interaction = prefab.AddComponent<StationInteraction>();
-                interaction.Configure(def.DisplayName, def.VendorId, def.VendorIds, def.SpawnInside);
+                interaction.Configure(def.DisplayName, def.VendorId, def.VendorIds, def.SpawnInside, def.MenuVendorIds);
             }
 
             PieceManager.Instance.AddPiece(piece);
@@ -231,22 +232,29 @@ namespace VillageLife.Building
         [SerializeField] private string _vendorId = "";
         [SerializeField] private string _vendorIds = "";   // CSV; non-empty = a board that posts several at once.
         [SerializeField] private bool _spawnInside;        // spawn the villager inside (building-based posts).
+        [SerializeField] private string _menuVendorIds = ""; // CSV; non-empty = [Use] opens the spawn panel for these.
 
-        public void Configure(string displayName, string vendorId, string[] vendorIds = null, bool spawnInside = false)
+        public void Configure(string displayName, string vendorId, string[] vendorIds = null,
+            bool spawnInside = false, string[] menuVendorIds = null)
         {
             _displayName = displayName;
             _vendorId = vendorId ?? "";
             _vendorIds = (vendorIds != null && vendorIds.Length > 0) ? string.Join(",", vendorIds) : "";
             _spawnInside = spawnInside;
+            _menuVendorIds = (menuVendorIds != null && menuVendorIds.Length > 0) ? string.Join(",", menuVendorIds) : "";
         }
 
         public string GetHoverName() => _displayName;
 
         public string GetHoverText()
         {
-            string action = string.IsNullOrEmpty(_vendorIds)
-                ? "Summon / dismiss merchant"
-                : "Post / dismiss bounties";
+            string action;
+            if (!string.IsNullOrEmpty(_menuVendorIds))
+                action = "Choose a villager";
+            else if (!string.IsNullOrEmpty(_vendorIds))
+                action = "Post / dismiss bounties";
+            else
+                action = "Summon / dismiss villager";
             return Localization.instance.Localize(
                 $"{_displayName}\n[<color=yellow><b>$KEY_Use</b></color>] {action}");
         }
@@ -277,10 +285,30 @@ namespace VillageLife.Building
                 frontCenter.y = GroundHeight(frontCenter);
             }
 
+            string[] menuIds = SplitIds(_menuVendorIds);
+            if (menuIds.Length > 0)
+                return OpenMenu(player, frontCenter, menuIds);
+
             string[] boardIds = SplitIds(_vendorIds);
             return boardIds.Length > 0
                 ? ToggleBoard(player, frontCenter, boardIds)
                 : ToggleSingle(player, frontCenter);
+        }
+
+        /// <summary>Biome spawner: open the panel to choose which villager to summon.</summary>
+        private bool OpenMenu(Player player, Vector3 frontCenter, string[] ids)
+        {
+            Quaternion rotation = Quaternion.LookRotation(-transform.forward);
+            if (VillagerCreationUI.Open(frontCenter, rotation, new List<string>(ids)))
+                return true;
+
+            // Fallback if the panel can't be shown: summon the first option directly.
+            NpcSpawner.Result result = NpcSpawner.Spawn(frontCenter, rotation, NpcSpawner.RequestFor(player, ids[0]));
+            player.Message(MessageHud.MessageType.Center,
+                result.Success
+                    ? $"{result.Name} the {result.Title} joined your village — \"{result.Greeting}\""
+                    : "Could not summon a villager.");
+            return true;
         }
 
         /// <summary>Ordinary post: one merchant, summoned on the first Use and dismissed on the next.</summary>

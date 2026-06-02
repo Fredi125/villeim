@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.23.0 — Biome spawners open a menu
+
+### Changed
+- The five biome posts are now **spawners**: pressing [Use] opens the spawn panel to **choose** which
+  of that biome's villagers to summon (currently its trader and its bounty-giver — expanding to 3
+  shops + 3 barterers per biome next), plus the Dismiss button. They no longer summon a fixed merchant.
+
 ## 3.22.0 — Reusable spawn panel + Dismiss
 
 ### Added
