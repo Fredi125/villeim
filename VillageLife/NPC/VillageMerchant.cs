@@ -85,6 +85,10 @@ namespace VillageLife.NPC
                 ? $"{MerchantName} ({type.Title}) · Rep {level}/{max}"
                 : $"{MerchantName} ({type.Title})";
 
+            // Give the merchant village-flavoured greetings and idle chatter in place of Haldor's
+            // lines. The vanilla Trader shows these itself; this is cosmetic and safe to re-apply.
+            VillagerChatter.Apply(_trader, type);
+
             // Replace Haldor's default stock with ours (filtered by reputation) — but only if ours
             // actually built, otherwise leave the existing stock so the store still has something.
             var stock = MerchantStock.Build(type, level);

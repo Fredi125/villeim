@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.26.0 — Merchants come alive (ambient chatter)
+
+### Added
+- **Coin merchants now chatter** in village-flavoured lines instead of Haldor's: they greet you as
+  you approach, say idle one-liners on their own (with a little biome flavour), comment when the
+  trade window opens, and thank you for a purchase. This reuses the vanilla trader's own speech
+  bubbles — no new per-frame code — and the text is set defensively (skipped, never fatal, if a
+  game update renames a field). Barterers and guards stay quiet for now (they have no trader to
+  speak through); their chatter is a later, separately-verified step.
+
 ## 3.25.0 — Every biome fleshed out + themed spawners
 
 ### Added
