@@ -161,8 +161,8 @@ namespace VillageLife.Building
                 VendorId = null,
                 VendorIds = new[]
                 {
-                    "bounty_meadows", "bounty_forest", "bounty_swamp",
-                    "bounty_mountain", "bounty_plains",
+                    "bounty_resin", "bounty_meadows", "bounty_forest",
+                    "bounty_swamp", "bounty_mountain", "bounty_plains",
                 },
                 Requirements = Req(
                     ("Wood", 20), ("FineWood", 10), ("Coal", 5)),

@@ -69,8 +69,8 @@ regenerates automatically (keeping a `.bak`) when a new version changes the buil
 
 ## Roadmap
 
-The trading-village core is complete. Still on the list, to be added once verified in-game:
-localization, ambient villager chatter, and deeper quests beyond the current turn-in bounties.
+The trading-village core is complete, and villagers now chatter ambiently. Next up: **deeper quests**
+beyond the current turn-in bounties. (Localization was considered and deliberately dropped.)
 
 ---
 

@@ -69,7 +69,7 @@ namespace VillageLife.NPC
         /// regenerates an out-of-date vendors.json from these defaults (keeping a .bak), so value
         /// tweaks here reach an existing install without a manual file delete.
         /// </summary>
-        public const int ConfigVersion = 10;
+        public const int ConfigVersion = 11;
 
         /// <summary>Built-in safety net, also used to seed vendors.json on first run.</summary>
         public static VendorType[] DefaultVendors => new[]
@@ -270,6 +270,14 @@ namespace VillageLife.NPC
                 CostPrefab = "TrophyGoblin",    CostAmount = 2,
                 GivePrefab = "Coins",           GiveAmount = 90,
                 UnlocksVendorId = "plains",
+            },
+            // A resource bounty rather than a trophy one: a standing order for resin, payable any
+            // time. No reputation (resin spans biomes) — just a reliable early coin faucet.
+            new VendorType
+            {
+                Id = "bounty_resin", Title = "Resin Bounty", Kind = "barter",
+                CostPrefab = "Resin", CostAmount = 5,
+                GivePrefab = "Coins", GiveAmount = 10,
             },
 
             // --- Meadows biome villagers (tier 1 ≈ 1 gold/unit) — the template for every biome's

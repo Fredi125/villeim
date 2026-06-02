@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.31.0 — Resin bounty
+
+### Added
+- A new **Resin Bounty** on the Bounty Board: hand in **5 Resin for 10 Coins**, any time. Unlike the
+  trophy bounties it grants no reputation — it's a simple, reliable early coin faucet.
+
 ## 3.30.0 — Barterers and guards speak up too
 
 ### Added

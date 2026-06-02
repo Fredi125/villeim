@@ -181,9 +181,10 @@ that unlocks higher-tier goods, distinct **per-tier station models** (a maypole 
 armor-stand Guard Post, and a cauldron/chairs/thrones for the biome spawners), **ambient chatter**
 for every villager, and a **Dismiss** button — see `Thunderstore/CHANGELOG.md` for the full history.
 
-### Deferred (want in-game testing first)
+### Still to come
 
-- **Localization** — its failure mode is visible (`$token` strings on working pieces), so it's best
-  verified live rather than pushed blind.
-- **Deeper quests** — the turn-in bounties are a lightweight first step; anything larger is the most
-  likely to need extensive new code, so it comes last.
+- **Deeper quests** — the turn-in bounties (and the multi-item quest board) are the first steps;
+  larger objectives build on those rails.
+
+Localization was considered and **deliberately dropped** — it adds churn and a visible failure mode
+(`$token` strings) for little benefit in a single-language setup.
