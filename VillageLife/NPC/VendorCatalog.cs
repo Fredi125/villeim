@@ -69,7 +69,7 @@ namespace VillageLife.NPC
         /// regenerates an out-of-date vendors.json from these defaults (keeping a .bak), so value
         /// tweaks here reach an existing install without a manual file delete.
         /// </summary>
-        public const int ConfigVersion = 8;
+        public const int ConfigVersion = 9;
 
         /// <summary>Built-in safety net, also used to seed vendors.json on first run.</summary>
         public static VendorType[] DefaultVendors => new[]
@@ -167,10 +167,10 @@ namespace VillageLife.NPC
                 Id = "meadows", Title = "Meadows Trader", Kind = "coin", Biome = "Meadows",
                 Goods = new[]
                 {
-                    new VendorGood("Wood",      10, 50),   // 0.2/unit
-                    new VendorGood("Stone",     10, 50),   // 0.2/unit
-                    new VendorGood("Flint",     15, 30),   // 0.5/unit
-                    new VendorGood("Resin",     10, 20),   // 0.5/unit
+                    new VendorGood("Wood",      50, 50),   // 1/unit
+                    new VendorGood("Stone",     50, 50),   // 1/unit
+                    new VendorGood("Flint",     30, 30),   // 1/unit
+                    new VendorGood("Resin",     20, 20),   // 1/unit
                     new VendorGood("Dandelion", 10, 10),   // 1/unit
                     new VendorGood("QueenBee", 800,  1, 1),  // rare — unlocks at Rep 1
                 }
@@ -269,6 +269,45 @@ namespace VillageLife.NPC
                 CostPrefab = "TrophyGoblin",    CostAmount = 2,
                 GivePrefab = "Coins",           GiveAmount = 90,
                 UnlocksVendorId = "plains",
+            },
+
+            // --- Meadows biome villagers (tier 1 ≈ 1 gold/unit) — the template for every biome's
+            // spawner: 3 shops that sell for gold + 3 barterers that swap a resource for gold or goods. ---
+            new VendorType
+            {
+                Id = "meadows_forage", Title = "Meadows Forager", Kind = "coin", Biome = "Meadows",
+                Goods = new[]
+                {
+                    new VendorGood("Raspberry",   20, 20),  // 1/unit
+                    new VendorGood("Mushroom",    20, 20),  // 1/unit
+                    new VendorGood("Blueberries", 20, 20),  // 1/unit
+                    new VendorGood("Dandelion",   20, 20),  // 1/unit
+                    new VendorGood("Honey",       40, 20),  // 2/unit
+                }
+            },
+            new VendorType
+            {
+                Id = "meadows_hunt", Title = "Meadows Hunter", Kind = "coin", Biome = "Meadows",
+                Goods = new[]
+                {
+                    new VendorGood("LeatherScraps", 20, 20),  // 1/unit
+                    new VendorGood("DeerHide",      20, 20),  // 1/unit
+                    new VendorGood("ArrowFlint",    20, 20),  // 1/unit
+                    new VendorGood("Feathers",      20, 20),  // 1/unit
+                    new VendorGood("Resin",         20, 20),  // 1/unit
+                }
+            },
+            new VendorType
+            {
+                Id = "meadows_tanner", Title = "Meadows Tanner", Kind = "barter", Biome = "Meadows",
+                CostPrefab = "DeerHide",      CostAmount = 5,
+                GivePrefab = "LeatherScraps", GiveAmount = 10,
+            },
+            new VendorType
+            {
+                Id = "meadows_beekeeper", Title = "Meadows Beekeeper", Kind = "barter", Biome = "Meadows",
+                CostPrefab = "Honey", CostAmount = 5,
+                GivePrefab = "Coins", GiveAmount = 10,
             },
         };
 

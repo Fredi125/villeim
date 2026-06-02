@@ -52,7 +52,11 @@ namespace VillageLife.Building
                 PrefabName = "VL_Station_Meadows",
                 DisplayName = "Meadows Spawner",
                 Description = "Press [Use] to choose a Meadows villager.",
-                MenuVendorIds = new[] { "meadows", "bounty_meadows" },
+                MenuVendorIds = new[]
+                {
+                    "meadows", "meadows_forage", "meadows_hunt",
+                    "bounty_meadows", "meadows_tanner", "meadows_beekeeper",
+                },
                 Requirements = Req(
                     ("Wood", 30), ("Stone", 15), ("Resin", 10),
                     ("LeatherScraps", 10), ("Feathers", 10), ("Dandelion", 5)),

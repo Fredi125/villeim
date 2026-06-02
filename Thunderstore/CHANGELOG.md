@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.24.0 — Meadows fully fleshed out (template)
+
+### Added
+- The **Meadows spawner** now offers **6 villagers** — the full 3-shops + 3-barterers layout that
+  every biome will get: **Meadows Trader**, **Forager** (food), **Hunter** (hides/arrows) for gold;
+  **Meadows Bounty** (trophies → gold), **Tanner** (deer hide → leather), **Beekeeper** (honey →
+  gold) for barter.
+
+### Changed
+- **Prices now follow the per-tier scale**: Meadows goods are ~**1 gold/unit** (premium items like
+  honey at 2). The other biomes will scale up by +1 gold/unit per tier (Black Forest 2, Swamp 3,
+  Mountain 4, Plains 5) once this template is confirmed. `vendors.json` auto-updates.
+
 ## 3.23.0 — Biome spawners open a menu
 
 ### Changed
