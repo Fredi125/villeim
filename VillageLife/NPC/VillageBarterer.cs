@@ -96,13 +96,16 @@ namespace VillageLife.NPC
             string action;
             if (t.IsQuest)
             {
-                int done = QuestProgress.Completed(t.Id);
+                int done = QuestProgress.Completed(t.Id, t.QuestCap);
+                QuestRecipe r = t.ActiveQuestRecipe(done);
                 string list = "";
-                foreach (QuestItem q in t.QuestItems)
-                    list += (list.Length > 0 ? ", " : "") + $"{QuestProgress.Scale(q.Amount, done)} {ItemNames.Display(q.Prefab)}";
-                int reward = QuestProgress.Scale(t.GiveAmount, done);
+                if (r.Items != null)
+                    foreach (QuestItem q in r.Items)
+                        list += (list.Length > 0 ? ", " : "") +
+                                $"{QuestProgress.Scale(q.Amount, done, t.QuestCostGrowth)} {ItemNames.Display(q.Prefab)}";
+                int reward = QuestProgress.Scale(r.RewardAmount, done, t.QuestRewardGrowth);
                 string repeat = done > 0 ? $" <color=#aab4ff>(completed {done}×)</color>" : "";
-                body = $"Quest{repeat}: {list}\nReward: {reward} {ItemNames.Display(t.GivePrefab)}";
+                body = $"Quest{repeat}: {list}\nReward: {reward} {ItemNames.Display(r.RewardPrefab)}";
                 action = "Hand in";
             }
             else
@@ -201,18 +204,19 @@ namespace VillageLife.NPC
             if (inv == null)
                 return;
 
-            if (!ItemNames.Exists(t.GivePrefab))
+            // Completion count drives both which recipe is active (rotation) and its size (scaling).
+            int done = QuestProgress.Completed(t.Id, t.QuestCap);
+            QuestRecipe r = t.ActiveQuestRecipe(done);
+
+            if (r.Items == null || r.Items.Length == 0 || !ItemNames.Exists(r.RewardPrefab))
             {
                 player.Message(MessageHud.MessageType.Center, "This quest can't be completed right now.");
-                Jotunn.Logger.LogWarning($"[VillageLife] Quest '{t.Id}' reward '{t.GivePrefab}' didn't resolve.");
+                Jotunn.Logger.LogWarning($"[VillageLife] Quest '{t.Id}' recipe unresolved (reward '{r.RewardPrefab}').");
                 return;
             }
 
-            // The quest scales up by 50% of the base per prior completion (world-global, capped).
-            int done = QuestProgress.Completed(t.Id);
-
             // First pass: resolve and verify every (scaled) requirement, removing nothing.
-            foreach (QuestItem q in t.QuestItems)
+            foreach (QuestItem q in r.Items)
             {
                 string shared = ItemNames.SharedName(q.Prefab);
                 if (string.IsNullOrEmpty(shared))
@@ -222,7 +226,7 @@ namespace VillageLife.NPC
                     return;
                 }
 
-                int need = QuestProgress.Scale(q.Amount, done);
+                int need = QuestProgress.Scale(q.Amount, done, t.QuestCostGrowth);
                 int have = inv.CountItems(shared);
                 if (have < need)
                 {
@@ -239,15 +243,15 @@ namespace VillageLife.NPC
             }
 
             // Second pass: requirements met — take everything, then give the scaled reward.
-            foreach (QuestItem q in t.QuestItems)
-                inv.RemoveItem(ItemNames.SharedName(q.Prefab), QuestProgress.Scale(q.Amount, done));
-            int reward = QuestProgress.Scale(t.GiveAmount, done);
-            inv.AddItem(t.GivePrefab, reward, 1, 0, 0L, "");
+            foreach (QuestItem q in r.Items)
+                inv.RemoveItem(ItemNames.SharedName(q.Prefab), QuestProgress.Scale(q.Amount, done, t.QuestCostGrowth));
+            int reward = QuestProgress.Scale(r.RewardAmount, done, t.QuestRewardGrowth);
+            inv.AddItem(r.RewardPrefab, reward, 1, 0, 0L, "");
 
-            QuestProgress.RecordCompletion(t.Id);
-            string more = done < QuestProgress.MaxScaling ? " The next order will be larger." : "";
+            QuestProgress.RecordCompletion(t.Id, t.QuestCap);
+            string more = done < t.QuestCap ? " The next request will change." : "";
             player.Message(MessageHud.MessageType.Center,
-                $"Quest complete! Received {reward} {ItemNames.Display(t.GivePrefab)}.{more}");
+                $"Quest complete! Received {reward} {ItemNames.Display(r.RewardPrefab)}.{more}");
 
             GrantReputation(player, t);
         }

@@ -59,9 +59,14 @@ namespace VillageLife.NPC
                         Check(g.Prefab, $"vendor '{v.Id}'");
                 }
 
-                if (v.QuestItems != null)
-                    foreach (QuestItem q in v.QuestItems)
-                        Check(q.Prefab, $"quest '{v.Id}'");
+                if (v.QuestRecipes != null)
+                    foreach (QuestRecipe r in v.QuestRecipes)
+                    {
+                        Check(r.RewardPrefab, $"quest '{v.Id}' reward");
+                        if (r.Items != null)
+                            foreach (QuestItem q in r.Items)
+                                Check(q.Prefab, $"quest '{v.Id}'");
+                    }
             }
 
             foreach ((string station, string item) in VillageStations.RequirementItems())

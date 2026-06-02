@@ -39,6 +39,16 @@ namespace VillageLife.NPC
         }
     }
 
+    /// <summary>One recipe in a quest: the items to hand in and the reward for them. A quest holds a
+    /// pool of these and rotates to the next one after each turn-in.</summary>
+    [Serializable]
+    public struct QuestRecipe
+    {
+        public QuestItem[] Items;
+        public string RewardPrefab;
+        public int RewardAmount;
+    }
+
     /// <summary>
     /// A kind of villager: a display title plus what it offers. Serializable so the whole catalogue
     /// can live in <c>vendors.json</c>. <see cref="Kind"/> is a string ("coin" or "barter") rather
@@ -65,16 +75,34 @@ namespace VillageLife.NPC
         // unlocking the trader's higher-tier goods. Empty = the barter grants no reputation.
         public string UnlocksVendorId = "";
 
-        // Quest: a multi-item turn-in (deeper than a single-item barter). When non-empty, this
-        // villager is a quest-giver — hand in ALL of these at once for the reward (GivePrefab ×
-        // GiveAmount, plus any UnlocksVendorId reputation). Spawned via the barter path (Kind="barter").
-        public QuestItem[] QuestItems;
+        // Quest: a multi-item turn-in (deeper than a single-item barter). A quest holds a POOL of
+        // recipes and rotates to the next one after each turn-in; non-empty = this villager is a
+        // quest-giver. Spawned via the barter path (Kind="barter"); any UnlocksVendorId still grants
+        // reputation on completion. The scaling fields tune how it grows as it is repeated.
+        public QuestRecipe[] QuestRecipes;
+
+        // Per-completion growth of the required items and the reward, as a fraction of the base
+        // (0.5 = +50% per prior completion). Rewards usually grow faster than costs so repeats pay
+        // off. QuestMaxScaling caps how far rotation + scaling climb before they plateau (0 = default).
+        public float QuestCostGrowth;
+        public float QuestRewardGrowth;
+        public int QuestMaxScaling;
 
         /// <summary>True when this vendor trades by barter rather than the coin shop.</summary>
         public bool IsBarter => string.Equals(Kind, "barter", StringComparison.OrdinalIgnoreCase);
 
-        /// <summary>True when this villager is a multi-item quest-giver.</summary>
-        public bool IsQuest => QuestItems != null && QuestItems.Length > 0;
+        /// <summary>True when this villager is a quest-giver (has at least one recipe).</summary>
+        public bool IsQuest => QuestRecipes != null && QuestRecipes.Length > 0;
+
+        /// <summary>This quest's scaling/rotation cap (completions before it plateaus).</summary>
+        public int QuestCap => QuestMaxScaling > 0 ? QuestMaxScaling : QuestProgress.DefaultMaxScaling;
+
+        /// <summary>The recipe active at a given completion count — the pool cycles one per turn-in.</summary>
+        public QuestRecipe ActiveQuestRecipe(int completed)
+        {
+            int n = QuestRecipes.Length;
+            return QuestRecipes[((completed % n) + n) % n];
+        }
     }
 
     /// <summary>
@@ -93,7 +121,7 @@ namespace VillageLife.NPC
         /// regenerates an out-of-date vendors.json from these defaults (keeping a .bak), so value
         /// tweaks here reach an existing install without a manual file delete.
         /// </summary>
-        public const int ConfigVersion = 12;
+        public const int ConfigVersion = 13;
 
         /// <summary>Built-in safety net, also used to seed vendors.json on first run.</summary>
         public static VendorType[] DefaultVendors => new[]
@@ -310,24 +338,38 @@ namespace VillageLife.NPC
             new VendorType
             {
                 Id = "quest_provisions", Title = "Provisioner's Request", Kind = "barter",
-                QuestItems = new[]
+                QuestCostGrowth = 0.5f, QuestRewardGrowth = 0.75f, QuestMaxScaling = 10,
+                QuestRecipes = new[]
                 {
-                    new QuestItem("Wood", 20),
-                    new QuestItem("Resin", 10),
-                    new QuestItem("LeatherScraps", 5),
+                    new QuestRecipe
+                    {
+                        Items = new[] { new QuestItem("Wood", 20), new QuestItem("Resin", 10), new QuestItem("LeatherScraps", 5) },
+                        RewardPrefab = "Coins", RewardAmount = 40,
+                    },
+                    new QuestRecipe
+                    {
+                        Items = new[] { new QuestItem("Stone", 20), new QuestItem("Flint", 10), new QuestItem("Feathers", 10) },
+                        RewardPrefab = "Coins", RewardAmount = 45,
+                    },
                 },
-                GivePrefab = "Coins", GiveAmount = 40,
             },
             new VendorType
             {
                 Id = "quest_smith", Title = "Smith's Commission", Kind = "barter",
-                QuestItems = new[]
+                QuestCostGrowth = 0.5f, QuestRewardGrowth = 0.75f, QuestMaxScaling = 10,
+                QuestRecipes = new[]
                 {
-                    new QuestItem("Coal",   10),
-                    new QuestItem("Copper",  5),
-                    new QuestItem("Tin",     5),
+                    new QuestRecipe
+                    {
+                        Items = new[] { new QuestItem("Coal", 10), new QuestItem("Copper", 5), new QuestItem("Tin", 5) },
+                        RewardPrefab = "Coins", RewardAmount = 60,
+                    },
+                    new QuestRecipe
+                    {
+                        Items = new[] { new QuestItem("Bronze", 5), new QuestItem("BronzeNails", 10), new QuestItem("Coal", 15) },
+                        RewardPrefab = "Coins", RewardAmount = 75,
+                    },
                 },
-                GivePrefab = "Coins", GiveAmount = 60,
             },
 
             // --- Meadows biome villagers (tier 1 ≈ 1 gold/unit) — the template for every biome's

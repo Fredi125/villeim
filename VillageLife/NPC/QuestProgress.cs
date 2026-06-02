@@ -7,47 +7,50 @@ namespace VillageLife.NPC
     /// mechanism Valheim uses for boss defeats and <see cref="TraderReputation"/> — so it survives
     /// saves and syncs in co-op.
     ///
-    /// A repeatable quest scales up: each prior completion adds 50% of the base to both the required
-    /// items and the reward (completion 0 = base ×1, then ×1.5, ×2, …). Scaling plateaus at
-    /// <see cref="MaxScaling"/> completions — the quest stays repeatable at that size, and the cap
-    /// keeps the per-quest global keys bounded.
+    /// The count drives both of a quest's repeat behaviours:
+    ///   • <b>rotation</b> — which recipe in the pool is active (count modulo pool size), and
+    ///   • <b>scaling</b> — the size of the required items and the reward, each growing by its own
+    ///     fraction of the base per prior completion (see <see cref="Scale"/>).
+    /// Both plateau at the quest's cap, which also keeps the per-quest global keys bounded.
     /// </summary>
     public static class QuestProgress
     {
-        /// <summary>How many completions the difficulty climbs over before it plateaus.</summary>
-        public const int MaxScaling = 10;
+        /// <summary>Cap used when a quest doesn't specify its own (completions before it plateaus).</summary>
+        public const int DefaultMaxScaling = 10;
 
         private static string Key(string questId, int n) => $"villagelife_quest_{questId}_{n}";
 
-        /// <summary>How many times this quest has been completed (clamped to 0..<see cref="MaxScaling"/>).</summary>
-        public static int Completed(string questId)
+        /// <summary>How many times this quest has been completed (clamped to 0..<paramref name="cap"/>).</summary>
+        public static int Completed(string questId, int cap)
         {
             ZoneSystem zs = ZoneSystem.instance;
             if (zs == null || string.IsNullOrEmpty(questId))
                 return 0;
+            if (cap <= 0)
+                cap = DefaultMaxScaling;
 
             int n = 0;
-            while (n < MaxScaling && zs.GetGlobalKey(Key(questId, n + 1)))
+            while (n < cap && zs.GetGlobalKey(Key(questId, n + 1)))
                 n++;
             return n;
         }
 
-        /// <summary>The cost/reward multiplier at a completion count: +50% of the base per prior turn-in.</summary>
-        public static float Multiplier(int completed) => 1f + 0.5f * completed;
+        /// <summary>Scale a base amount by <paramref name="growth"/> per completion (at least 1):
+        /// <c>round(base × (1 + growth × completed))</c>.</summary>
+        public static int Scale(int baseAmount, int completed, float growth)
+            => Mathf.Max(1, Mathf.RoundToInt(baseAmount * (1f + growth * completed)));
 
-        /// <summary>Scale a base amount by the completion multiplier (at least 1).</summary>
-        public static int Scale(int baseAmount, int completed)
-            => Mathf.Max(1, Mathf.RoundToInt(baseAmount * Multiplier(completed)));
-
-        /// <summary>Record one completion (advancing the count) unless already at the scaling cap.</summary>
-        public static void RecordCompletion(string questId)
+        /// <summary>Record one completion (advancing the count) unless already at the cap.</summary>
+        public static void RecordCompletion(string questId, int cap)
         {
             ZoneSystem zs = ZoneSystem.instance;
             if (zs == null || string.IsNullOrEmpty(questId))
                 return;
+            if (cap <= 0)
+                cap = DefaultMaxScaling;
 
-            int n = Completed(questId);
-            if (n < MaxScaling)
+            int n = Completed(questId, cap);
+            if (n < cap)
                 zs.SetGlobalKey(Key(questId, n + 1));
         }
     }

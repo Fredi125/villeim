@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.34.0 — Quests rotate and pay off more
+
+### Added
+- **Rotating recipes:** each quest now holds a **pool of recipes** and cycles to the next one after
+  every turn-in, so a repeated quest keeps asking for different things. The two starter quests each
+  have two recipes (e.g. the Provisioner alternates a wood/resin/leather order with a stone/flint/
+  feathers one).
+
+### Changed
+- **Scaling is now tunable per quest, and rewards outpace costs.** Required items grow **+50%** of the
+  base per completion while the reward grows **+75%**, so repeats get steadily more lucrative. Each
+  quest can set its own cost growth, reward growth, and plateau cap in `vendors.json`. ConfigVersion
+  12 → 13 (the quest format changed; the file regenerates).
+
 ## 3.33.0 — Quests scale up as you repeat them
 
 ### Added

@@ -25,7 +25,8 @@ so they're grouped together instead of scattered through *Misc*.
 - **Bounty Board** — posts (or dismisses) every bounty-giver in a row at once (the five biome
   trophy bounties plus a Resin bounty).
 - **Quest Board** — posts multi-item **quest-givers**: hand in several different items at once for a
-  reward (a first step toward deeper quests, beyond the single-item bounties).
+  reward. Repeatable quests **rotate** through a pool of recipes and **scale up** each turn-in (the
+  reward grows faster than the cost), tracked per world like reputation.
 - **Guard Post** — posts (or dismisses) a guard that wards off nearby monsters.
 - **Decorative world structures** — a curated set of vanilla buildings (abandoned houses, ruins)
   registered as plain buildable scenery.
