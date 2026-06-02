@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.20.0 — Building discovery scan (redesign groundwork)
+
+### Added
+- On first entering a world, the mod now logs every building-like prefab the game has
+  (`Building-prefab candidates (N): ...`) — the real list we'll pick ~3 decorative structures per
+  biome from, for the upcoming spawner/decoration split. Runs once, read-only, via a coroutine that
+  waits for ZNetScene (it isn't populated at the menu, which is why the earlier scan no-op'd).
+
 ## 3.19.1 — Lift inside-spawned villagers
 
 ### Fixed

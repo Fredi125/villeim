@@ -40,6 +40,10 @@ namespace VillageLife.Plugin
             PrefabManager.OnVanillaPrefabsAvailable += OnPrefabsAvailable;
 
             Jotunn.Logger.LogInfo($"{Constants.PluginName} v{Constants.PluginVersion} loaded.");
+
+            // Once a world is loaded, log the building-like prefabs so we can pick decorative
+            // structures per biome from a real list (ZNetScene isn't populated until in-world).
+            StartCoroutine(DiscoverBuildingsWhenReady());
         }
 
         private void OnPrefabsAvailable()
@@ -53,6 +57,18 @@ namespace VillageLife.Plugin
             // the mod references resolves, logging any that don't. This is the same moment Jötunn
             // resolves the station requirements above, so the audit sees exactly what the game will.
             ItemNameAudit.Run();
+        }
+
+        /// <summary>Wait until a world is loaded (ZNetScene populated), then log building prefabs once.</summary>
+        private System.Collections.IEnumerator DiscoverBuildingsWhenReady()
+        {
+            while (ZNetScene.instance == null ||
+                   ZNetScene.instance.m_prefabs == null ||
+                   ZNetScene.instance.m_prefabs.Count == 0)
+            {
+                yield return new UnityEngine.WaitForSeconds(1f);
+            }
+            WorldStructures.LogBuildingCandidates();
         }
     }
 }

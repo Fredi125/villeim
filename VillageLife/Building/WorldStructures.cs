@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
@@ -93,6 +94,56 @@ namespace VillageLife.Building
             }
 
             Jotunn.Logger.LogInfo($"[VillageLife] World structures: {ok} buildable, {skipped} skipped.");
+        }
+
+        /// <summary>
+        /// Log every loaded prefab whose name looks like a building, so we can pick decorative
+        /// structures per biome from a real list instead of guessing. Read-only; call only once
+        /// ZNetScene is populated (in-world).
+        /// </summary>
+        public static void LogBuildingCandidates()
+        {
+            try
+            {
+                ZNetScene zs = ZNetScene.instance;
+                if (zs == null || zs.m_prefabs == null)
+                {
+                    Jotunn.Logger.LogInfo("[VillageLife] Building discovery: ZNetScene not ready.");
+                    return;
+                }
+
+                string[] keywords =
+                {
+                    "house", "tower", "ruin", "dvergr", "hut", "cabin", "shack", "castle",
+                    "village", "longhouse", "fuling", "draugr", "goblin", "crypt", "fortress"
+                };
+
+                var found = new List<string>();
+                foreach (GameObject p in zs.m_prefabs)
+                {
+                    if (p == null)
+                        continue;
+                    string lower = p.name.ToLowerInvariant();
+                    foreach (string k in keywords)
+                    {
+                        if (lower.Contains(k))
+                        {
+                            found.Add(p.name);
+                            break;
+                        }
+                    }
+                }
+                found.Sort();
+
+                Jotunn.Logger.LogInfo($"[VillageLife] Building-prefab candidates ({found.Count}):");
+                const int chunk = 20;
+                for (int i = 0; i < found.Count; i += chunk)
+                    Jotunn.Logger.LogInfo("  " + string.Join(", ", found.GetRange(i, Math.Min(chunk, found.Count - i))));
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogWarning($"[VillageLife] Building discovery failed: {e.Message}");
+            }
         }
     }
 }
