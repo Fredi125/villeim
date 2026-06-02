@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.36.0 — Experimental: alternate villager model (opt-in)
+
+### Added
+- A new **Experimental → VillagerBasePrefab** config (default empty = off, zero impact). Set it to
+  another NPC prefab name — e.g. `Hildir` — and villagers clone from that model instead of Haldor for
+  a genuinely different look. It's clearly experimental: a non-Haldor base keeps a `Character`/AI this
+  mod normally avoids (so it may be attackable or wander), the mod strips obvious AI defensively, and
+  it falls back to Haldor if the prefab can't be cloned. A proof of concept to gauge stability before
+  any real commitment — the safe colour/size variation remains the default.
+
 ## 3.35.0 — Villagers come in different colours
 
 ### Added

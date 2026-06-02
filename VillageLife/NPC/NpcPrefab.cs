@@ -1,5 +1,6 @@
 using Jotunn.Managers;
 using UnityEngine;
+using VillageLife.Plugin;
 using VillageLife.Util;
 
 namespace VillageLife.NPC
@@ -80,22 +81,58 @@ namespace VillageLife.NPC
             Jotunn.Logger.LogInfo("[VillageLife] Guard prefab registered.");
         }
 
-        /// <summary>Clone Haldor (resolvable via PrefabManager) and make it persist with the world.</summary>
+        /// <summary>Clone the villager base (Haldor by default) and make it persist with the world.
+        /// An experimental config can point this at another NPC prefab for a different look; that path
+        /// strips obvious AI and falls back to Haldor if the prefab can't be cloned.</summary>
         private static GameObject Clone(string name)
         {
-            GameObject prefab = PrefabManager.Instance.CreateClonedPrefab(name, Constants.NpcBasePrefab);
+            string baseName = ExperimentalBase();
+
+            GameObject prefab = PrefabManager.Instance.CreateClonedPrefab(name, baseName);
+            if (prefab == null && baseName != Constants.NpcBasePrefab)
+            {
+                Jotunn.Logger.LogWarning(
+                    $"[VillageLife] Experimental villager base '{baseName}' didn't resolve; using Haldor.");
+                baseName = Constants.NpcBasePrefab;
+                prefab = PrefabManager.Instance.CreateClonedPrefab(name, baseName);
+            }
             if (prefab == null)
             {
-                Jotunn.Logger.LogError(
-                    $"[VillageLife] Could not clone '{Constants.NpcBasePrefab}' for '{name}'.");
+                Jotunn.Logger.LogError($"[VillageLife] Could not clone '{baseName}' for '{name}'.");
                 return null;
             }
+
+            // A non-Haldor base is a real creature: strip its movement/combat/loot behaviour so it
+            // stands still and friendly, keeping the model, animator, Trader and ZNetView. Done by
+            // type name so it compiles on any build and silently no-ops for components it lacks.
+            if (baseName != Constants.NpcBasePrefab)
+                Neutralize(prefab);
 
             var nview = prefab.GetComponent<ZNetView>();
             if (nview != null)
                 nview.m_persistent = true;
 
             return prefab;
+        }
+
+        /// <summary>The configured experimental base prefab, or Haldor when unset.</summary>
+        private static string ExperimentalBase()
+        {
+            var cfg = VillageLifePlugin.VillagerBasePrefab;
+            string name = cfg != null ? cfg.Value : null;
+            return string.IsNullOrWhiteSpace(name) ? Constants.NpcBasePrefab : name.Trim();
+        }
+
+        /// <summary>Strip the crash- and wander-prone behaviour from a non-Haldor NPC base.</summary>
+        private static void Neutralize(GameObject prefab)
+        {
+            foreach (string comp in new[]
+                { "MonsterAI", "AnimalAI", "BaseAI", "Tameable", "CharacterDrop", "Growup", "Procreation" })
+            {
+                Component c = prefab.GetComponent(comp);
+                if (c != null)
+                    Object.DestroyImmediate(c);
+            }
         }
     }
 }

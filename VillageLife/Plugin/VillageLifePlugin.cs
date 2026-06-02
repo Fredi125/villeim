@@ -21,8 +21,19 @@ namespace VillageLife.Plugin
         /// <summary>How far in front of the Village Hall (metres) a new villager appears.</summary>
         public static ConfigEntry<float> SpawnDistance;
 
+        /// <summary>EXPERIMENTAL: an alternate NPC prefab to clone villagers from (empty = Haldor).</summary>
+        public static ConfigEntry<string> VillagerBasePrefab;
+
         private void Awake()
         {
+            VillagerBasePrefab = Config.Bind(
+                "Experimental", "VillagerBasePrefab", "",
+                "EXPERIMENTAL — clone villagers from this NPC prefab instead of Haldor, for a " +
+                "different look (try \"Hildir\"). Empty = Haldor (the stable default). A non-Haldor " +
+                "model keeps a Character/AI that this mod normally avoids, so it may be attackable, " +
+                "wander, or be unstable; the mod strips obvious AI defensively and falls back to " +
+                "Haldor if the prefab can't be cloned. Restart to apply.");
+
             SpawnDistance = Config.Bind(
                 "General", "SpawnDistance", 2.5f,
                 "How far in front of the Village Hall (in metres) a new villager spawns.");
