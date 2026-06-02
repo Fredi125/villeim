@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.33.0 — Quests scale up as you repeat them
+
+### Added
+- **Repeatable quests now grow.** Each time you complete a quest, its required items **and** its
+  reward climb by **+50% of the base** (first turn-in is the base, then ×1.5, ×2, ×2.5, …). The
+  quest-giver's hover always shows the current amounts and how many times you've completed it.
+  Progress is stored per world (like reputation), so it persists and syncs in co-op, and it plateaus
+  after 10 completions to keep things bounded (still repeatable at that size).
+
 ## 3.32.0 — Quests (proof of concept)
 
 ### Added

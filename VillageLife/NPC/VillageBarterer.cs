@@ -96,10 +96,13 @@ namespace VillageLife.NPC
             string action;
             if (t.IsQuest)
             {
+                int done = QuestProgress.Completed(t.Id);
                 string list = "";
                 foreach (QuestItem q in t.QuestItems)
-                    list += (list.Length > 0 ? ", " : "") + $"{q.Amount} {ItemNames.Display(q.Prefab)}";
-                body = $"Quest: {list}\nReward: {t.GiveAmount} {ItemNames.Display(t.GivePrefab)}";
+                    list += (list.Length > 0 ? ", " : "") + $"{QuestProgress.Scale(q.Amount, done)} {ItemNames.Display(q.Prefab)}";
+                int reward = QuestProgress.Scale(t.GiveAmount, done);
+                string repeat = done > 0 ? $" <color=#aab4ff>(completed {done}×)</color>" : "";
+                body = $"Quest{repeat}: {list}\nReward: {reward} {ItemNames.Display(t.GivePrefab)}";
                 action = "Hand in";
             }
             else
@@ -205,7 +208,10 @@ namespace VillageLife.NPC
                 return;
             }
 
-            // First pass: resolve and verify every requirement, removing nothing.
+            // The quest scales up by 50% of the base per prior completion (world-global, capped).
+            int done = QuestProgress.Completed(t.Id);
+
+            // First pass: resolve and verify every (scaled) requirement, removing nothing.
             foreach (QuestItem q in t.QuestItems)
             {
                 string shared = ItemNames.SharedName(q.Prefab);
@@ -216,11 +222,12 @@ namespace VillageLife.NPC
                     return;
                 }
 
+                int need = QuestProgress.Scale(q.Amount, done);
                 int have = inv.CountItems(shared);
-                if (have < q.Amount)
+                if (have < need)
                 {
                     player.Message(MessageHud.MessageType.Center,
-                        $"Quest needs {q.Amount} {ItemNames.Display(q.Prefab)} (you have {have}).");
+                        $"Quest needs {need} {ItemNames.Display(q.Prefab)} (you have {have}).");
                     return;
                 }
             }
@@ -231,13 +238,16 @@ namespace VillageLife.NPC
                 return;
             }
 
-            // Second pass: requirements met — take everything, then give the reward.
+            // Second pass: requirements met — take everything, then give the scaled reward.
             foreach (QuestItem q in t.QuestItems)
-                inv.RemoveItem(ItemNames.SharedName(q.Prefab), q.Amount);
-            inv.AddItem(t.GivePrefab, t.GiveAmount, 1, 0, 0L, "");
+                inv.RemoveItem(ItemNames.SharedName(q.Prefab), QuestProgress.Scale(q.Amount, done));
+            int reward = QuestProgress.Scale(t.GiveAmount, done);
+            inv.AddItem(t.GivePrefab, reward, 1, 0, 0L, "");
 
+            QuestProgress.RecordCompletion(t.Id);
+            string more = done < QuestProgress.MaxScaling ? " The next order will be larger." : "";
             player.Message(MessageHud.MessageType.Center,
-                $"Quest complete! Received {t.GiveAmount} {ItemNames.Display(t.GivePrefab)}.");
+                $"Quest complete! Received {reward} {ItemNames.Display(t.GivePrefab)}.{more}");
 
             GrantReputation(player, t);
         }
