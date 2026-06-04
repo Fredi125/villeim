@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.37.0 — Summon villagers at your feet
+
+### Changed
+- Villagers now spawn **where the player is standing** instead of in front of the station, so you can
+  walk around a spawner and summon a few to **place them yourself** around the building. (You still
+  have to be close enough to Use the station, so they always end up nearby.) The `SpawnDistance`
+  config now nudges them forward from you and **defaults to 0** (right at your feet); raise it if you'd
+  rather they appear a step ahead.
+
 ## 3.36.0 — Experimental: alternate villager model (opt-in)
 
 ### Added

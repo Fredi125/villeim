@@ -18,7 +18,7 @@ namespace VillageLife.Plugin
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
     public class VillageLifePlugin : BaseUnityPlugin
     {
-        /// <summary>How far in front of the Village Hall (metres) a new villager appears.</summary>
+        /// <summary>How far in front of the player (metres) a summoned villager appears (0 = at feet).</summary>
         public static ConfigEntry<float> SpawnDistance;
 
         /// <summary>EXPERIMENTAL: an alternate NPC prefab to clone villagers from (empty = Haldor).</summary>
@@ -35,8 +35,9 @@ namespace VillageLife.Plugin
                 "Haldor if the prefab can't be cloned. Restart to apply.");
 
             SpawnDistance = Config.Bind(
-                "General", "SpawnDistance", 2.5f,
-                "How far in front of the Village Hall (in metres) a new villager spawns.");
+                "General", "SpawnDistance", 0f,
+                "How far in front of the player (in metres) a summoned villager appears. 0 = right at " +
+                "your feet, so you can place a few around a spawner by summoning from different spots.");
 
             // Load the vendor catalogue from BepInEx/config/VillageLife/vendors.json (writes
             // defaults on first run; falls back to built-in defaults if the file is bad). Done

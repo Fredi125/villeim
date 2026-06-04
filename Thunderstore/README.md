@@ -59,7 +59,7 @@ grows.
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| SpawnDistance | 2.5 | How far in front of a station (metres) a villager appears |
+| SpawnDistance | 0 | How far in front of the player (metres) a summoned villager appears (0 = at your feet) |
 
 Villagers themselves are defined in `BepInEx/config/VillageLife/vendors.json`, written with defaults
 on first run. Edit it to tweak types, goods, prices and barter rates with no rebuild — the file

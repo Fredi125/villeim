@@ -362,20 +362,24 @@ namespace VillageLife.Building
             if (player == null)
                 return false;
 
-            float distance = VillageLifePlugin.SpawnDistance != null
-                ? VillageLifePlugin.SpawnDistance.Value
-                : 2.5f;
-
             Vector3 frontCenter;
             if (_spawnInside)
             {
-                // Building-based posts (e.g. the Meadows house) put the villager inside, lifted onto
-                // the floor rather than sunk into it.
+                // Building-based posts put the villager inside, lifted onto the floor.
                 frontCenter = transform.position + Vector3.up * InsideLift;
             }
             else
             {
-                frontCenter = transform.position + transform.forward * distance;
+                // Spawn where the player is standing — villagers appear at your feet, so you can walk
+                // around the building and summon a few to arrange them. SpawnDistance optionally nudges
+                // them forward (0 = exactly at your feet). You must be close enough to Use the station,
+                // so they always end up near it.
+                float offset = VillageLifePlugin.SpawnDistance != null ? VillageLifePlugin.SpawnDistance.Value : 0f;
+                Vector3 fwd = player.transform.forward;
+                fwd.y = 0f;
+                frontCenter = player.transform.position;
+                if (offset != 0f && fwd.sqrMagnitude > 0.0001f)
+                    frontCenter += fwd.normalized * offset;
                 frontCenter.y = GroundHeight(frontCenter);
             }
 
