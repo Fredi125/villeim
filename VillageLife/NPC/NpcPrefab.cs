@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Jotunn.Managers;
 using UnityEngine;
@@ -194,9 +193,9 @@ namespace VillageLife.NPC
                     $"[VillageLife] Villager-model candidates — other humanoids ({humanoids.Count}, experimental):");
                 const int chunk = 20;
                 for (int i = 0; i < humanoids.Count; i += chunk)
-                    Jotunn.Logger.LogInfo("  " + string.Join(", ", humanoids.GetRange(i, Math.Min(chunk, humanoids.Count - i))));
+                    Jotunn.Logger.LogInfo("  " + string.Join(", ", humanoids.GetRange(i, System.Math.Min(chunk, humanoids.Count - i))));
             }
-            catch (Exception e)
+            catch (System.Exception e)
             {
                 Jotunn.Logger.LogWarning($"[VillageLife] Model-candidate scan failed: {e.Message}");
             }

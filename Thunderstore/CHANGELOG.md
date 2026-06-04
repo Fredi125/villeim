@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.38.1 — Build fix
+
+### Fixed
+- Fixed build errors from 3.38.0: an ambiguous `Object` reference in `NpcPrefab` (caused by a stray
+  `using System;`). Also modernized the deprecated `FindObjectsOfType` calls to `FindObjectsByType`
+  and removed the leftover, never-set `SpawnInside` field — the build is now clean and warning-free.
+
 ## 3.38.0 — Hildir is the default, and models can vary by role
 
 ### Changed

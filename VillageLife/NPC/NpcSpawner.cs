@@ -136,9 +136,9 @@ namespace VillageLife.NPC
                 return 0;
 
             float r2 = radius * radius;
-            return DestroyNear(Object.FindObjectsOfType<VillageMerchant>(), center, r2)
-                 + DestroyNear(Object.FindObjectsOfType<VillageBarterer>(), center, r2)
-                 + DestroyNear(Object.FindObjectsOfType<VillageGuard>(), center, r2);
+            return DestroyNear(Object.FindObjectsByType<VillageMerchant>(FindObjectsSortMode.None), center, r2)
+                 + DestroyNear(Object.FindObjectsByType<VillageBarterer>(FindObjectsSortMode.None), center, r2)
+                 + DestroyNear(Object.FindObjectsByType<VillageGuard>(FindObjectsSortMode.None), center, r2);
         }
 
         private static int DestroyNear<T>(T[] components, Vector3 center, float radiusSqr) where T : Component

@@ -272,7 +272,7 @@ namespace VillageLife.NPC
                     ? $"{trader.Title}: reputation {level}/{max} — all goods unlocked!"
                     : $"{trader.Title}: reputation {level}/{max} — new goods unlocked!");
 
-            foreach (VillageMerchant m in Object.FindObjectsOfType<VillageMerchant>())
+            foreach (VillageMerchant m in Object.FindObjectsByType<VillageMerchant>(FindObjectsSortMode.None))
                 if (m != null && m.VendorTypeId == t.UnlocksVendorId)
                     m.RefreshStock();
         }

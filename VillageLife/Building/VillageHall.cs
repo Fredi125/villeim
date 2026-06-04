@@ -31,7 +31,6 @@ namespace VillageLife.Building
             public string VendorId;     // null = use the rotation (Village Hall); else a specific vendor id.
             public string[] VendorIds;  // when set, the station posts several specific vendors at once (Bounty Board).
             public string[] MenuVendorIds; // when set, [Use] opens the spawn panel to pick from these (biome spawners).
-            public bool SpawnInside;    // spawn the villager inside the structure (for building-based posts).
             public RequirementConfig[] Requirements;
         }
 
@@ -298,7 +297,7 @@ namespace VillageLife.Building
                 var interaction = prefab.GetComponent<StationInteraction>();
                 if (interaction == null)
                     interaction = prefab.AddComponent<StationInteraction>();
-                interaction.Configure(def.DisplayName, def.VendorId, def.VendorIds, def.SpawnInside, def.MenuVendorIds);
+                interaction.Configure(def.DisplayName, def.VendorId, def.VendorIds, def.MenuVendorIds);
             }
 
             PieceManager.Instance.AddPiece(piece);
@@ -317,24 +316,18 @@ namespace VillageLife.Building
         // enough not to grab a neighbouring post's merchant in a tightly-packed trading hub.
         private const float MerchantRadius = 3f;
 
-        // Lift for inside-spawned villagers so they stand on the floor instead of sinking into it
-        // (the structure's pivot sits at the foundation, a bit below the floor surface).
-        private const float InsideLift = 1f;
-
         // Set on the prefab at registration; serialized by Unity so placed instances keep them.
         [SerializeField] private string _displayName = "Village Hall";
         [SerializeField] private string _vendorId = "";
         [SerializeField] private string _vendorIds = "";   // CSV; non-empty = a board that posts several at once.
-        [SerializeField] private bool _spawnInside;        // spawn the villager inside (building-based posts).
         [SerializeField] private string _menuVendorIds = ""; // CSV; non-empty = [Use] opens the spawn panel for these.
 
         public void Configure(string displayName, string vendorId, string[] vendorIds = null,
-            bool spawnInside = false, string[] menuVendorIds = null)
+            string[] menuVendorIds = null)
         {
             _displayName = displayName;
             _vendorId = vendorId ?? "";
             _vendorIds = (vendorIds != null && vendorIds.Length > 0) ? string.Join(",", vendorIds) : "";
-            _spawnInside = spawnInside;
             _menuVendorIds = (menuVendorIds != null && menuVendorIds.Length > 0) ? string.Join(",", menuVendorIds) : "";
         }
 
@@ -362,26 +355,17 @@ namespace VillageLife.Building
             if (player == null)
                 return false;
 
-            Vector3 frontCenter;
-            if (_spawnInside)
-            {
-                // Building-based posts put the villager inside, lifted onto the floor.
-                frontCenter = transform.position + Vector3.up * InsideLift;
-            }
-            else
-            {
-                // Spawn where the player is standing — villagers appear at your feet, so you can walk
-                // around the building and summon a few to arrange them. SpawnDistance optionally nudges
-                // them forward (0 = exactly at your feet). You must be close enough to Use the station,
-                // so they always end up near it.
-                float offset = VillageLifePlugin.SpawnDistance != null ? VillageLifePlugin.SpawnDistance.Value : 0f;
-                Vector3 fwd = player.transform.forward;
-                fwd.y = 0f;
-                frontCenter = player.transform.position;
-                if (offset != 0f && fwd.sqrMagnitude > 0.0001f)
-                    frontCenter += fwd.normalized * offset;
-                frontCenter.y = GroundHeight(frontCenter);
-            }
+            // Spawn where the player is standing — villagers appear at your feet, so you can walk
+            // around the building and summon a few to arrange them. SpawnDistance optionally nudges
+            // them forward (0 = exactly at your feet). You must be close enough to Use the station, so
+            // they always end up near it.
+            float offset = VillageLifePlugin.SpawnDistance != null ? VillageLifePlugin.SpawnDistance.Value : 0f;
+            Vector3 fwd = player.transform.forward;
+            fwd.y = 0f;
+            Vector3 frontCenter = player.transform.position;
+            if (offset != 0f && fwd.sqrMagnitude > 0.0001f)
+                frontCenter += fwd.normalized * offset;
+            frontCenter.y = GroundHeight(frontCenter);
 
             string[] menuIds = SplitIds(_menuVendorIds);
             if (menuIds.Length > 0)
