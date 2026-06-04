@@ -61,6 +61,7 @@ namespace VillageLife.NPC
         public string Title;
         public string Kind = "coin";   // "coin" = vanilla shop window; "barter" = fixed swap.
         public string Biome = "";      // Optional tag for biome-themed vendors (forward-looking).
+        public string Model = "";      // Optional NPC prefab to clone for this villager's look (empty = default).
 
         // Coin shop: the goods sold for coins (include a high-priced "rare" entry if desired).
         public VendorGood[] Goods;
@@ -121,7 +122,7 @@ namespace VillageLife.NPC
         /// regenerates an out-of-date vendors.json from these defaults (keeping a .bak), so value
         /// tweaks here reach an existing install without a manual file delete.
         /// </summary>
-        public const int ConfigVersion = 13;
+        public const int ConfigVersion = 14;
 
         /// <summary>Built-in safety net, also used to seed vendors.json on first run.</summary>
         public static VendorType[] DefaultVendors => new[]
@@ -327,7 +328,7 @@ namespace VillageLife.NPC
             // time. No reputation (resin spans biomes) — just a reliable early coin faucet.
             new VendorType
             {
-                Id = "bounty_resin", Title = "Resin Bounty", Kind = "barter",
+                Id = "bounty_resin", Title = "Resin Bounty", Kind = "barter", Model = "Haldor",
                 CostPrefab = "Resin", CostAmount = 5,
                 GivePrefab = "Coins", GiveAmount = 10,
             },

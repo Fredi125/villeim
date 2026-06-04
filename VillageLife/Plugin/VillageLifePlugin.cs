@@ -28,11 +28,11 @@ namespace VillageLife.Plugin
         {
             VillagerBasePrefab = Config.Bind(
                 "Experimental", "VillagerBasePrefab", "",
-                "EXPERIMENTAL — clone villagers from this NPC prefab instead of Haldor, for a " +
-                "different look (try \"Hildir\"). Empty = Haldor (the stable default). A non-Haldor " +
-                "model keeps a Character/AI that this mod normally avoids, so it may be attackable, " +
-                "wander, or be unstable; the mod strips obvious AI defensively and falls back to " +
-                "Haldor if the prefab can't be cloned. Restart to apply.");
+                "Override the global villager model with this NPC prefab. Empty = the built-in default " +
+                "(Hildir). The BepInEx log lists candidate prefab names on world load (search " +
+                "\"Villager-model candidates\"). A creature model's wander/combat AI is stripped on " +
+                "clone, and it falls back to Haldor if the prefab can't be cloned. Per-type looks can " +
+                "also be set in vendors.json (a vendor's \"Model\"). Restart to apply.");
 
             SpawnDistance = Config.Bind(
                 "General", "SpawnDistance", 0f,
@@ -81,6 +81,7 @@ namespace VillageLife.Plugin
                 yield return new UnityEngine.WaitForSeconds(1f);
             }
             WorldStructures.LogBuildingCandidates();
+            NpcPrefab.LogModelCandidates();
         }
     }
 }

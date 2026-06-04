@@ -9,7 +9,7 @@ namespace VillageLife.Util
         // Plugin identity
         public const string PluginGuid = "com.villagelife.mod";
         public const string PluginName = "VillageLife";
-        public const string PluginVersion = "3.37.0";
+        public const string PluginVersion = "3.38.0";
 
         // Prefab names for the content we register (cloned from the vanilla prefabs below).
         // Two villager prefabs: one keeps Haldor's Trader (coin shop), one has it removed and
@@ -19,10 +19,12 @@ namespace VillageLife.Util
         public const string GuardPrefabName = "VL_Guard";
         public const string VillageHallPrefabName = "VL_VillageHall";
 
-        // Vanilla prefabs we clone. Haldor is a friendly, stationary, non-combat trader with
-        // no Character/AI component — so we keep his Trader (real shop UI) for our merchant.
-        // The workbench is a known-good buildable piece.
-        public const string NpcBasePrefab = "Haldor";
+        // NPC prefabs we clone for villagers. Hildir is the default look; Haldor is the reliable
+        // fallback (a friendly, stationary, no-Character/AI trader). The model can also be set globally
+        // (the Experimental config) or per villager type (VendorType.Model); a creature model's wander/
+        // combat AI is stripped on clone so it stands still and friendly. Workbench = known-good piece.
+        public const string NpcBasePrefab = "Hildir";
+        public const string NpcFallbackPrefab = "Haldor";
         public const string HallBasePrefab = "piece_workbench";
 
         // Single custom Hammer tab that groups every VillageLife buildable. Jötunn auto-creates the

@@ -81,15 +81,19 @@ namespace VillageLife.NPC
             if (ZNetScene.instance == null)
                 return result;
 
-            string prefabName;
+            string baseKind;
             if (string.Equals(type.Kind, "guard", System.StringComparison.OrdinalIgnoreCase))
-                prefabName = Constants.GuardPrefabName;
+                baseKind = Constants.GuardPrefabName;
             else if (type.IsBarter)
-                prefabName = Constants.BartererPrefabName;
+                baseKind = Constants.BartererPrefabName;
             else
-                prefabName = Constants.MerchantPrefabName;
+                baseKind = Constants.MerchantPrefabName;
 
+            // Per-type model: a vendor can request a specific look via its Model; otherwise the default.
+            string prefabName = NpcPrefab.VariantPrefab(baseKind, type.Model);
             GameObject prefab = ZNetScene.instance.GetPrefab(prefabName);
+            if (prefab == null && prefabName != baseKind)
+                prefab = ZNetScene.instance.GetPrefab(baseKind);   // variant missing → fall back to default look
             if (prefab == null)
             {
                 Jotunn.Logger.LogError($"[VillageLife] Prefab '{prefabName}' not found in ZNetScene.");

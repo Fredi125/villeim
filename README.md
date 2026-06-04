@@ -47,9 +47,12 @@ so they're grouped together instead of scattered through *Misc*.
 - **Reputation** — completing a biome's bounty raises a world-global reputation level for that
   trader, which **unlocks higher-tier goods** (for example, the Black Forest's fine wood and each
   biome's premium "rare" item). Reputation is shown in the shop title and the bounty hover text.
-- **Named & persistent** — every villager's name, type, size and reputation are persisted in the ZDO,
-  so they survive save/reload and sync in co-op. Villagers are non-hostile, stationary networked
-  objects like Haldor.
+- **Named & persistent** — every villager's name, type, size, colour and reputation are persisted in
+  the ZDO, so they survive save/reload and sync in co-op. Villagers are non-hostile, stationary
+  networked NPCs.
+- **Varied looks** — villagers use the **Hildir** model by default (Haldor is the fallback), each with
+  a gentle random size and colour. A vendor type can request its own model, and the global model is
+  configurable; a creature model's wander/combat AI is stripped on clone so it stays put and friendly.
 
 Villagers are defined in `BepInEx/config/VillageLife/vendors.json` (written with defaults on first
 run). Edit it to change types, goods, prices, or barter rates — no rebuild needed. The file carries a
@@ -63,7 +66,7 @@ VillageLife/
   Plugin/VillageLifePlugin.cs   BepInEx entry point; binds config; registers content on the PrefabManager event
   Util/Constants.cs             Prefab names, the "VillageLife" build-tab name, hashed ZDO keys, version
   NPC/
-    NpcPrefab.cs                Registers the three villager prefabs (Haldor clones): merchant, barterer, guard
+    NpcPrefab.cs                Registers villager prefabs (Hildir/Haldor/etc. clones) per model: merchant, barterer, guard
     NpcSpawner.cs               Single spawn seam; routes coin/barter/guard by vendor kind; RemoveNear() dismisses
     VendorCatalog.cs            Vendor data model + built-in defaults + ConfigVersion; the in-memory catalogue
     VendorConfigLoader.cs       Loads/writes vendors.json; regenerates on a version change; falls back to defaults
@@ -86,9 +89,10 @@ VillageLife/
 
 ### Design principles (why it should stay reliable)
 
-- **Clone vanilla, don't hand-build.** Villagers are Haldor clones registered through Jötunn's
-  `PrefabManager`; stations are Jötunn `CustomPiece`s cloned from vanilla build pieces. No manual
-  prefab construction. Coin merchants keep Haldor's own `Trader`, so the shop UI is vanilla.
+- **Clone vanilla, don't hand-build.** Villagers are NPC clones (Hildir by default, Haldor as a
+  fallback) registered through Jötunn's `PrefabManager`; stations are Jötunn `CustomPiece`s cloned
+  from vanilla build pieces. No manual prefab construction. Coin merchants keep the model's own
+  `Trader`, so the shop UI is vanilla; a creature model's AI is stripped on clone so it stays put.
 - **One build tab.** Every piece is placed in a single Jötunn-created **"VillageLife"** Hammer tab so
   the content groups together. (An earlier rebuild used the vanilla *Misc* tab as a precaution; the
   custom tab now works reliably through Jötunn.)

@@ -1,5 +1,22 @@
 # Changelog
 
+## 3.38.0 — Hildir is the default, and models can vary by role
+
+### Changed
+- **Villagers now look like Hildir by default** instead of Haldor (Haldor remains the reliable
+  fallback). Any creature model's wander/combat AI is stripped on clone so it stands still and
+  friendly.
+
+### Added
+- **Per-type villager models.** A vendor type can request its own look via a `Model` prefab name in
+  `vendors.json`. The **Resin Bounty** now uses **Haldor**, while everything else uses the default.
+  ConfigVersion 13 → 14.
+- **Model discovery in the log.** On world load the BepInEx log now lists *"Villager-model
+  candidates"* — Trader NPCs first (the safest, e.g. Haldor and Hildir), then other humanoids to
+  experiment with via the config or a vendor's `Model`.
+- The `VillagerBasePrefab` config is no longer just experimental — it cleanly overrides the global
+  model (default Hildir), falling back to Haldor if a name can't be cloned.
+
 ## 3.37.0 — Summon villagers at your feet
 
 ### Changed

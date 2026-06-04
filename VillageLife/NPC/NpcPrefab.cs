@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Jotunn.Managers;
 using UnityEngine;
 using VillageLife.Plugin;
@@ -6,51 +8,89 @@ using VillageLife.Util;
 namespace VillageLife.NPC
 {
     /// <summary>
-    /// Registers the two villager prefabs, both friendly, persistent clones of Haldor added as
-    /// PLAIN custom prefabs (not Jötunn "creatures" — the game log proved Haldor has no Character/
-    /// AI/Rigidbody, so CreatureManager rejects him; PrefabManager.AddPrefab injects the clone into
-    /// ZNetScene on every world load instead).
+    /// Registers the villager prefabs — friendly, persistent clones of an NPC model (Hildir by
+    /// default, Haldor as the reliable fallback). Three kinds per model:
+    ///   • <see cref="Constants.MerchantPrefabName"/> KEEPS the model's Trader (vanilla shop window);
+    ///   • <see cref="Constants.BartererPrefabName"/> has the Trader removed and a <see cref="VillageBarterer"/> added;
+    ///   • <see cref="Constants.GuardPrefabName"/> likewise, with a <see cref="VillageGuard"/>.
     ///
-    ///   • <see cref="Constants.MerchantPrefabName"/> — KEEPS Haldor's Trader, so the vanilla shop
-    ///     window, hover and Use interaction all come for free (coin shops).
-    ///   • <see cref="Constants.BartererPrefabName"/> — Trader REMOVED and a <see cref="VillageBarterer"/>
-    ///     added, which becomes the sole Hoverable/Interactable (fixed resource-for-product swap,
-    ///     no coins, no shop window). Keeping these as separate prefabs avoids two interactables on
-    ///     one object — the kind of ambiguity that bit earlier builds.
+    /// The model can be set globally (the Experimental <c>VillagerBasePrefab</c> config) or per villager
+    /// type (<see cref="VendorType.Model"/>). The default model keeps the plain prefab names, so
+    /// villagers placed by older versions still resolve; every other model gets suffixed variants
+    /// (e.g. <c>VL_Barterer__Haldor</c>), and <see cref="NpcSpawner"/> picks the right one.
     ///
-    /// A no-Character villager also can't enter the global character list, so it cannot trigger the
-    /// per-frame EnemyHud / GetCharactersInRange crashes seen with the old Player-based NPCs.
+    /// A creature model (like Hildir) is a real <c>Character</c>, so its wander/combat/loot AI is
+    /// stripped on clone (<see cref="Neutralize"/>) to leave a stationary, friendly NPC; that strip is
+    /// a no-op for Haldor, who has none of it. If a model can't be cloned the clone falls back to
+    /// Haldor, so a bad name only changes the look, never breaks the villager.
     /// </summary>
     public static class NpcPrefab
     {
         public static void Register()
         {
-            RegisterMerchant();
-            RegisterBarterer();
-            RegisterGuard();
+            string def = DefaultModel();
+            RegisterVariant(def, "");
+            foreach (string model in OverrideModels(def))
+                RegisterVariant(model, Suffix(model));
         }
 
-        private static void RegisterMerchant()
+        /// <summary>The default villager model: the Experimental config override, or Hildir.</summary>
+        public static string DefaultModel()
         {
-            GameObject prefab = Clone(Constants.MerchantPrefabName);
+            var cfg = VillageLifePlugin.VillagerBasePrefab;
+            string name = cfg != null ? cfg.Value : null;
+            return string.IsNullOrWhiteSpace(name) ? Constants.NpcBasePrefab : name.Trim();
+        }
+
+        /// <summary>The registered prefab name for a kind + model: the plain name for the default
+        /// model, or a suffixed variant otherwise. Used by <see cref="NpcSpawner"/>.</summary>
+        public static string VariantPrefab(string baseKind, string model)
+        {
+            if (string.IsNullOrWhiteSpace(model) || model.Trim() == DefaultModel())
+                return baseKind;
+            return baseKind + Suffix(model.Trim());
+        }
+
+        private static string Suffix(string model) => "__" + model;
+
+        /// <summary>Distinct non-default models any vendor type asks for (so we register their variants).</summary>
+        private static IEnumerable<string> OverrideModels(string def)
+        {
+            var set = new HashSet<string>();
+            foreach (VendorType v in VendorCatalog.All)
+                if (v != null && !string.IsNullOrWhiteSpace(v.Model) && v.Model.Trim() != def)
+                    set.Add(v.Model.Trim());
+            return set;
+        }
+
+        private static void RegisterVariant(string model, string suffix)
+        {
+            RegisterMerchant(Constants.MerchantPrefabName + suffix, model);
+            RegisterBarterer(Constants.BartererPrefabName + suffix, model);
+            RegisterGuard(Constants.GuardPrefabName + suffix, model);
+        }
+
+        private static void RegisterMerchant(string prefabName, string model)
+        {
+            GameObject prefab = Clone(prefabName, model);
             if (prefab == null)
                 return;
 
-            // Keep Haldor's Trader (vanilla shop UI + Use interaction). Companion sets name + stock.
+            // Keep the model's Trader (vanilla shop UI + Use interaction). Companion sets name + stock.
             if (prefab.GetComponent<VillageMerchant>() == null)
                 prefab.AddComponent<VillageMerchant>();
 
             PrefabManager.Instance.AddPrefab(prefab);
-            Jotunn.Logger.LogInfo("[VillageLife] Merchant prefab registered.");
+            Jotunn.Logger.LogInfo($"[VillageLife] Merchant prefab '{prefabName}' ({model}) registered.");
         }
 
-        private static void RegisterBarterer()
+        private static void RegisterBarterer(string prefabName, string model)
         {
-            GameObject prefab = Clone(Constants.BartererPrefabName);
+            GameObject prefab = Clone(prefabName, model);
             if (prefab == null)
                 return;
 
-            // Remove Haldor's Trader so our VillageBarterer is the only interactable.
+            // Remove the model's Trader so our VillageBarterer is the only interactable.
             var trader = prefab.GetComponent<Trader>();
             if (trader != null)
                 Object.DestroyImmediate(trader);
@@ -59,17 +99,17 @@ namespace VillageLife.NPC
                 prefab.AddComponent<VillageBarterer>();
 
             PrefabManager.Instance.AddPrefab(prefab);
-            Jotunn.Logger.LogInfo("[VillageLife] Barterer prefab registered.");
+            Jotunn.Logger.LogInfo($"[VillageLife] Barterer prefab '{prefabName}' ({model}) registered.");
         }
 
-        private static void RegisterGuard()
+        private static void RegisterGuard(string prefabName, string model)
         {
-            GameObject prefab = Clone(Constants.GuardPrefabName);
+            GameObject prefab = Clone(prefabName, model);
             if (prefab == null)
                 return;
 
-            // A guard has no shop, so (like the barterer) Haldor's Trader is removed and our
-            // VillageGuard becomes the only interactable.
+            // A guard has no shop, so (like the barterer) the Trader is removed and our VillageGuard
+            // becomes the only interactable.
             var trader = prefab.GetComponent<Trader>();
             if (trader != null)
                 Object.DestroyImmediate(trader);
@@ -78,35 +118,27 @@ namespace VillageLife.NPC
                 prefab.AddComponent<VillageGuard>();
 
             PrefabManager.Instance.AddPrefab(prefab);
-            Jotunn.Logger.LogInfo("[VillageLife] Guard prefab registered.");
+            Jotunn.Logger.LogInfo($"[VillageLife] Guard prefab '{prefabName}' ({model}) registered.");
         }
 
-        /// <summary>Clone the villager base (Haldor by default) and make it persist with the world.
-        /// An experimental config can point this at another NPC prefab for a different look; that path
-        /// strips obvious AI and falls back to Haldor if the prefab can't be cloned.</summary>
-        private static GameObject Clone(string name)
+        /// <summary>Clone an NPC model into a persistent villager prefab, stripping wander/combat AI
+        /// (a no-op for Haldor) and falling back to Haldor if the model can't be cloned.</summary>
+        private static GameObject Clone(string name, string model)
         {
-            string baseName = ExperimentalBase();
-
-            GameObject prefab = PrefabManager.Instance.CreateClonedPrefab(name, baseName);
-            if (prefab == null && baseName != Constants.NpcBasePrefab)
+            GameObject prefab = PrefabManager.Instance.CreateClonedPrefab(name, model);
+            if (prefab == null && model != Constants.NpcFallbackPrefab)
             {
                 Jotunn.Logger.LogWarning(
-                    $"[VillageLife] Experimental villager base '{baseName}' didn't resolve; using Haldor.");
-                baseName = Constants.NpcBasePrefab;
-                prefab = PrefabManager.Instance.CreateClonedPrefab(name, baseName);
+                    $"[VillageLife] Villager model '{model}' didn't resolve; using {Constants.NpcFallbackPrefab}.");
+                prefab = PrefabManager.Instance.CreateClonedPrefab(name, Constants.NpcFallbackPrefab);
             }
             if (prefab == null)
             {
-                Jotunn.Logger.LogError($"[VillageLife] Could not clone '{baseName}' for '{name}'.");
+                Jotunn.Logger.LogError($"[VillageLife] Could not clone a villager model for '{name}'.");
                 return null;
             }
 
-            // A non-Haldor base is a real creature: strip its movement/combat/loot behaviour so it
-            // stands still and friendly, keeping the model, animator, Trader and ZNetView. Done by
-            // type name so it compiles on any build and silently no-ops for components it lacks.
-            if (baseName != Constants.NpcBasePrefab)
-                Neutralize(prefab);
+            Neutralize(prefab);
 
             var nview = prefab.GetComponent<ZNetView>();
             if (nview != null)
@@ -115,15 +147,9 @@ namespace VillageLife.NPC
             return prefab;
         }
 
-        /// <summary>The configured experimental base prefab, or Haldor when unset.</summary>
-        private static string ExperimentalBase()
-        {
-            var cfg = VillageLifePlugin.VillagerBasePrefab;
-            string name = cfg != null ? cfg.Value : null;
-            return string.IsNullOrWhiteSpace(name) ? Constants.NpcBasePrefab : name.Trim();
-        }
-
-        /// <summary>Strip the crash- and wander-prone behaviour from a non-Haldor NPC base.</summary>
+        /// <summary>Strip wander/combat/loot/breeding behaviour from a creature-based model so it
+        /// stands still and friendly. By type name, so it no-ops for components a model lacks
+        /// (Haldor has none of these).</summary>
         private static void Neutralize(GameObject prefab)
         {
             foreach (string comp in new[]
@@ -132,6 +158,47 @@ namespace VillageLife.NPC
                 Component c = prefab.GetComponent(comp);
                 if (c != null)
                     Object.DestroyImmediate(c);
+            }
+        }
+
+        /// <summary>
+        /// Log NPC prefabs that could serve as villager models — Trader-NPCs first (the safest,
+        /// e.g. Haldor and Hildir), then other humanoids to experiment with via the config or a
+        /// vendor's Model. Read-only; call once a world is loaded (ZNetScene populated).
+        /// </summary>
+        public static void LogModelCandidates()
+        {
+            try
+            {
+                ZNetScene zs = ZNetScene.instance;
+                if (zs == null || zs.m_prefabs == null)
+                    return;
+
+                var traders = new List<string>();
+                var humanoids = new List<string>();
+                foreach (GameObject p in zs.m_prefabs)
+                {
+                    if (p == null || p.GetComponent("Humanoid") == null)
+                        continue;
+                    if (p.GetComponent("Trader") != null)
+                        traders.Add(p.name);
+                    else
+                        humanoids.Add(p.name);
+                }
+                traders.Sort();
+                humanoids.Sort();
+
+                Jotunn.Logger.LogInfo(
+                    $"[VillageLife] Villager-model candidates — Trader NPCs (safest): {string.Join(", ", traders)}");
+                Jotunn.Logger.LogInfo(
+                    $"[VillageLife] Villager-model candidates — other humanoids ({humanoids.Count}, experimental):");
+                const int chunk = 20;
+                for (int i = 0; i < humanoids.Count; i += chunk)
+                    Jotunn.Logger.LogInfo("  " + string.Join(", ", humanoids.GetRange(i, Math.Min(chunk, humanoids.Count - i))));
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogWarning($"[VillageLife] Model-candidate scan failed: {e.Message}");
             }
         }
     }
