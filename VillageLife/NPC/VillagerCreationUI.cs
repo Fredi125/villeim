@@ -40,12 +40,14 @@ namespace VillageLife.NPC
                 _rot = rot;
                 _name = NpcSpawner.RandomName();
 
-                // Hide any villager already standing here; it returns to the list once dismissed
-                // (the Dismiss button sweeps the same radius), so each spawner fills out one-of-each.
-                List<string> available = WithoutPresent(vendorIds, pos);
+                // Hide any villager already standing here (recall it by dismissing); split the rest into
+                // what's offered now vs. what's shown locked behind a reputation gate.
+                var available = new List<string>();
+                var locked = new List<string>();
+                Partition(vendorIds, pos, available, locked);
 
-                Teardown();           // rebuild fresh so the list matches this spawner
-                Build(available);
+                Teardown();           // rebuild fresh so the list matches this spawner + current rep
+                Build(available, locked);
                 if (_panel == null)
                     return false;
 
@@ -64,28 +66,34 @@ namespace VillageLife.NPC
         /// <summary>Village Hall entry point: the general roles.</summary>
         public static bool Open(Vector3 pos, Quaternion rot) => Open(pos, rot, GeneralRoleIds());
 
-        /// <summary>Drop the vendor ids whose villager is already standing within the dismiss radius of
-        /// <paramref name="pos"/>. Returns the original list when none are present (the common case).</summary>
-        private static List<string> WithoutPresent(List<string> ids, Vector3 pos)
+        /// <summary>Split the menu's vendor ids three ways: a villager already standing within the
+        /// dismiss radius is dropped (recall it by dismissing); of the rest, one whose reputation gate
+        /// isn't met yet goes to <paramref name="locked"/> (shown greyed), the others to
+        /// <paramref name="available"/> (clickable).</summary>
+        private static void Partition(List<string> ids, Vector3 pos, List<string> available, List<string> locked)
         {
             HashSet<string> present = NpcSpawner.VendorIdsNear(pos, DismissRadius);
-            if (present.Count == 0)
-                return ids;
-            var available = new List<string>(ids.Count);
             foreach (string id in ids)
-                if (!present.Contains(id))
+            {
+                if (present.Contains(id))
+                    continue;
+                VendorType v = VendorCatalog.ById(id);
+                if (v != null && !v.ReputationMet)
+                    locked.Add(id);
+                else
                     available.Add(id);
-            return available;
+            }
         }
 
-        private static void Build(List<string> vendorIds)
+        private static void Build(List<string> available, List<string> locked)
         {
             Transform parent = GUIManager.CustomGUIFront.transform;
 
-            bool none = vendorIds.Count == 0;
+            int offered = available.Count + locked.Count;
+            bool none = offered == 0;
             const float rowH = 40f;
-            // name + (each vendor, or a single "all summoned" notice) + dismiss + close
-            int rows = (none ? 1 : vendorIds.Count) + 3;
+            // name + (each available + each locked, or a single "all summoned" notice) + dismiss + close
+            int rows = (none ? 1 : offered) + 3;
             float height = rows * rowH + 60f;
 
             _panel = GUIManager.Instance.CreateWoodpanel(
@@ -116,11 +124,19 @@ namespace VillageLife.NPC
             }
             else
             {
-                foreach (string id in vendorIds)
+                foreach (string id in available)
                 {
                     string vid = id;
                     string label = VendorCatalog.ById(vid).Title;
                     Button(label, y).GetComponent<Button>().onClick.AddListener(() => Summon(vid));
+                    y -= rowH;
+                }
+                // Locked entries: visible but greyed and unclickable, so the player can see which
+                // villagers reputation will unlock and how much is needed.
+                foreach (string id in locked)
+                {
+                    VendorType v = VendorCatalog.ById(id);
+                    LockedButton($"{v.Title}  —  Rep {v.MinReputation} required", y);
                     y -= rowH;
                 }
             }
@@ -129,6 +145,18 @@ namespace VillageLife.NPC
             y -= rowH;
 
             Button("Close", y).GetComponent<Button>().onClick.AddListener(Close);
+        }
+
+        /// <summary>A non-interactable, dimmed menu row — a villager whose reputation gate isn't met.</summary>
+        private static void LockedButton(string text, float y)
+        {
+            GameObject go = Button(text, y);
+            Button btn = go.GetComponent<Button>();
+            if (btn != null)
+                btn.interactable = false;
+            Text label = go.GetComponentInChildren<Text>();
+            if (label != null)
+                label.color = new Color(0.6f, 0.6f, 0.6f, 0.9f);
         }
 
         private static GameObject Button(string text, float y) =>

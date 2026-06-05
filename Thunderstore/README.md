@@ -26,7 +26,9 @@ grows.
 - **Coin merchants** — open **Valheim's own trade window** and sell that biome's goods for coins.
 - **Barterers** — make one fixed swap, like 5 Deer Hide → 10 Leather Scraps.
 - **Bounties & reputation** — turn monster trophies in for coins to raise your **reputation** with a
-  biome's trader, which **unlocks its higher-tier goods** (premium materials and rare items).
+  biome's trader, which **unlocks its higher-tier goods** (premium materials and rare items) and
+  **unlocks extra villagers** in that biome's spawner (locked entries show greyed with the reputation
+  they need, until you've earned it).
 - **Per-tier pricing** — goods cost roughly **1 gold/unit in the Meadows**, climbing **+1 per tier**
   up to the Plains, so prices stay sensible as you progress.
 - **Bounty Board, Quest Board & Guard Post** — post every bounty-giver at once, take on multi-item

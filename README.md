@@ -52,7 +52,10 @@ so they're grouped together instead of scattered through *Misc*.
   Meadows, +1 per tier up to ~**5 gold/unit** in the Plains.
 - **Reputation** — completing a biome's bounty raises a world-global reputation level for that
   trader, which **unlocks higher-tier goods** (for example, the Black Forest's fine wood and each
-  biome's premium "rare" item). Reputation is shown in the shop title and the bounty hover text.
+  biome's premium "rare" item) and **unlocks extra villagers** in that biome's spawn menu (each biome
+  has one premium barterer that opens up at Rep 1). Locked villagers still show in the menu — greyed,
+  with the reputation they need — so you can see what's ahead. Reputation appears in the shop title and
+  the bounty hover text.
 - **Named & persistent** — every villager's name, type, size, colour and reputation are persisted in
   the ZDO, so they survive save/reload and sync in co-op. Villagers are non-hostile, stationary
   networked NPCs.

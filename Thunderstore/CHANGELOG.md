@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.45.0 — Reputation unlocks villagers (shown locked until earned)
+
+### Added
+- **Spawn menus are now reputation-gated.** A villager can require a minimum reputation before it can
+  be summoned, via a new `MinReputation` on the vendor (checked against its reputation track). Below
+  the threshold it still appears in the biome's menu — **greyed and unclickable, labelled with the
+  reputation it needs** — so you can see what's coming rather than it being hidden.
+- Each biome now has one **premium barterer that unlocks at Rep 1**, earned by completing that biome's
+  bounty: Meadows Beekeeper, Black Forest Smelter, Swamp Bowman, Mountain Jeweler, Plains Rancher.
+  (Edit `MinReputation` / `ReputationId` in `vendors.json` to gate any villager you like.) ConfigVersion
+  17 → 18.
+
 ## 3.44.0 — Review fixes: slope-proof dismiss, reputation cap, quest safety
 
 Fixes from the pre-V1 logic review — the ones that didn't need an in-game check first.

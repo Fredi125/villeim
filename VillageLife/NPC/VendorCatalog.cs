@@ -70,6 +70,12 @@ namespace VillageLife.NPC
         // has a bounty advancing it. Resolved by RepVendorId.
         public string ReputationId = "";
 
+        // Spawn-menu gate: the minimum reputation (on this vendor's RepVendorId track) before this
+        // villager can be SUMMONED at its station. 0 = always available. Below the threshold it still
+        // appears in the spawn menu but locked/greyed, so players can see what reputation will unlock.
+        // Set ReputationId to the biome trader so the gate tracks that biome's bounty progress.
+        public int MinReputation;
+
         // Coin shop: the goods sold for coins (include a high-priced "rare" entry if desired).
         public VendorGood[] Goods;
 
@@ -103,6 +109,10 @@ namespace VillageLife.NPC
         /// when set, otherwise this vendor's own <see cref="Id"/>.</summary>
         public string RepVendorId => string.IsNullOrEmpty(ReputationId) ? Id : ReputationId;
 
+        /// <summary>True when this villager's spawn-menu reputation gate is met (always true for an
+        /// ungated vendor). The spawn menu uses this to show a villager as offered vs. locked.</summary>
+        public bool ReputationMet => MinReputation <= 0 || TraderReputation.Level(RepVendorId) >= MinReputation;
+
         /// <summary>True when this villager is a quest-giver (has at least one recipe).</summary>
         public bool IsQuest => QuestRecipes != null && QuestRecipes.Length > 0;
 
@@ -133,7 +143,7 @@ namespace VillageLife.NPC
         /// regenerates an out-of-date vendors.json from these defaults (keeping a .bak), so value
         /// tweaks here reach an existing install without a manual file delete.
         /// </summary>
-        public const int ConfigVersion = 17;
+        public const int ConfigVersion = 18;
 
         /// <summary>Built-in safety net, also used to seed vendors.json on first run.</summary>
         public static VendorType[] DefaultVendors => new[]
@@ -419,6 +429,7 @@ namespace VillageLife.NPC
             new VendorType
             {
                 Id = "meadows_beekeeper", Title = "Meadows Beekeeper", Kind = "barter", Biome = "Meadows",
+                ReputationId = "meadows", MinReputation = 1,
                 CostPrefab = "Honey", CostAmount = 5,
                 GivePrefab = "Coins", GiveAmount = 10,
             },
@@ -458,6 +469,7 @@ namespace VillageLife.NPC
             new VendorType
             {
                 Id = "blackforest_smelter", Title = "Black Forest Smelter", Kind = "barter", Biome = "BlackForest", Model = "DvergerMageFire",
+                ReputationId = "blackforest", MinReputation = 1,
                 CostPrefab = "GreydwarfEye", CostAmount = 5,
                 GivePrefab = "Coins",        GiveAmount = 20,
             },
@@ -538,6 +550,7 @@ namespace VillageLife.NPC
             new VendorType
             {
                 Id = "mountain_jeweler", Title = "Mountain Jeweler", Kind = "barter", Biome = "Mountain", Model = "DvergerMage",
+                ReputationId = "mountain", MinReputation = 1,
                 CostPrefab = "FreezeGland", CostAmount = 5,
                 GivePrefab = "Coins",       GiveAmount = 40,
             },
@@ -576,6 +589,7 @@ namespace VillageLife.NPC
             new VendorType
             {
                 Id = "plains_rancher", Title = "Plains Rancher", Kind = "barter", Biome = "Plains", Model = "GoblinShaman",
+                ReputationId = "plains", MinReputation = 1,
                 CostPrefab = "Cloudberry", CostAmount = 5,
                 GivePrefab = "Coins",      GiveAmount = 50,
             },
@@ -608,6 +622,7 @@ namespace VillageLife.NPC
             new VendorType
             {
                 Id = "swamp_archer", Title = "Swamp Bowman", Kind = "barter", Biome = "Swamp", Model = "Draugr_Ranged",
+                ReputationId = "swamp", MinReputation = 1,
                 CostPrefab = "Feathers", CostAmount = 10,
                 GivePrefab = "Coins",    GiveAmount = 30,
             },
