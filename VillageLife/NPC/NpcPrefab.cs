@@ -152,7 +152,7 @@ namespace VillageLife.NPC
         private static void Neutralize(GameObject prefab)
         {
             foreach (string comp in new[]
-                { "MonsterAI", "AnimalAI", "BaseAI", "Tameable", "CharacterDrop", "Growup", "Procreation" })
+                { "MonsterAI", "AnimalAI", "BaseAI", "NpcTalk", "Tameable", "CharacterDrop", "Growup", "Procreation" })
             {
                 Component c = prefab.GetComponent(comp);
                 if (c != null)

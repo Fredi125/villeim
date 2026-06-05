@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.39.1 — Model Sampler: curated, named, and quiet
+
+### Fixed
+- The Model Sampler no longer floods the console. It spawned **every** humanoid — including bosses,
+  serpents and blobs — whose `NpcTalk` and boss health-bar code threw every frame once their AI was
+  stripped. The sampler now spawns a **curated allowlist** of bipedal, villager-friendly models
+  (no bosses), and `NpcTalk` is stripped on both the sampler and the villager path.
+
+### Added
+- Each sampled model now **floats its prefab name** as a label (re-shown when you're near), so you can
+  read the whole lineup without hovering — making it easy to pick which to keep as villagers.
+
 ## 3.39.0 — Model Sampler (preview every NPC look)
 
 ### Added

@@ -187,7 +187,7 @@ namespace VillageLife.Building
             {
                 PrefabName = "VL_Station_ModelSampler",
                 DisplayName = "Model Sampler",
-                Description = "Press [Use] to spawn (or clear) a line of every NPC model, to preview villager looks.",
+                Description = "Press [Use] to spawn (or clear) a named lineup of candidate villager models.",
                 Sampler = true,
                 Requirements = Req(("Wood", 5)),
             },

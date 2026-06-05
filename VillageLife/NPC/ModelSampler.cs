@@ -4,11 +4,11 @@ using UnityEngine;
 namespace VillageLife.NPC
 {
     /// <summary>
-    /// A survey tool. Press Use to spawn one of every humanoid NPC model in a row in front of it, with
-    /// their wander/combat AI stripped so they just stand there (and made non-persistent, so they
-    /// don't save). Each is renamed to its prefab, so hovering one shows the name to drop into the
-    /// <c>VillagerBasePrefab</c> config or a vendor's <c>Model</c>; the full left-to-right list is also
-    /// written to the BepInEx log. Press Use again to clear the row.
+    /// A survey tool. Press Use to spawn a curated set of humanoid NPC models in a row in front of it,
+    /// with their wander/combat AI stripped so they just stand there (and made non-persistent, so they
+    /// don't save). Each floats its prefab name as a label (and is renamed, so hovering also shows it)
+    /// to drop into the <c>VillagerBasePrefab</c> config or a vendor's <c>Model</c>; the full
+    /// left-to-right list is logged too. Press Use again to clear the row.
     ///
     /// Defensive throughout: each spawn is wrapped (a model that won't instantiate is logged and
     /// skipped), and no `using System;` here on purpose, so bare <c>Object</c> stays UnityEngine's.
@@ -19,14 +19,14 @@ namespace VillageLife.NPC
         private const int MaxModels = 60;
 
         private static readonly string[] AiComponents =
-            { "MonsterAI", "AnimalAI", "BaseAI", "Tameable", "CharacterDrop", "Growup", "Procreation" };
+            { "MonsterAI", "AnimalAI", "BaseAI", "NpcTalk", "Tameable", "CharacterDrop", "Growup", "Procreation" };
 
         private readonly List<GameObject> _spawned = new List<GameObject>();
 
         public string GetHoverName() => "Model Sampler";
 
         public string GetHoverText() => Localization.instance.Localize(
-            "Model Sampler\n[<color=yellow><b>$KEY_Use</b></color>] Show / clear every NPC model");
+            "Model Sampler\n[<color=yellow><b>$KEY_Use</b></color>] Show / clear the named model lineup");
 
         public bool Interact(Humanoid user, bool hold, bool alt)
         {
@@ -46,7 +46,7 @@ namespace VillageLife.NPC
             int n = Spawn();
             player.Message(MessageHud.MessageType.Center,
                 n > 0
-                    ? $"Spawned {n} models — walk the line and hover each to read its prefab name."
+                    ? $"Spawned {n} models — walk the line; each shows its prefab name."
                     : "No models found to spawn.");
             return true;
         }
@@ -103,11 +103,29 @@ namespace VillageLife.NPC
             }
 
             Jotunn.Logger.LogInfo("[VillageLife] Model Sampler line (left to right): " + string.Join(", ", names));
+            if (spawned > 0)
+                InvokeRepeating(nameof(RelabelTick), 0.5f, 5f);
             return spawned;
+        }
+
+        /// <summary>Re-show each nearby model's prefab name as a floating label, so the whole lineup is
+        /// readable without hovering. Low-frequency, proximity-gated, and visual-only.</summary>
+        private void RelabelTick()
+        {
+            Player p = Player.m_localPlayer;
+            if (p == null)
+                return;
+            foreach (GameObject go in _spawned)
+            {
+                if (go == null || Vector3.Distance(p.transform.position, go.transform.position) > 30f)
+                    continue;
+                VillagerChatter.Announce(go, go.name);
+            }
         }
 
         private int Clear()
         {
+            CancelInvoke(nameof(RelabelTick));
             int cleared = 0;
             ZNetScene zs = ZNetScene.instance;
             foreach (GameObject go in _spawned)
@@ -130,22 +148,46 @@ namespace VillageLife.NPC
             return cleared;
         }
 
-        /// <summary>Names of humanoid NPC prefabs worth previewing (skips ragdolls, effects, spawners).</summary>
+        // A curated allowlist of bipedal, person-/creature-shaped NPCs that render cleanly as a
+        // standing model and make plausible villagers. Spawning *every* humanoid also dragged in
+        // bosses, serpents, blobs and Gjall — visually broken and the source of looping errors — so we
+        // pick from a known-good set instead. Names that don't exist on the running build are simply
+        // skipped, so this stays safe to extend; tell me which to add or drop.
+        private static readonly string[] Candidates =
+        {
+            // Traders — the cleanest fits
+            "Haldor", "Hildir",
+            // Black Forest
+            "Greyling", "Greydwarf", "Greydwarf_Elite", "Greydwarf_Shaman", "Skeleton", "Skeleton_Poison",
+            // Swamp
+            "Draugr", "Draugr_Elite", "Draugr_Ranged", "Wraith",
+            // Mountain
+            "Fenring", "Fenring_Cultist", "Ulv", "Cultist",
+            // Plains
+            "Goblin", "GoblinShaman", "GoblinBrute",
+            // Mistlands
+            "Dverger", "DvergerMage", "DvergerMageFire", "DvergerMageIce", "DvergerMageSupport",
+            "Seeker", "SeekerBrute",
+            // Ashlands
+            "Charred_Melee", "Charred_Archer", "Charred_Mage", "Charred_Twitcher",
+            // Misc
+            "Troll",
+        };
+
+        /// <summary>The allowlisted models actually present on this build (humanoid, not a boss).</summary>
         private static List<string> ModelNames(ZNetScene zs)
         {
             var names = new List<string>();
-            foreach (GameObject p in zs.m_prefabs)
+            foreach (string name in Candidates)
             {
+                GameObject p = zs.GetPrefab(name);
                 if (p == null || p.GetComponent("Humanoid") == null)
                     continue;
-                string lower = p.name.ToLowerInvariant();
-                if (lower.Contains("ragdoll") || lower.Contains("_attack") ||
-                    lower.StartsWith("fx_") || lower.StartsWith("vfx_") || lower.StartsWith("sfx_") ||
-                    lower.StartsWith("spawner_"))
+                Character character = p.GetComponent<Character>();
+                if (character != null && character.m_boss)
                     continue;
-                names.Add(p.name);
+                names.Add(name);
             }
-            names.Sort();
             if (names.Count > MaxModels)
                 names = names.GetRange(0, MaxModels);
             return names;

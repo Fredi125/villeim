@@ -129,6 +129,22 @@ namespace VillageLife.NPC
             return _setNpcText;
         }
 
+        /// <summary>Show a specific text as a bubble over any object (used by the Model Sampler to label
+        /// each preview model). Same reflection-guarded path as <see cref="Say"/>.</summary>
+        public static void Announce(GameObject npc, string text)
+        {
+            if (npc == null || string.IsNullOrEmpty(text))
+                return;
+
+            Chat chat = Chat.instance;
+            MethodInfo method = NpcTextMethod();
+            if (chat == null || method == null)
+                return;
+
+            try { method.Invoke(chat, BuildNpcTextArgs(method.GetParameters(), npc, text)); }
+            catch { /* cosmetic only — never throw */ }
+        }
+
         /// <summary>Show a random line as a chat bubble over a villager that has no Trader of its own.
         /// Uses the vanilla bubble call via reflection; any mismatch simply shows nothing.</summary>
         public static void Say(GameObject npc, string[] lines)
