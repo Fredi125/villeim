@@ -22,9 +22,11 @@ namespace VillageLife.NPC
         private const float TickSeconds = 3f;
         private const float DamagePerTick = 12f;
         private const int MaxTargetsPerTick = 3;
+        private const float ChatterRange = 10f;
 
         private ZNetView _nview;
         private bool _tickFailed;
+        private bool _playerNear;
         private static readonly List<Character> _buffer = new List<Character>();
 
         public string GuardName { get; private set; } = "Guard";
@@ -46,7 +48,7 @@ namespace VillageLife.NPC
 
             VillagerAppearance.Apply(gameObject, zdo);
             InvokeRepeating(nameof(GuardTick), TickSeconds, TickSeconds);
-            InvokeRepeating(nameof(ChatterTick), 7f, 14f);
+            InvokeRepeating(nameof(ChatterTick), 2f, 2f);
         }
 
         private void OnDestroy()
@@ -59,10 +61,19 @@ namespace VillageLife.NPC
         private void ChatterTick()
         {
             Player p = Player.m_localPlayer;
-            if (p == null || Vector3.Distance(p.transform.position, transform.position) > 16f)
+            bool near = p != null && Vector3.Distance(p.transform.position, transform.position) <= ChatterRange;
+            if (!near)
+            {
+                _playerNear = false;
                 return;
-            if (UnityEngine.Random.value > 0.5f)
+            }
+
+            // Greet on the rising edge (just walked up); afterwards, only an occasional idle line.
+            if (!_playerNear)
+                _playerNear = true;
+            else if (UnityEngine.Random.value > 0.12f)
                 return;
+
             VillagerChatter.Say(gameObject, VillagerChatter.GuardTalk);
         }
 

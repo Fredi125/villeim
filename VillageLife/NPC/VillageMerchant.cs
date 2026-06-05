@@ -77,7 +77,7 @@ namespace VillageLife.NPC
                 return;
 
             VendorType type = VendorCatalog.ById(VendorTypeId);
-            int level = TraderReputation.Level(VendorTypeId);
+            int level = TraderReputation.Level(type.RepVendorId);
             int max = TraderReputation.MaxTier(type);
 
             // Show reputation in the shop title when this trader has anything to unlock.

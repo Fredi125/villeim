@@ -21,6 +21,12 @@ namespace VillageLife.NPC
         public string MerchantName { get; private set; } = "Trader";
         public string VendorTypeId { get; private set; } = "stonemason";
 
+        // Chatter: greet the moment the player walks up (the rising edge of "in range"), the way the
+        // vanilla Trader greets — so a barterer/bounty shows its bubble on approach, not only on a
+        // slow random timer that often left it silent as you arrived.
+        private const float ChatterRange = 10f;
+        private bool _playerNear;
+
         private void Awake()
         {
             _nview = GetComponent<ZNetView>();
@@ -36,21 +42,37 @@ namespace VillageLife.NPC
             }
 
             VillagerAppearance.Apply(gameObject, zdo);
-            InvokeRepeating(nameof(ChatterTick), 6f, 14f);
+            InvokeRepeating(nameof(ChatterTick), 2f, 2f);
         }
 
         private void OnDestroy() => CancelInvoke();
 
-        /// <summary>Occasionally show a flavour line over the barterer when a player is nearby. Purely
-        /// visual (a local chat bubble), so it runs on every client and needs no ownership check.</summary>
+        /// <summary>Show a flavour line over the barterer: a greeting the moment the player comes within
+        /// range (so the bubble appears on approach, like the vanilla Trader), then only an occasional
+        /// idle line while they linger. Purely visual (a local chat bubble), so it runs on every client
+        /// and needs no ownership check.</summary>
         private void ChatterTick()
         {
             Player p = Player.m_localPlayer;
-            if (p == null || Vector3.Distance(p.transform.position, transform.position) > 16f)
+            bool near = p != null && Vector3.Distance(p.transform.position, transform.position) <= ChatterRange;
+            if (!near)
+            {
+                _playerNear = false;
                 return;
-            if (UnityEngine.Random.value > 0.5f)
+            }
+
+            // Greet on the rising edge (just walked up); afterwards, only an occasional idle line.
+            if (!_playerNear)
+                _playerNear = true;
+            else if (UnityEngine.Random.value > 0.12f)
                 return;
 
+            Say();
+        }
+
+        /// <summary>Pick the flavour lines that match this villager's role and show one over its head.</summary>
+        private void Say()
+        {
             VendorType t = VendorCatalog.ById(VendorTypeId);
             string[] lines;
             if (t != null && t.IsQuest)
@@ -273,8 +295,14 @@ namespace VillageLife.NPC
                     : $"{trader.Title}: reputation {level}/{max} — new goods unlocked!");
 
             foreach (VillageMerchant m in Object.FindObjectsByType<VillageMerchant>(FindObjectsSortMode.None))
-                if (m != null && m.VendorTypeId == t.UnlocksVendorId)
+            {
+                if (m == null)
+                    continue;
+                // Refresh every shop that reads this trader's reputation — its own merchants and any
+                // secondary shop sharing the track (e.g. the Mountain Miner reading Mountain rep).
+                if (VendorCatalog.ById(m.VendorTypeId).RepVendorId == t.UnlocksVendorId)
                     m.RefreshStock();
+            }
         }
     }
 }

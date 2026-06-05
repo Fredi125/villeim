@@ -64,6 +64,12 @@ namespace VillageLife.NPC
         public string Model = "";      // Optional NPC prefab to clone for this villager's look (empty = default).
         public float Tint = -1f;       // Optional fixed colour hue (0..1) for this villager (< 0 = random per-villager).
 
+        // Coin shop: which trader's reputation gates this shop's higher-tier goods. Empty = this
+        // vendor's own Id (the usual case). Set it to share another trader's reputation track — e.g. a
+        // biome's secondary shop reading the biome trader's reputation, since only that biome trader
+        // has a bounty advancing it. Resolved by RepVendorId.
+        public string ReputationId = "";
+
         // Coin shop: the goods sold for coins (include a high-priced "rare" entry if desired).
         public VendorGood[] Goods;
 
@@ -92,6 +98,10 @@ namespace VillageLife.NPC
 
         /// <summary>True when this vendor trades by barter rather than the coin shop.</summary>
         public bool IsBarter => string.Equals(Kind, "barter", StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>The trader id whose reputation gates this vendor's goods: <see cref="ReputationId"/>
+        /// when set, otherwise this vendor's own <see cref="Id"/>.</summary>
+        public string RepVendorId => string.IsNullOrEmpty(ReputationId) ? Id : ReputationId;
 
         /// <summary>True when this villager is a quest-giver (has at least one recipe).</summary>
         public bool IsQuest => QuestRecipes != null && QuestRecipes.Length > 0;
@@ -123,7 +133,7 @@ namespace VillageLife.NPC
         /// regenerates an out-of-date vendors.json from these defaults (keeping a .bak), so value
         /// tweaks here reach an existing install without a manual file delete.
         /// </summary>
-        public const int ConfigVersion = 15;
+        public const int ConfigVersion = 16;
 
         /// <summary>Built-in safety net, also used to seed vendors.json on first run.</summary>
         public static VendorType[] DefaultVendors => new[]
@@ -494,13 +504,17 @@ namespace VillageLife.NPC
             new VendorType
             {
                 Id = "mountain_miner", Title = "Mountain Miner", Kind = "coin", Biome = "Mountain",
+                // Shares the Mountain Trader's reputation (raised by the Mountain Bounty), so the
+                // smelted silver ingot below stays locked until you've proven yourself in the peaks.
+                ReputationId = "mountain",
                 Goods = new[]
                 {
-                    new VendorGood("Silver",   80, 20),  // 4/unit
-                    new VendorGood("Obsidian", 80, 20),  // 4/unit
-                    new VendorGood("Crystal",  80, 20),  // 4/unit
-                    new VendorGood("Stone",    80, 20),  // 4/unit
-                    new VendorGood("Coal",    120, 30),  // 4/unit
+                    new VendorGood("SilverOre", 160, 10),     // raw ore by the stack (16/unit)
+                    new VendorGood("Silver",     80, 20, 1),  // smelted ingot — unlocks at Mountain Rep 1
+                    new VendorGood("Obsidian",   80, 20),  // 4/unit
+                    new VendorGood("Crystal",    80, 20),  // 4/unit
+                    new VendorGood("Stone",      80, 20),  // 4/unit
+                    new VendorGood("Coal",      120, 30),  // 4/unit
                 }
             },
             new VendorType

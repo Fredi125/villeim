@@ -1,5 +1,20 @@
 # Changelog
 
+## 3.42.0 — Bounty hellos & a smarter silver trade
+
+### Fixed
+- **Barterers, bounty-givers and quest-givers now greet you on approach.** They only ever spoke on a
+  slow random timer, so walking up to a bounty-giver usually got you silence — while coin merchants
+  (the vanilla Trader) greet the moment you're near. They now do the same: a line the instant you come
+  within range, then the occasional idle remark while you linger. Guards greet on approach too.
+
+### Changed
+- **The Mountain Miner no longer sells silver ingots cold.** At base reputation it now offers **Silver
+  Ore (×10 for 160 coins)**; the smelted **Silver ingot unlocks once you've earned Mountain reputation**
+  (complete the Mountain Bounty). To make that possible, a coin shop can now **share another trader's
+  reputation track** via a new `ReputationId` — the Mountain Miner reads the Mountain Trader's, since
+  only that trader has a bounty advancing it. ConfigVersion 15 → 16.
+
 ## 3.41.0 — Spawn menus hide who's already here
 
 ### Changed
