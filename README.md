@@ -28,6 +28,9 @@ so they're grouped together instead of scattered through *Misc*.
   reward. Repeatable quests **rotate** through a pool of recipes and **scale up** each turn-in (the
   reward grows faster than the cost), tracked per world like reputation.
 - **Guard Post** — posts (or dismisses) a guard that wards off nearby monsters.
+- **Model Sampler** — a preview tool: [Use] spawns one of every humanoid NPC model in a row (AI
+  stripped, non-persistent), each named after its prefab, so you can scout which models to use for
+  villager looks. [Use] again clears them.
 - **Decorative world structures** — a curated set of vanilla buildings (abandoned houses, ruins)
   registered as plain buildable scenery.
 

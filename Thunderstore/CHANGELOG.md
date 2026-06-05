@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.39.0 — Model Sampler (preview every NPC look)
+
+### Added
+- A buildable **Model Sampler**: press [Use] and it spawns **one of every humanoid NPC model in a
+  row** in front of it — AI stripped so they just stand there, non-persistent so they don't save —
+  each renamed to its prefab so you can **hover to read the name** to use as a villager model (the
+  full left-to-right list is also written to the log). Press [Use] again to clear the row. A quick way
+  to scout which models are available for the `VillagerBasePrefab` config or a vendor's `Model`.
+
 ## 3.38.1 — Build fix
 
 ### Fixed

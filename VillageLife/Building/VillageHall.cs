@@ -31,6 +31,7 @@ namespace VillageLife.Building
             public string VendorId;     // null = use the rotation (Village Hall); else a specific vendor id.
             public string[] VendorIds;  // when set, the station posts several specific vendors at once (Bounty Board).
             public string[] MenuVendorIds; // when set, [Use] opens the spawn panel to pick from these (biome spawners).
+            public bool Sampler;        // when set, the piece is the Model Sampler survey tool (not a spawner).
             public RequirementConfig[] Requirements;
         }
 
@@ -179,6 +180,17 @@ namespace VillageLife.Building
                 Requirements = Req(
                     ("Wood", 20), ("FineWood", 10), ("BronzeNails", 5)),
             },
+
+            // Model Sampler — a preview/survey tool: [Use] spawns one of every humanoid NPC model in a
+            // row (AI stripped, non-persistent) so you can see what's available for villager looks.
+            new StationDef
+            {
+                PrefabName = "VL_Station_ModelSampler",
+                DisplayName = "Model Sampler",
+                Description = "Press [Use] to spawn (or clear) a line of every NPC model, to preview villager looks.",
+                Sampler = true,
+                Requirements = Req(("Wood", 5)),
+            },
         };
 
         /// <summary>Concise builder for a recovery-on-deconstruct requirement list.</summary>
@@ -294,10 +306,19 @@ namespace VillageLife.Building
                 if (pieceComp != null)
                     pieceComp.m_craftingStation = null;
 
-                var interaction = prefab.GetComponent<StationInteraction>();
-                if (interaction == null)
-                    interaction = prefab.AddComponent<StationInteraction>();
-                interaction.Configure(def.DisplayName, def.VendorId, def.VendorIds, def.MenuVendorIds);
+                if (def.Sampler)
+                {
+                    // The Model Sampler is a survey tool, not a spawner: it gets its own interaction.
+                    if (prefab.GetComponent<ModelSampler>() == null)
+                        prefab.AddComponent<ModelSampler>();
+                }
+                else
+                {
+                    var interaction = prefab.GetComponent<StationInteraction>();
+                    if (interaction == null)
+                        interaction = prefab.AddComponent<StationInteraction>();
+                    interaction.Configure(def.DisplayName, def.VendorId, def.VendorIds, def.MenuVendorIds);
+                }
             }
 
             PieceManager.Instance.AddPiece(piece);
