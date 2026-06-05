@@ -39,14 +39,35 @@ namespace VillageLife.NPC
         }
 
         /// <summary>
+        /// The reputation cap for a whole track: the highest good tier across EVERY vendor that reads
+        /// this reputation id (the trader itself plus any secondary shop sharing it via
+        /// <see cref="VendorType.ReputationId"/>). Using the track-wide max means a shared shop's
+        /// higher-tier goods are actually reachable, and the bounty's advance cap matches what those
+        /// shops gate on. For an unshared trader this equals <see cref="MaxTier"/> of that trader.
+        /// </summary>
+        public static int MaxTierForTrack(string repVendorId)
+        {
+            int max = 0;
+            if (string.IsNullOrEmpty(repVendorId))
+                return max;
+            foreach (VendorType v in VendorCatalog.All)
+                if (v != null && v.RepVendorId == repVendorId)
+                {
+                    int t = MaxTier(v);
+                    if (t > max)
+                        max = t;
+                }
+            return max;
+        }
+
+        /// <summary>
         /// Raise a trader's reputation by one level (setting the next global key) unless it's already
         /// at its cap. Returns true if it advanced. <paramref name="newLevel"/> and
         /// <paramref name="maxLevel"/> describe the state either way, so callers can message progress.
         /// </summary>
         public static bool TryAdvance(string traderId, out int newLevel, out int maxLevel)
         {
-            VendorType trader = VendorCatalog.ById(traderId);
-            maxLevel = MaxTier(trader);
+            maxLevel = MaxTierForTrack(traderId);
             newLevel = Level(traderId);
 
             ZoneSystem zs = ZoneSystem.instance;

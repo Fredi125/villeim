@@ -131,6 +131,11 @@ The build needs a local Valheim install for the game assemblies (they are **not*
 BepInEx, Jötunn and Harmony reference DLLs *are* committed under `VillageLife/lib/`, so you don't
 need to pre-install any mods to compile.
 
+> **Keep the Jötunn reference in sync with the dependency.** `lib/Jotunn.dll` is only the *compile*
+> reference; players run the version pinned in `Thunderstore/manifest.json` (currently
+> `ValheimModding-Jotunn-2.27.1`). Before a release build, copy that same Jötunn version's `Jotunn.dll`
+> into `lib/` so you compile against exactly what users load (the two should never drift).
+
 ### Find your Valheim folder
 
 It's the folder that contains `valheim.exe` and a `valheim_Data\Managed\` subfolder. In Steam:

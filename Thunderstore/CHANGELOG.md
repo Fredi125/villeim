@@ -1,5 +1,33 @@
 # Changelog
 
+## 3.44.0 — Review fixes: slope-proof dismiss, reputation cap, quest safety
+
+Fixes from the pre-V1 logic review — the ones that didn't need an in-game check first.
+
+### Fixed
+- **Dismiss & "already here" now ignore height.** Boards and spawn menus matched villagers by 3D
+  distance, so on steep ground the uphill/downhill ends of a posted row fell outside the sweep —
+  they couldn't be dismissed and re-Use stacked duplicates. Matching is horizontal-only now.
+- **Reputation caps to the whole track.** A shop sharing another trader's reputation (the Mountain
+  Miner reads the Mountain Trader's, via `ReputationId`) could define a tier higher than that trader's
+  own goods and never unlock it. The cap — and the shop title's "Rep x/max" — now spans every shop on
+  the track, so a shared shop's higher tiers are reachable and the number shown is accurate.
+- **"Earns favor" only appears when there's something to unlock** (the target actually has tiered
+  goods), instead of advertising favor a turn-in could never grant.
+- **Quest turn-ins sum duplicate items.** A recipe listing the same item twice was checked against full
+  stock twice and then removed twice (item loss); requirements are now summed per item before any are
+  taken, so a turn-in can never over-charge.
+- **Merchants recover stock if ObjectDB wasn't ready at load** — they retry briefly instead of silently
+  keeping the model's default (Haldor) stock for the session.
+
+### Notes
+- Reputation stays **world-global** (shared by everyone on the world), like boss-defeat keys. Per-player
+  reputation is a possible future change.
+- Still to verify in-game (deferred on purpose): whether the per-villager **tint** writes the right
+  shader property, whether creature villagers keep their authored **scale**, and whether the new
+  structure **icons** render at load. Syncing a customized `vendors.json` across multiplayer is also a
+  later item.
+
 ## 3.43.0 — Pre-V1 polish: ore economy, real icons, more options
 
 ### Changed

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using VillageLife.Plugin;
 using VillageLife.Util;
@@ -114,7 +115,7 @@ namespace VillageLife.NPC
 
             // For bounties/quests tied to a trader, note the reputation gain.
             string favor = "";
-            if (!string.IsNullOrEmpty(t.UnlocksVendorId))
+            if (!string.IsNullOrEmpty(t.UnlocksVendorId) && TraderReputation.MaxTierForTrack(t.UnlocksVendorId) > 0)
                 favor = $"\n<color=#aab4ff>Earns favor with the {VendorCatalog.ById(t.UnlocksVendorId).Title}</color>";
 
             string body;
@@ -240,7 +241,11 @@ namespace VillageLife.NPC
                 return;
             }
 
-            // First pass: resolve and verify every (scaled) requirement, removing nothing.
+            // First pass: resolve and SUM the scaled requirement per resolved item name, removing
+            // nothing. Summing means a recipe that lists the same prefab twice is counted once against
+            // the player's stock instead of being verified twice and then removed twice (item loss).
+            var need = new Dictionary<string, int>();
+            var display = new Dictionary<string, string>();
             foreach (QuestItem q in r.Items)
             {
                 string shared = ItemNames.SharedName(q.Prefab);
@@ -250,13 +255,18 @@ namespace VillageLife.NPC
                     Jotunn.Logger.LogWarning($"[VillageLife] Quest '{t.Id}' item '{q.Prefab}' didn't resolve.");
                     return;
                 }
+                need[shared] = (need.TryGetValue(shared, out int prior) ? prior : 0)
+                               + QuestProgress.Scale(q.Amount, done, t.QuestCostGrowth);
+                display[shared] = ItemNames.Display(q.Prefab);
+            }
 
-                int need = QuestProgress.Scale(q.Amount, done, t.QuestCostGrowth);
-                int have = inv.CountItems(shared);
-                if (have < need)
+            foreach (KeyValuePair<string, int> req in need)
+            {
+                int have = inv.CountItems(req.Key);
+                if (have < req.Value)
                 {
                     player.Message(MessageHud.MessageType.Center,
-                        $"Quest needs {need} {ItemNames.Display(q.Prefab)} (you have {have}).");
+                        $"Quest needs {req.Value} {display[req.Key]} (you have {have}).");
                     return;
                 }
             }
@@ -267,9 +277,9 @@ namespace VillageLife.NPC
                 return;
             }
 
-            // Second pass: requirements met — take everything, then give the scaled reward.
-            foreach (QuestItem q in r.Items)
-                inv.RemoveItem(ItemNames.SharedName(q.Prefab), QuestProgress.Scale(q.Amount, done, t.QuestCostGrowth));
+            // Requirements met — take the summed amounts, then give the scaled reward.
+            foreach (KeyValuePair<string, int> req in need)
+                inv.RemoveItem(req.Key, req.Value);
             int reward = QuestProgress.Scale(r.RewardAmount, done, t.QuestRewardGrowth);
             inv.AddItem(r.RewardPrefab, reward, 1, 0, 0L, "");
 

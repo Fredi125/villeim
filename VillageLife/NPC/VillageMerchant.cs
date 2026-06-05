@@ -30,6 +30,8 @@ namespace VillageLife.NPC
             _trader = GetComponent<Trader>();
         }
 
+        private void OnDestroy() => CancelInvoke();
+
         private void Start()
         {
             // Learn name + type from the ZDO. This is how clients that received us over the network,
@@ -78,7 +80,7 @@ namespace VillageLife.NPC
 
             VendorType type = VendorCatalog.ById(VendorTypeId);
             int level = TraderReputation.Level(type.RepVendorId);
-            int max = TraderReputation.MaxTier(type);
+            int max = TraderReputation.MaxTierForTrack(type.RepVendorId);
 
             // Show reputation in the shop title when this trader has anything to unlock.
             _trader.m_name = max > 0
@@ -93,11 +95,21 @@ namespace VillageLife.NPC
             // actually built, otherwise leave the existing stock so the store still has something.
             var stock = MerchantStock.Build(type, level);
             if (stock.Count > 0)
+            {
                 _trader.m_items = stock;
+            }
+            else if (ObjectDB.instance == null)
+            {
+                // ObjectDB isn't populated this early in load, so Build returned nothing. Retry shortly
+                // instead of sitting on the model's default (Haldor) stock for the whole session.
+                Invoke(nameof(ApplyVendorType), 1f);
+            }
             else
+            {
                 Jotunn.Logger.LogWarning(
                     $"[VillageLife] Merchant '{MerchantName}' ({type.Id}) built no stock; " +
-                    "keeping default. ObjectDB may not have been ready.");
+                    "keeping default. Its item names may be unresolved.");
+            }
         }
     }
 }

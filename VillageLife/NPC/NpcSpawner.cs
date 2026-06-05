@@ -167,7 +167,7 @@ namespace VillageLife.NPC
         {
             foreach (T comp in components)
             {
-                if (comp == null || (comp.transform.position - center).sqrMagnitude > radiusSqr)
+                if (comp == null || HorizontalSqr(comp.transform.position, center) > radiusSqr)
                     continue;
                 string id = idOf(comp);
                 if (!string.IsNullOrEmpty(id))
@@ -180,7 +180,7 @@ namespace VillageLife.NPC
             int removed = 0;
             foreach (T comp in components)
             {
-                if (comp == null || (comp.transform.position - center).sqrMagnitude > radiusSqr)
+                if (comp == null || HorizontalSqr(comp.transform.position, center) > radiusSqr)
                     continue;
 
                 ZNetView nview = comp.GetComponent<ZNetView>();
@@ -196,6 +196,16 @@ namespace VillageLife.NPC
                 removed++;
             }
             return removed;
+        }
+
+        /// <summary>Squared distance ignoring height. Villagers placed in a row sit at per-point ground
+        /// height, so a 3D sphere would drop the uphill/downhill ends on steep terrain; comparing only
+        /// the horizontal plane keeps a sloped row entirely "near" its station for dismiss/visibility.</summary>
+        private static float HorizontalSqr(Vector3 a, Vector3 b)
+        {
+            float dx = a.x - b.x;
+            float dz = a.z - b.z;
+            return dx * dx + dz * dz;
         }
     }
 }
