@@ -21,6 +21,12 @@ namespace VillageLife.Plugin
         /// <summary>How far in front of the player (metres) a summoned villager appears (0 = at feet).</summary>
         public static ConfigEntry<float> SpawnDistance;
 
+        /// <summary>Damage a Village Guard deals per tick to each nearby hostile (0 = guards do no damage).</summary>
+        public static ConfigEntry<float> GuardDamage;
+
+        /// <summary>Whether barterers/bounty-givers/quest-givers/guards show ambient chat bubbles.</summary>
+        public static ConfigEntry<bool> VillagerChatter;
+
         /// <summary>EXPERIMENTAL: an alternate NPC prefab to clone villagers from (empty = Haldor).</summary>
         public static ConfigEntry<string> VillagerBasePrefab;
 
@@ -38,6 +44,17 @@ namespace VillageLife.Plugin
                 "General", "SpawnDistance", 0f,
                 "How far in front of the player (in metres) a summoned villager appears. 0 = right at " +
                 "your feet, so you can place a few around a spawner by summoning from different spots.");
+
+            GuardDamage = Config.Bind(
+                "General", "GuardDamage", 12f,
+                "Blunt damage a Village Guard deals each tick (about every 3s) to each nearby hostile " +
+                "creature, up to a few at once. Set to 0 to make guards purely decorative (no damage).");
+
+            VillagerChatter = Config.Bind(
+                "General", "VillagerChatter", true,
+                "Show ambient chat bubbles over barterers, bounty-givers, quest-givers and guards (a " +
+                "greeting when you approach, then the occasional idle line). Coin merchants use " +
+                "Valheim's own trader chatter and are unaffected by this toggle.");
 
             // Load the vendor catalogue from BepInEx/config/VillageLife/vendors.json (writes
             // defaults on first run; falls back to built-in defaults if the file is bad). Done

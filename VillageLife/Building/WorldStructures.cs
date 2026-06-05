@@ -77,7 +77,7 @@ namespace VillageLife.Building
                         Description = d.Description,
                         PieceTable = "Hammer",
                         Category = Constants.BuildCategory,
-                        Icon = BuildablePrep.PlaceholderIcon(),
+                        Icon = BuildablePrep.RenderedIcon(clone),
                         Requirements = d.Requirements
                     };
 

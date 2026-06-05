@@ -65,5 +65,36 @@ namespace VillageLife.Building
             _placeholderIcon = p != null ? p.m_icon : null;
             return _placeholderIcon;
         }
+
+        /// <summary>
+        /// A real build-menu icon rendered from the prefab itself via Jötunn's RenderManager, so each
+        /// decorative structure shows itself in the Hammer instead of all sharing the workbench icon.
+        /// Falls back to <see cref="PlaceholderIcon"/> if rendering isn't available (older Jötunn, no
+        /// renderers on the prefab) and never throws — a build icon is cosmetic, never worth a crash.
+        /// </summary>
+        public static Sprite RenderedIcon(GameObject prefab)
+        {
+            try
+            {
+                if (prefab != null && RenderManager.Instance != null)
+                {
+                    Sprite rendered = RenderManager.Instance.Render(new RenderManager.RenderRequest(prefab)
+                    {
+                        Width = 64,
+                        Height = 64,
+                        Rotation = RenderManager.IsometricRotation,
+                    });
+                    if (rendered != null)
+                        return rendered;
+                }
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogWarning(
+                    $"[VillageLife] Icon render failed for '{(prefab != null ? prefab.name : "null")}'; " +
+                    $"using placeholder. {e.Message}");
+            }
+            return PlaceholderIcon();
+        }
     }
 }

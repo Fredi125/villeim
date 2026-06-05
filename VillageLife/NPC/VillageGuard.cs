@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using VillageLife.Plugin;
 using VillageLife.Util;
 
 namespace VillageLife.NPC
@@ -60,6 +61,8 @@ namespace VillageLife.NPC
         /// Purely visual (a local chat bubble), so it runs on every client.</summary>
         private void ChatterTick()
         {
+            if (VillageLifePlugin.VillagerChatter != null && !VillageLifePlugin.VillagerChatter.Value)
+                return;
             Player p = Player.m_localPlayer;
             bool near = p != null && Vector3.Distance(p.transform.position, transform.position) <= ChatterRange;
             if (!near)
@@ -105,6 +108,11 @@ namespace VillageLife.NPC
                 _buffer.Clear();
                 Character.GetCharactersInRange(transform.position, Radius, _buffer);
 
+                // Damage is configurable; 0 makes the guard purely decorative.
+                float dmg = VillageLifePlugin.GuardDamage != null ? VillageLifePlugin.GuardDamage.Value : DamagePerTick;
+                if (dmg <= 0f)
+                    return;
+
                 int hits = 0;
                 foreach (Character c in _buffer)
                 {
@@ -114,7 +122,7 @@ namespace VillageLife.NPC
                         continue;
 
                     var hit = new HitData();
-                    hit.m_damage.m_blunt = DamagePerTick;
+                    hit.m_damage.m_blunt = dmg;
                     hit.m_point = c.GetCenterPoint();
                     hit.m_dir = (c.transform.position - transform.position).normalized;
                     c.Damage(hit);

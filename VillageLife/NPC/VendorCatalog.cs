@@ -133,7 +133,7 @@ namespace VillageLife.NPC
         /// regenerates an out-of-date vendors.json from these defaults (keeping a .bak), so value
         /// tweaks here reach an existing install without a manual file delete.
         /// </summary>
-        public const int ConfigVersion = 16;
+        public const int ConfigVersion = 17;
 
         /// <summary>Built-in safety net, also used to seed vendors.json on first run.</summary>
         public static VendorType[] DefaultVendors => new[]
@@ -191,7 +191,7 @@ namespace VillageLife.NPC
                     new VendorGood("Coal",        10, 20),  // 0.5/unit
                     new VendorGood("BronzeNails", 10, 20),  // 0.5/unit
                     new VendorGood("IronNails",   20, 20),  // 1/unit
-                    new VendorGood("Bronze",      50, 10),  // 5/unit
+                    new VendorGood("Bronze",     100, 10),  // 10/unit (alloy — no ore form)
                 }
             },
             new VendorType
@@ -246,10 +246,10 @@ namespace VillageLife.NPC
                 {
                     new VendorGood("RoundLog",      60, 30),     // 2/unit (core wood)
                     new VendorGood("Coal",          60, 30),     // 2/unit
-                    new VendorGood("Copper",        40, 20),     // 2/unit
-                    new VendorGood("Tin",           40, 20),     // 2/unit
+                    new VendorGood("CopperOre",     80, 20),     // 4/unit (raw ore)
+                    new VendorGood("TinOre",        80, 20),     // 4/unit (raw ore)
                     new VendorGood("FineWood",      60, 30, 1),  // 2/unit — fine wood unlocks at Rep 1
-                    new VendorGood("SurtlingCore", 200,  1, 1),  // rare — unlocks at Rep 1
+                    new VendorGood("SurtlingCore", 400,  1, 1),  // rare — unlocks at Rep 1
                 }
             },
             new VendorType
@@ -262,7 +262,7 @@ namespace VillageLife.NPC
                     new VendorGood("Bloodbag",      60, 20),  // 3/unit
                     new VendorGood("WitheredBone",  30, 10),  // 3/unit
                     new VendorGood("ElderBark",     60, 20),  // 3/unit (ancient wood)
-                    new VendorGood("IronScrap",     60, 20),  // 3/unit
+                    new VendorGood("IronScrap",    120, 20),  // 6/unit (raw scrap)
                     new VendorGood("Chain",        400,  1, 1),  // rare — unlocks at Rep 1
                 }
             },
@@ -271,12 +271,12 @@ namespace VillageLife.NPC
                 Id = "mountain", Title = "Mountain Trader", Kind = "coin", Biome = "Mountain",
                 Goods = new[]
                 {
-                    new VendorGood("Obsidian",      80, 20),  // 4/unit
+                    new VendorGood("Obsidian",     160, 20),  // 8/unit
                     new VendorGood("FreezeGland",   80, 20),  // 4/unit
                     new VendorGood("WolfPelt",      80, 20),  // 4/unit
                     new VendorGood("Onion",         40, 10),  // 4/unit
-                    new VendorGood("Crystal",       80, 20),  // 4/unit
-                    new VendorGood("Silver",        80, 20),  // 4/unit
+                    new VendorGood("Crystal",      160, 20),  // 8/unit
+                    new VendorGood("SilverOre",    160, 10),  // 16/unit (raw ore)
                     new VendorGood("DragonEgg",   9999,  1, 1),  // rare — unlocks at Rep 1
                 }
             },
@@ -285,13 +285,13 @@ namespace VillageLife.NPC
                 Id = "plains", Title = "Plains Trader", Kind = "coin", Biome = "Plains",
                 Goods = new[]
                 {
-                    new VendorGood("Barley",      100, 20),  // 5/unit
-                    new VendorGood("Flax",        100, 20),  // 5/unit
-                    new VendorGood("Cloudberry",  100, 20),  // 5/unit
-                    new VendorGood("Needle",      100, 20),  // 5/unit
-                    new VendorGood("Tar",         100, 20),  // 5/unit
-                    new VendorGood("BlackMetal",  100, 20),  // 5/unit
-                    new VendorGood("LoxPelt",     300,  1, 1),  // rare — unlocks at Rep 1
+                    new VendorGood("Barley",          100, 20),  // 5/unit
+                    new VendorGood("Flax",            100, 20),  // 5/unit
+                    new VendorGood("Cloudberry",      100, 20),  // 5/unit
+                    new VendorGood("Needle",          100, 20),  // 5/unit
+                    new VendorGood("Tar",             100, 20),  // 5/unit
+                    new VendorGood("BlackMetalScrap", 200, 20),  // 10/unit (raw scrap)
+                    new VendorGood("LoxPelt",         300,  1, 1),  // rare — unlocks at Rep 1
                 }
             },
 
@@ -430,11 +430,11 @@ namespace VillageLife.NPC
                 Id = "blackforest_miner", Title = "Black Forest Miner", Kind = "coin", Biome = "BlackForest",
                 Goods = new[]
                 {
-                    new VendorGood("Copper", 40, 20),  // 2/unit
-                    new VendorGood("Tin",    40, 20),  // 2/unit
-                    new VendorGood("Coal",   60, 30),  // 2/unit
-                    new VendorGood("Stone",  40, 20),  // 2/unit
-                    new VendorGood("Flint",  40, 20),  // 2/unit
+                    new VendorGood("CopperOre", 80, 20),  // 4/unit (raw ore)
+                    new VendorGood("TinOre",    80, 20),  // 4/unit (raw ore)
+                    new VendorGood("Coal",      60, 30),  // 2/unit
+                    new VendorGood("Stone",     40, 20),  // 2/unit
+                    new VendorGood("Flint",     40, 20),  // 2/unit
                 }
             },
             new VendorType
@@ -480,7 +480,7 @@ namespace VillageLife.NPC
                 Id = "swamp_digger", Title = "Swamp Digger", Kind = "coin", Biome = "Swamp",
                 Goods = new[]
                 {
-                    new VendorGood("IronScrap",    60, 20),  // 3/unit
+                    new VendorGood("IronScrap",   120, 20),  // 6/unit (raw scrap)
                     new VendorGood("ElderBark",    60, 20),  // 3/unit
                     new VendorGood("Coal",         90, 30),  // 3/unit
                     new VendorGood("Stone",        60, 20),  // 3/unit
@@ -504,15 +504,15 @@ namespace VillageLife.NPC
             new VendorType
             {
                 Id = "mountain_miner", Title = "Mountain Miner", Kind = "coin", Biome = "Mountain",
-                // Shares the Mountain Trader's reputation (raised by the Mountain Bounty), so the
-                // smelted silver ingot below stays locked until you've proven yourself in the peaks.
+                // Shares the Mountain Trader's reputation (raised by the Mountain Bounty): the cheap
+                // bulk silver ore stays locked until you've proven yourself in the peaks.
                 ReputationId = "mountain",
                 Goods = new[]
                 {
-                    new VendorGood("SilverOre", 160, 10),     // raw ore by the stack (16/unit)
-                    new VendorGood("Silver",     80, 20, 1),  // smelted ingot — unlocks at Mountain Rep 1
-                    new VendorGood("Obsidian",   80, 20),  // 4/unit
-                    new VendorGood("Crystal",    80, 20),  // 4/unit
+                    new VendorGood("SilverOre", 160, 10),     // 16/unit — small lots, always available
+                    new VendorGood("SilverOre",  80, 20, 1),  // 4/unit — bulk lot, unlocks at Mountain Rep 1
+                    new VendorGood("Obsidian",  160, 20),  // 8/unit
+                    new VendorGood("Crystal",   160, 20),  // 8/unit
                     new VendorGood("Stone",      80, 20),  // 4/unit
                     new VendorGood("Coal",      120, 30),  // 4/unit
                 }
@@ -560,11 +560,11 @@ namespace VillageLife.NPC
                 Id = "plains_smith", Title = "Plains Blacksmith", Kind = "coin", Biome = "Plains",
                 Goods = new[]
                 {
-                    new VendorGood("BlackMetal", 100, 20),  // 5/unit
-                    new VendorGood("Tar",        100, 20),  // 5/unit
-                    new VendorGood("Needle",     100, 20),  // 5/unit
-                    new VendorGood("Barley",     100, 20),  // 5/unit
-                    new VendorGood("Flax",       100, 20),  // 5/unit
+                    new VendorGood("BlackMetalScrap", 200, 20),  // 10/unit (raw scrap)
+                    new VendorGood("Tar",             100, 20),  // 5/unit
+                    new VendorGood("Needle",          100, 20),  // 5/unit
+                    new VendorGood("Barley",          100, 20),  // 5/unit
+                    new VendorGood("Flax",            100, 20),  // 5/unit
                 }
             },
             new VendorType

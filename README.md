@@ -67,6 +67,18 @@ run). Edit it to change types, goods, prices, or barter rates — no rebuild nee
 version; when the built-in defaults change, an out-of-date file is **regenerated** automatically
 (keeping a `.bak`).
 
+A few general options live in `BepInEx/config/com.villagelife.mod.cfg`: `SpawnDistance` (how far in
+front of you villagers appear), `GuardDamage` (per-tick guard damage; 0 = decorative), and
+`VillagerChatter` (toggle the ambient bubbles).
+
+**Multiplayer note:** `vendors.json` is **not** synced between players. The built-in defaults are
+identical for everyone, so co-op works out of the box — but if you *customize* the file, hand the same
+copy to every player (and the dedicated server) so everyone sees the same economy and villager looks.
+
+**Removing the mod:** villagers and VillageLife stations you've placed become unknown prefabs in your
+save, so Valheim drops them on load (with a one-time warning per object in the log). Your world is
+otherwise fine — nothing else depends on the mod.
+
 ## Project layout
 
 ```

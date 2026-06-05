@@ -1,4 +1,5 @@
 using UnityEngine;
+using VillageLife.Plugin;
 using VillageLife.Util;
 
 namespace VillageLife.NPC
@@ -53,6 +54,8 @@ namespace VillageLife.NPC
         /// and needs no ownership check.</summary>
         private void ChatterTick()
         {
+            if (VillageLifePlugin.VillagerChatter != null && !VillageLifePlugin.VillagerChatter.Value)
+                return;
             Player p = Player.m_localPlayer;
             bool near = p != null && Vector3.Distance(p.transform.position, transform.position) <= ChatterRange;
             if (!near)

@@ -65,10 +65,17 @@ grows.
 | Setting | Default | Description |
 |---------|---------|-------------|
 | SpawnDistance | 0 | How far in front of the player (metres) a summoned villager appears (0 = at your feet) |
+| GuardDamage | 12 | Blunt damage a guard deals per tick to each nearby hostile (0 = decorative) |
+| VillagerChatter | true | Show ambient chat bubbles over barterers, bounty-givers, quest-givers and guards |
 
 Villagers themselves are defined in `BepInEx/config/VillageLife/vendors.json`, written with defaults
 on first run. Edit it to tweak types, goods, prices and barter rates with no rebuild — the file
 regenerates automatically (keeping a `.bak`) when a new version changes the built-in defaults.
+**`vendors.json` isn't synced in multiplayer** — the defaults match for everyone, but if you customize
+it, share the same file with all players and the dedicated server.
+
+**Removing the mod** is safe: placed villagers and stations become unknown prefabs that Valheim drops
+on load (one log warning each); the rest of your world is unaffected.
 
 ---
 

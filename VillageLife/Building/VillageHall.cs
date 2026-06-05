@@ -272,7 +272,7 @@ namespace VillageLife.Building
                 else
                 {
                     BuildablePrep.Prepare(clone);
-                    config.Icon = BuildablePrep.PlaceholderIcon();
+                    config.Icon = BuildablePrep.RenderedIcon(clone);
                     piece = new CustomPiece(clone, false, config);
                 }
             }

@@ -1,5 +1,26 @@
 # Changelog
 
+## 3.43.0 — Pre-V1 polish: ore economy, real icons, more options
+
+### Changed
+- **Shops sell raw ore, not ingots.** Every smelted metal in a shop is now its **ore**, so you refine
+  it yourself: Copper→Copper Ore, Tin→Tin Ore, Black Metal→Black Metal Scrap (Silver was already ore;
+  Bronze is an alloy with no ore, so it stays). The Mountain Miner's reputation unlock is now a
+  **cheaper bulk lot of silver ore** instead of an ingot.
+- **Minerals cost more.** Metal ores and mined goods (copper/tin/iron/black-metal, obsidian, crystal,
+  surtling cores, bronze) are priced up — roughly doubled — so minerals feel like the premium goods
+  they are. ConfigVersion 16 → 17 (your `vendors.json` regenerates, keeping a `.bak`).
+
+### Added
+- **Real build-menu icons** for the decorative world structures (old houses, ruins), rendered from the
+  prefab itself via Jötunn's RenderManager instead of all borrowing the workbench icon.
+- **Two new config options:** `GuardDamage` (per-tick guard damage; set 0 for decorative guards) and
+  `VillagerChatter` (toggle the ambient chat bubbles).
+
+### Docs
+- README notes that `vendors.json` isn't synced in multiplayer (share it if you customize it) and that
+  removing the mod is safe (placed villagers/stations are simply dropped on load).
+
 ## 3.42.0 — Bounty hellos & a smarter silver trade
 
 ### Fixed
