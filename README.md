@@ -175,10 +175,19 @@ is inert if `R2_PROFILE` is unset, so it never affects other machines. Make sure
 
 ## Packaging for Thunderstore
 
-`Thunderstore/` holds the package metadata (`manifest.json`, `README.md`, `CHANGELOG.md`) and
-`VillageLife/thunderstore/` holds the icon. Drop a freshly built `VillageLife.dll` alongside them
-when zipping a release. Keep both `manifest.json` files on the same version as `Constants.PluginVersion`
-and the `<Version>` in `VillageLife.csproj`.
+`Thunderstore/` holds the complete package — `manifest.json`, `icon.png`, `README.md`, `CHANGELOG.md`
+and `package.ps1`. After a **Release** build, run the script to produce an upload-ready zip:
+
+```powershell
+pwsh ./Thunderstore/package.ps1
+```
+
+It verifies the version is in sync across `manifest.json`, `Constants.PluginVersion` and the
+`<Version>` in `VillageLife.csproj`, then writes `dist/VillageLife-<version>.zip` with the layout
+Thunderstore expects (`manifest.json`, `icon.png`, `README.md`, `CHANGELOG.md`,
+`plugins/VillageLife.dll`). Upload it at [thunderstore.io](https://thunderstore.io/) under your team.
+Published version numbers are **permanent**, so bump the version (all three files above) for every
+release.
 
 ## Roadmap
 
