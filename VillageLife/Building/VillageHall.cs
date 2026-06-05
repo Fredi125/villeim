@@ -103,6 +103,7 @@ namespace VillageLife.Building
                 {
                     "swamp", "swamp_alchemist", "swamp_digger",
                     "bounty_swamp", "swamp_grinder", "swamp_renderer",
+                    "quest_wraith", "swamp_archer",
                 },
                 Requirements = Req(
                     ("ElderBark", 30), ("Iron", 5), ("Guck", 10),
@@ -118,6 +119,7 @@ namespace VillageLife.Building
                 {
                     "mountain", "mountain_miner", "mountain_herbalist",
                     "bounty_mountain", "mountain_furrier", "mountain_jeweler",
+                    "quest_fenring", "mountain_troll",
                 },
                 Requirements = Req(
                     ("Stone", 30), ("Obsidian", 10), ("Silver", 5),
@@ -133,6 +135,7 @@ namespace VillageLife.Building
                 {
                     "plains", "plains_farmer", "plains_smith",
                     "bounty_plains", "plains_weaver", "plains_rancher",
+                    "bounty_brute",
                 },
                 Requirements = Req(
                     ("FineWood", 30), ("BlackMetal", 5), ("Flax", 10),
@@ -163,6 +166,7 @@ namespace VillageLife.Building
                 {
                     "bounty_resin", "bounty_meadows", "bounty_forest",
                     "bounty_swamp", "bounty_mountain", "bounty_plains",
+                    "bounty_brute",
                 },
                 Requirements = Req(
                     ("Wood", 20), ("FineWood", 10), ("Coal", 5)),
@@ -176,7 +180,7 @@ namespace VillageLife.Building
                 DisplayName = "Quest Board",
                 Description = "Press [Use] to post (or dismiss) the quest-givers.",
                 VendorId = null,
-                VendorIds = new[] { "quest_provisions", "quest_smith" },
+                VendorIds = new[] { "quest_provisions", "quest_smith", "quest_wraith", "quest_fenring" },
                 Requirements = Req(
                     ("Wood", 20), ("FineWood", 10), ("BronzeNails", 5)),
             },

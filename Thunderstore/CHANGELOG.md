@@ -1,5 +1,34 @@
 # Changelog
 
+## 3.40.0 — Variety pass: monsters move in
+
+The later biomes now field recognisable locals instead of a row of identical Hildirs. Each new
+villager clones a monster prefab (its AI stripped so it stands still and friendly).
+
+### Added
+- **Creature-model villagers across the roster.** Existing barterers were re-skinned and five new
+  villagers joined the later biomes:
+  - **Swamp** — *Wraith's Lament* (a ghost **quest-giver** who pays for the marsh's grisly leavings)
+    and the *Swamp Bowman* (a **Draugr_Ranged** who buys feathers).
+  - **Mountain** — *Cultist's Vendetta* (a **Fenring_Cultist** **quest-giver** with a vendetta against
+    his own kind — turn in Fenring trophies) and the *Mountain Troll* (trades stone for coin).
+  - **Plains** — *Plains Brute Bounty* (a **GoblinBrute** that pays the heaviest purse for the
+    heaviest trophy). The *Plains Weaver* is now a **Goblin** and the *Plains Rancher* a **GoblinShaman**.
+  - The full Dvergr line now appears as barterers (**Dverger**, **DvergerMage**, plus the Fire/Ice/
+    Support mages), and the **Black Forest Charcoaler** is now a recoloured **Greydwarf** so he reads
+    as an NPC rather than a monster.
+- **Per-vendor signature tint.** A vendor type can pin a fixed clothing hue via a new `Tint` field
+  (0–1), used to give the NPC Greydwarf his distinct colour; villagers without one keep their random
+  tint. ConfigVersion 14 → 15.
+- New quest- and bounty-givers are posted at the **Quest Board** and **Bounty Board** too, and each
+  appears in its biome spawner's [Use] menu.
+
+### Changed
+- **Smarter villager-prefab registration.** A creature model is now cloned only for the *kinds* a
+  vendor actually uses it for (almost always just the barterer), instead of always building a
+  merchant + barterer + guard apiece. With a dozen-plus new models this avoids ~28 needless clones
+  (and AI-strips) at startup.
+
 ## 3.39.1 — Model Sampler: curated, named, and quiet
 
 ### Fixed

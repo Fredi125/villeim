@@ -21,11 +21,13 @@ namespace VillageLife.NPC
         // reads as different-coloured clothes rather than a garish, fully-recoloured body.
         private const float TintStrength = 0.4f;
 
-        /// <summary>Pick a random size + tint, store them in the ZDO, and apply. Called once, at spawn.</summary>
-        public static void Assign(GameObject go, ZDO zdo)
+        /// <summary>Pick a random size + tint, store them in the ZDO, and apply. Called once, at spawn.
+        /// A <paramref name="tintSeed"/> in [0,1] fixes this villager's hue (so a vendor type can have a
+        /// signature colour); anything outside that range keeps the per-villager random tint.</summary>
+        public static void Assign(GameObject go, ZDO zdo, float tintSeed = -1f)
         {
             float scale = Random.Range(Min, Max);
-            float tint = Random.value;
+            float tint = (tintSeed >= 0f && tintSeed <= 1f) ? tintSeed : Random.value;
             if (zdo != null)
             {
                 zdo.Set(Constants.KeyScale, scale);

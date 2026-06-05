@@ -15,9 +15,13 @@ grows.
 - **Village Hall** — press *Use* to open a panel and summon a villager (a sampler of the general
   roles).
 - **Biome spawners** — Meadows, Black Forest, Swamp, Mountain and Plains stations, each a distinct
-  small crafting station. *Use* opens a menu to **choose one of six villagers** for that biome (a
-  trader, two themed shops, a bounty-giver, and two barterers), plus a **Dismiss nearby villager**
-  button.
+  small crafting station. *Use* opens a menu to **choose a villager** for that biome (a trader, two
+  themed shops, a bounty-giver and barterers — the later biomes add quest-givers and more), plus a
+  **Dismiss nearby villager** button.
+- **Recognisable locals** — many later-biome villagers wear monster looks (the full Dvergr line,
+  Goblins, a Wraith, a Troll, a Draugr archer and a turncoat Fenring Cultist), each cloned from the
+  creature and stripped of its AI so it stands still and friendly — with a signature colour where it
+  helps it read as an NPC.
 - **Coin merchants** — open **Valheim's own trade window** and sell that biome's goods for coins.
 - **Barterers** — make one fixed swap, like 5 Deer Hide → 10 Leather Scraps.
 - **Bounties & reputation** — turn monster trophies in for coins to raise your **reputation** with a

@@ -20,8 +20,9 @@ so they're grouped together instead of scattered through *Misc*.
   all the general roles.
 - **Biome spawners** (Meadows, Black Forest, Swamp, Mountain, Plains) — each is a distinct small
   crafting station (cauldron, artisan table, stonecutter, forge, spinning wheel). *Use* opens a menu
-  to **choose one of that biome's six villagers**: the biome trader, two themed coin shops, the biome
-  bounty-giver, and two barterers. The same panel has a **Dismiss nearby villager** button.
+  to **choose one of that biome's villagers**: the biome trader, two themed coin shops, the biome
+  bounty-giver, and barterers (the Swamp, Mountain and Plains also add quest-givers and extra
+  creature-model locals). The same panel has a **Dismiss nearby villager** button.
 - **Bounty Board** — posts (or dismisses) every bounty-giver in a row at once (the five biome
   trophy bounties plus a Resin bounty).
 - **Quest Board** — posts multi-item **quest-givers**: hand in several different items at once for a
@@ -54,8 +55,10 @@ so they're grouped together instead of scattered through *Misc*.
   the ZDO, so they survive save/reload and sync in co-op. Villagers are non-hostile, stationary
   networked NPCs.
 - **Varied looks** — villagers use the **Hildir** model by default (Haldor is the fallback), each with
-  a gentle random size and colour. A vendor type can request its own model, and the global model is
-  configurable; a creature model's wander/combat AI is stripped on clone so it stays put and friendly.
+  a gentle random size and colour. A vendor type can request its **own model** (the later biomes field
+  the full Dvergr line, Goblins, a Wraith, a Troll, a Draugr archer and a turncoat Fenring Cultist) and
+  an optional **signature tint**; the global model is configurable. A creature model's wander/combat AI
+  is stripped on clone so it stays put and friendly.
 
 Villagers are defined in `BepInEx/config/VillageLife/vendors.json` (written with defaults on first
 run). Edit it to change types, goods, prices, or barter rates — no rebuild needed. The file carries a
@@ -79,7 +82,7 @@ VillageLife/
     MerchantStock.cs            Resolves a coin vendor's goods into trade items (reputation-filtered) via ObjectDB
     TraderReputation.cs         World-global reputation levels (global keys) that gate higher-tier goods
     VillagerCreationUI.cs       The spawn panel: choose a villager, reroll the name, dismiss a nearby one
-    VillagerAppearance.cs       Cosmetic per-villager size variation, persisted in the ZDO
+    VillagerAppearance.cs       Cosmetic per-villager size + colour-tint variation, persisted in the ZDO
     Greetings.cs                Flavour one-liners shown when a villager is summoned
     ItemNames.cs                Resolves prefab vs. shared item names (safe inventory moves)
     ItemNameAudit.cs            Startup audit: logs any referenced item/requirement name that won't resolve

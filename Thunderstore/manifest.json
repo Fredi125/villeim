@@ -1,6 +1,6 @@
 {
     "name": "VillageLife",
-    "version_number": "3.39.1",
+    "version_number": "3.40.0",
     "website_url": "https://github.com/Fredi125/villeim",
     "description": "Build biome-themed stations and summon friendly, named villagers: coin merchants, barterers, bounty-givers and guards, with per-tier prices and reputation that unlocks better goods.",
     "dependencies": [

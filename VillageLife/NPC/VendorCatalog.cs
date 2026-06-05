@@ -62,6 +62,7 @@ namespace VillageLife.NPC
         public string Kind = "coin";   // "coin" = vanilla shop window; "barter" = fixed swap.
         public string Biome = "";      // Optional tag for biome-themed vendors (forward-looking).
         public string Model = "";      // Optional NPC prefab to clone for this villager's look (empty = default).
+        public float Tint = -1f;       // Optional fixed colour hue (0..1) for this villager (< 0 = random per-villager).
 
         // Coin shop: the goods sold for coins (include a high-priced "rare" entry if desired).
         public VendorGood[] Goods;
@@ -122,7 +123,7 @@ namespace VillageLife.NPC
         /// regenerates an out-of-date vendors.json from these defaults (keeping a .bak), so value
         /// tweaks here reach an existing install without a manual file delete.
         /// </summary>
-        public const int ConfigVersion = 14;
+        public const int ConfigVersion = 15;
 
         /// <summary>Built-in safety net, also used to seed vendors.json on first run.</summary>
         public static VendorType[] DefaultVendors => new[]
@@ -312,7 +313,7 @@ namespace VillageLife.NPC
             },
             new VendorType
             {
-                Id = "bounty_mountain", Title = "Mountain Bounty", Kind = "barter",
+                Id = "bounty_mountain", Title = "Mountain Bounty", Kind = "barter", Model = "DvergerMageSupport",
                 CostPrefab = "TrophyWolf",      CostAmount = 2,
                 GivePrefab = "Coins",           GiveAmount = 70,
                 UnlocksVendorId = "mountain",
@@ -440,13 +441,13 @@ namespace VillageLife.NPC
             },
             new VendorType
             {
-                Id = "blackforest_charcoal", Title = "Black Forest Charcoaler", Kind = "barter", Biome = "BlackForest",
+                Id = "blackforest_charcoal", Title = "Black Forest Charcoaler", Kind = "barter", Biome = "BlackForest", Model = "Greydwarf", Tint = 0.08f,
                 CostPrefab = "Wood", CostAmount = 5,
                 GivePrefab = "Coal", GiveAmount = 10,
             },
             new VendorType
             {
-                Id = "blackforest_smelter", Title = "Black Forest Smelter", Kind = "barter", Biome = "BlackForest",
+                Id = "blackforest_smelter", Title = "Black Forest Smelter", Kind = "barter", Biome = "BlackForest", Model = "DvergerMageFire",
                 CostPrefab = "GreydwarfEye", CostAmount = 5,
                 GivePrefab = "Coins",        GiveAmount = 20,
             },
@@ -478,7 +479,7 @@ namespace VillageLife.NPC
             },
             new VendorType
             {
-                Id = "swamp_grinder", Title = "Swamp Bonegrinder", Kind = "barter", Biome = "Swamp",
+                Id = "swamp_grinder", Title = "Swamp Bonegrinder", Kind = "barter", Biome = "Swamp", Model = "DvergerMageIce",
                 CostPrefab = "WitheredBone",  CostAmount = 5,
                 GivePrefab = "BoneFragments", GiveAmount = 10,
             },
@@ -516,13 +517,13 @@ namespace VillageLife.NPC
             },
             new VendorType
             {
-                Id = "mountain_furrier", Title = "Mountain Furrier", Kind = "barter", Biome = "Mountain",
+                Id = "mountain_furrier", Title = "Mountain Furrier", Kind = "barter", Biome = "Mountain", Model = "Dverger",
                 CostPrefab = "WolfPelt",      CostAmount = 5,
                 GivePrefab = "LeatherScraps", GiveAmount = 10,
             },
             new VendorType
             {
-                Id = "mountain_jeweler", Title = "Mountain Jeweler", Kind = "barter", Biome = "Mountain",
+                Id = "mountain_jeweler", Title = "Mountain Jeweler", Kind = "barter", Biome = "Mountain", Model = "DvergerMage",
                 CostPrefab = "FreezeGland", CostAmount = 5,
                 GivePrefab = "Coins",       GiveAmount = 40,
             },
@@ -554,15 +555,84 @@ namespace VillageLife.NPC
             },
             new VendorType
             {
-                Id = "plains_weaver", Title = "Plains Weaver", Kind = "barter", Biome = "Plains",
+                Id = "plains_weaver", Title = "Plains Weaver", Kind = "barter", Biome = "Plains", Model = "Goblin",
                 CostPrefab = "Flax",        CostAmount = 5,
                 GivePrefab = "LinenThread", GiveAmount = 10,
             },
             new VendorType
             {
-                Id = "plains_rancher", Title = "Plains Rancher", Kind = "barter", Biome = "Plains",
+                Id = "plains_rancher", Title = "Plains Rancher", Kind = "barter", Biome = "Plains", Model = "GoblinShaman",
                 CostPrefab = "Cloudberry", CostAmount = 5,
                 GivePrefab = "Coins",      GiveAmount = 50,
+            },
+
+            // --- v3.40.0 variety pass — themed creature-model villagers that round out the later
+            // biomes. Each clones a monster prefab (stripped of AI by NpcPrefab.Neutralize) so the
+            // swamp/mountain/plains stations field recognisable locals instead of more Hildirs. ---
+
+            // Swamp Wraith quest-giver: a ghost that pays well for the marsh's grisly leavings.
+            new VendorType
+            {
+                Id = "quest_wraith", Title = "Wraith's Lament", Kind = "barter", Biome = "Swamp", Model = "Wraith",
+                UnlocksVendorId = "swamp",
+                QuestCostGrowth = 0.5f, QuestRewardGrowth = 0.75f, QuestMaxScaling = 10,
+                QuestRecipes = new[]
+                {
+                    new QuestRecipe
+                    {
+                        Items = new[] { new QuestItem("WitheredBone", 3), new QuestItem("Bloodbag", 5), new QuestItem("Guck", 5) },
+                        RewardPrefab = "Coins", RewardAmount = 80,
+                    },
+                    new QuestRecipe
+                    {
+                        Items = new[] { new QuestItem("Entrails", 5), new QuestItem("IronScrap", 10), new QuestItem("ElderBark", 10) },
+                        RewardPrefab = "Coins", RewardAmount = 90,
+                    },
+                },
+            },
+            // Swamp Draugr archer: a barterer who buys feathers for the fletching trade.
+            new VendorType
+            {
+                Id = "swamp_archer", Title = "Swamp Bowman", Kind = "barter", Biome = "Swamp", Model = "Draugr_Ranged",
+                CostPrefab = "Feathers", CostAmount = 10,
+                GivePrefab = "Coins",    GiveAmount = 30,
+            },
+
+            // Mountain Fenring Cultist quest-giver: a turncoat who pays bounties on his own kind.
+            new VendorType
+            {
+                Id = "quest_fenring", Title = "Cultist's Vendetta", Kind = "barter", Biome = "Mountain", Model = "Fenring_Cultist",
+                UnlocksVendorId = "mountain",
+                QuestCostGrowth = 0.5f, QuestRewardGrowth = 0.8f, QuestMaxScaling = 10,
+                QuestRecipes = new[]
+                {
+                    new QuestRecipe
+                    {
+                        Items = new[] { new QuestItem("TrophyFenring", 2) },
+                        RewardPrefab = "Coins", RewardAmount = 120,
+                    },
+                    new QuestRecipe
+                    {
+                        Items = new[] { new QuestItem("TrophyFenring", 1), new QuestItem("TrophyUlv", 2) },
+                        RewardPrefab = "Coins", RewardAmount = 140,
+                    },
+                },
+            },
+            // Mountain Troll barterer: a gentle giant who takes stone off your hands for coin.
+            new VendorType
+            {
+                Id = "mountain_troll", Title = "Mountain Troll", Kind = "barter", Biome = "Mountain", Model = "Troll",
+                CostPrefab = "Stone", CostAmount = 20,
+                GivePrefab = "Coins", GiveAmount = 40,
+            },
+
+            // Plains Goblin Brute bounty: the heaviest trophy pays the heaviest purse.
+            new VendorType
+            {
+                Id = "bounty_brute", Title = "Plains Brute Bounty", Kind = "barter", Biome = "Plains", Model = "GoblinBrute",
+                CostPrefab = "TrophyGoblinBrute", CostAmount = 1,
+                GivePrefab = "Coins",             GiveAmount = 120,
+                UnlocksVendorId = "plains",
             },
         };
 

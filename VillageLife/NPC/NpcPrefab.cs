@@ -28,9 +28,15 @@ namespace VillageLife.NPC
         public static void Register()
         {
             string def = DefaultModel();
+            // The default model can back a vendor of any kind, so register all three kinds for it.
             RegisterVariant(def, "");
-            foreach (string model in OverrideModels(def))
-                RegisterVariant(model, Suffix(model));
+
+            // Every other (creature) model is registered only for the KINDS a vendor actually uses it
+            // for — almost always just the barterer. Without this we'd clone and AI-strip a merchant +
+            // barterer + guard apiece for a dozen creatures that only ever appear as one, a startup
+            // cost that ballooned with the v3.40.0 variety pass (Goblins, Dvergr, Wraith, Troll, …).
+            foreach (var pair in OverrideModelKinds(def))
+                RegisterVariantKinds(pair.Key, Suffix(pair.Key), pair.Value);
         }
 
         /// <summary>The default villager model: the Experimental config override, or Hildir.</summary>
@@ -50,16 +56,37 @@ namespace VillageLife.NPC
             return baseKind + Suffix(model.Trim());
         }
 
+        /// <summary>The base villager prefab name for a vendor's kind (guard / barter / coin merchant).
+        /// Mirrors the selection in <see cref="NpcSpawner.Spawn"/> so registration covers exactly the
+        /// kinds that can be summoned — no more, no fewer.</summary>
+        public static string BaseKindFor(VendorType v)
+        {
+            if (v != null && string.Equals(v.Kind, "guard", System.StringComparison.OrdinalIgnoreCase))
+                return Constants.GuardPrefabName;
+            if (v != null && v.IsBarter)
+                return Constants.BartererPrefabName;
+            return Constants.MerchantPrefabName;
+        }
+
         private static string Suffix(string model) => "__" + model;
 
-        /// <summary>Distinct non-default models any vendor type asks for (so we register their variants).</summary>
-        private static IEnumerable<string> OverrideModels(string def)
+        /// <summary>Non-default models any vendor asks for, each mapped to the set of base kinds that
+        /// use it — so we register a creature variant only for the kinds actually summoned.</summary>
+        private static Dictionary<string, HashSet<string>> OverrideModelKinds(string def)
         {
-            var set = new HashSet<string>();
+            var map = new Dictionary<string, HashSet<string>>();
             foreach (VendorType v in VendorCatalog.All)
-                if (v != null && !string.IsNullOrWhiteSpace(v.Model) && v.Model.Trim() != def)
-                    set.Add(v.Model.Trim());
-            return set;
+            {
+                if (v == null || string.IsNullOrWhiteSpace(v.Model))
+                    continue;
+                string model = v.Model.Trim();
+                if (model == def)
+                    continue;
+                if (!map.TryGetValue(model, out HashSet<string> kinds))
+                    map[model] = kinds = new HashSet<string>();
+                kinds.Add(BaseKindFor(v));
+            }
+            return map;
         }
 
         private static void RegisterVariant(string model, string suffix)
@@ -67,6 +94,18 @@ namespace VillageLife.NPC
             RegisterMerchant(Constants.MerchantPrefabName + suffix, model);
             RegisterBarterer(Constants.BartererPrefabName + suffix, model);
             RegisterGuard(Constants.GuardPrefabName + suffix, model);
+        }
+
+        /// <summary>Register only the requested kinds of a model's variant — used for creature models,
+        /// which are typically only ever barterers, so we skip cloning the merchant/guard forms.</summary>
+        private static void RegisterVariantKinds(string model, string suffix, HashSet<string> kinds)
+        {
+            if (kinds.Contains(Constants.MerchantPrefabName))
+                RegisterMerchant(Constants.MerchantPrefabName + suffix, model);
+            if (kinds.Contains(Constants.BartererPrefabName))
+                RegisterBarterer(Constants.BartererPrefabName + suffix, model);
+            if (kinds.Contains(Constants.GuardPrefabName))
+                RegisterGuard(Constants.GuardPrefabName + suffix, model);
         }
 
         private static void RegisterMerchant(string prefabName, string model)

@@ -115,9 +115,10 @@ namespace VillageLife.NPC
             if (guard != null)
                 guard.Initialize(request.Name, request.VendorTypeId, request.CreatorId);
 
-            // Give each villager a slightly different build, persisted in its ZDO.
+            // Give each villager a slightly different build, persisted in its ZDO. A vendor type may
+            // pin a signature hue via Tint (e.g. the NPC Greydwarf); otherwise the tint is random.
             var nview = go.GetComponent<ZNetView>();
-            VillagerAppearance.Assign(go, nview != null ? nview.GetZDO() : null);
+            VillagerAppearance.Assign(go, nview != null ? nview.GetZDO() : null, type.Tint);
 
             result.Success = true;
             return result;
