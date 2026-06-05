@@ -17,7 +17,8 @@ grows.
 - **Biome spawners** — Meadows, Black Forest, Swamp, Mountain and Plains stations, each a distinct
   small crafting station. *Use* opens a menu to **choose a villager** for that biome (a trader, two
   themed shops, a bounty-giver and barterers — the later biomes add quest-givers and more), plus a
-  **Dismiss nearby villager** button.
+  **Dismiss nearby villager** button. A villager you've already summoned here drops out of the menu
+  until dismissed, so you fill out one of each without duplicates.
 - **Recognisable locals** — many later-biome villagers wear monster looks (the full Dvergr line,
   Goblins, a Wraith, a Troll, a Draugr archer and a turncoat Fenring Cultist), each cloned from the
   creature and stripped of its AI so it stands still and friendly — with a signature colour where it

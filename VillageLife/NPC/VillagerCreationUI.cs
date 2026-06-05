@@ -40,8 +40,12 @@ namespace VillageLife.NPC
                 _rot = rot;
                 _name = NpcSpawner.RandomName();
 
+                // Hide any villager already standing here; it returns to the list once dismissed
+                // (the Dismiss button sweeps the same radius), so each spawner fills out one-of-each.
+                List<string> available = WithoutPresent(vendorIds, pos);
+
                 Teardown();           // rebuild fresh so the list matches this spawner
-                Build(vendorIds);
+                Build(available);
                 if (_panel == null)
                     return false;
 
@@ -60,12 +64,28 @@ namespace VillageLife.NPC
         /// <summary>Village Hall entry point: the general roles.</summary>
         public static bool Open(Vector3 pos, Quaternion rot) => Open(pos, rot, GeneralRoleIds());
 
+        /// <summary>Drop the vendor ids whose villager is already standing within the dismiss radius of
+        /// <paramref name="pos"/>. Returns the original list when none are present (the common case).</summary>
+        private static List<string> WithoutPresent(List<string> ids, Vector3 pos)
+        {
+            HashSet<string> present = NpcSpawner.VendorIdsNear(pos, DismissRadius);
+            if (present.Count == 0)
+                return ids;
+            var available = new List<string>(ids.Count);
+            foreach (string id in ids)
+                if (!present.Contains(id))
+                    available.Add(id);
+            return available;
+        }
+
         private static void Build(List<string> vendorIds)
         {
             Transform parent = GUIManager.CustomGUIFront.transform;
 
+            bool none = vendorIds.Count == 0;
             const float rowH = 40f;
-            int rows = vendorIds.Count + 3; // name + each vendor + dismiss + close
+            // name + (each vendor, or a single "all summoned" notice) + dismiss + close
+            int rows = (none ? 1 : vendorIds.Count) + 3;
             float height = rows * rowH + 60f;
 
             _panel = GUIManager.Instance.CreateWoodpanel(
@@ -87,12 +107,22 @@ namespace VillageLife.NPC
             });
             y -= rowH;
 
-            foreach (string id in vendorIds)
+            if (none)
             {
-                string vid = id;
-                string label = VendorCatalog.ById(vid).Title;
-                Button(label, y).GetComponent<Button>().onClick.AddListener(() => Summon(vid));
+                // Everything this spawner offers is already standing nearby — a no-op notice, so the
+                // panel still shows the Dismiss button below to recall them back into the list.
+                Button("All summoned — dismiss to recall", y);
                 y -= rowH;
+            }
+            else
+            {
+                foreach (string id in vendorIds)
+                {
+                    string vid = id;
+                    string label = VendorCatalog.ById(vid).Title;
+                    Button(label, y).GetComponent<Button>().onClick.AddListener(() => Summon(vid));
+                    y -= rowH;
+                }
             }
 
             Button("Dismiss nearby villager", y).GetComponent<Button>().onClick.AddListener(DismissNearby);

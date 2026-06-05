@@ -28,6 +28,7 @@ namespace VillageLife.NPC
         private static readonly List<Character> _buffer = new List<Character>();
 
         public string GuardName { get; private set; } = "Guard";
+        public string VendorTypeId { get; private set; } = "guard";
 
         private void Awake()
         {
@@ -38,7 +39,10 @@ namespace VillageLife.NPC
         {
             ZDO zdo = _nview != null ? _nview.GetZDO() : null;
             if (zdo != null)
+            {
                 GuardName = zdo.GetString(Constants.KeyName, GuardName);
+                VendorTypeId = zdo.GetString(Constants.KeyVendorType, VendorTypeId);
+            }
 
             VillagerAppearance.Apply(gameObject, zdo);
             InvokeRepeating(nameof(GuardTick), TickSeconds, TickSeconds);
@@ -67,12 +71,14 @@ namespace VillageLife.NPC
         {
             if (!string.IsNullOrEmpty(name))
                 GuardName = name;
+            if (!string.IsNullOrEmpty(vendorTypeId))
+                VendorTypeId = vendorTypeId;
 
             ZDO zdo = _nview != null ? _nview.GetZDO() : null;
             if (zdo != null)
             {
                 zdo.Set(Constants.KeyName, GuardName);
-                zdo.Set(Constants.KeyVendorType, vendorTypeId);
+                zdo.Set(Constants.KeyVendorType, VendorTypeId);
                 zdo.Set(Constants.KeyCreator, creatorId);
             }
         }

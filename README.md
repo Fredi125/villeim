@@ -22,7 +22,9 @@ so they're grouped together instead of scattered through *Misc*.
   crafting station (cauldron, artisan table, stonecutter, forge, spinning wheel). *Use* opens a menu
   to **choose one of that biome's villagers**: the biome trader, two themed coin shops, the biome
   bounty-giver, and barterers (the Swamp, Mountain and Plains also add quest-givers and extra
-  creature-model locals). The same panel has a **Dismiss nearby villager** button.
+  creature-model locals). The same panel has a **Dismiss nearby villager** button — and a villager
+  you've already summoned here is **hidden from the menu until you dismiss it**, so you fill out a
+  one-of-each village without stacking duplicates.
 - **Bounty Board** — posts (or dismisses) every bounty-giver in a row at once (the five biome
   trophy bounties plus a Resin bounty).
 - **Quest Board** — posts multi-item **quest-givers**: hand in several different items at once for a

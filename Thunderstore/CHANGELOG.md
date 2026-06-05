@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.41.0 — Spawn menus hide who's already here
+
+### Changed
+- A station's spawn menu now **hides any villager already standing nearby**. Summon the Swamp
+  Alchemist and it drops out of that spawner's list until you **dismiss** it, so you fill out a
+  one-of-each village instead of accidentally stacking duplicates of the same villager. "Hidden" and
+  "dismissable" use the **same radius** as the menu's *Dismiss nearby villager* button, so whatever is
+  hidden right now is always recallable right now. When every option is already posted, the menu shows
+  a short *"All summoned — dismiss to recall"* notice above the still-present Dismiss button.
+
 ## 3.40.0 — Variety pass: monsters move in
 
 The later biomes now field recognisable locals instead of a row of identical Hildirs. Each new

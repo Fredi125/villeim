@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using VillageLife.Util;
 
@@ -140,6 +141,38 @@ namespace VillageLife.NPC
             return DestroyNear(Object.FindObjectsByType<VillageMerchant>(FindObjectsSortMode.None), center, r2)
                  + DestroyNear(Object.FindObjectsByType<VillageBarterer>(FindObjectsSortMode.None), center, r2)
                  + DestroyNear(Object.FindObjectsByType<VillageGuard>(FindObjectsSortMode.None), center, r2);
+        }
+
+        /// <summary>
+        /// The set of vendor-type ids whose villager currently stands within <paramref name="radius"/>
+        /// of <paramref name="center"/>. The spawn menus use this to hide a villager that's already
+        /// posted here until it's dismissed — swept with the same radius the menu's Dismiss button uses,
+        /// so anything hidden right now is always recallable right now.
+        /// </summary>
+        public static HashSet<string> VendorIdsNear(Vector3 center, float radius)
+        {
+            var ids = new HashSet<string>();
+            if (ZNetScene.instance == null)
+                return ids;
+
+            float r2 = radius * radius;
+            CollectNear(Object.FindObjectsByType<VillageMerchant>(FindObjectsSortMode.None), center, r2, m => m.VendorTypeId, ids);
+            CollectNear(Object.FindObjectsByType<VillageBarterer>(FindObjectsSortMode.None), center, r2, b => b.VendorTypeId, ids);
+            CollectNear(Object.FindObjectsByType<VillageGuard>(FindObjectsSortMode.None), center, r2, g => g.VendorTypeId, ids);
+            return ids;
+        }
+
+        private static void CollectNear<T>(T[] components, Vector3 center, float radiusSqr,
+            System.Func<T, string> idOf, HashSet<string> into) where T : Component
+        {
+            foreach (T comp in components)
+            {
+                if (comp == null || (comp.transform.position - center).sqrMagnitude > radiusSqr)
+                    continue;
+                string id = idOf(comp);
+                if (!string.IsNullOrEmpty(id))
+                    into.Add(id);
+            }
         }
 
         private static int DestroyNear<T>(T[] components, Vector3 center, float radiusSqr) where T : Component
